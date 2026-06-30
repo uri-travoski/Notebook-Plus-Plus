@@ -28,10 +28,17 @@ type Props = {
   initialContent?: unknown[]
   editable?: boolean
   documentId?: string
+  theme?: 'light' | 'dark'
   onChange?: (doc: unknown[]) => void
 }
 
-export default function Editor({ initialContent, editable = true, documentId, onChange }: Props) {
+export default function Editor({
+  initialContent,
+  editable = true,
+  documentId,
+  theme = 'light',
+  onChange,
+}: Props) {
   const editor = useCreateBlockNote({
     schema,
     initialContent:
@@ -206,7 +213,7 @@ export default function Editor({ initialContent, editable = true, documentId, on
     {
       editor,
       editable,
-      theme: 'light',
+      theme,
       slashMenu: false,
       onChange: () => onChange?.(editor.document as unknown[]),
     },

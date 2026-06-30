@@ -1,3 +1,5 @@
+import { generateKeyBetween } from 'fractional-indexing'
+
 export type TreeNote = {
   id: string
   title: string
@@ -82,7 +84,39 @@ export function useTree() {
     await refresh()
   }
 
+  // Drag-reorder: place `draggedId` immediately before `targetId`, adopting the target's
+  // notebook/parent (so a drag can both reorder within a list and move between notebooks).
+  const reorderNote = async (draggedId: string, targetId: string) => {
+    if (draggedId === targetId) return
+    const all = (tree.value?.projects ?? []).flatMap((p) => p.notebooks.flatMap((nb) => nb.notes))
+    const dragged = all.find((n) => n.id === draggedId)
+    const target = all.find((n) => n.id === targetId)
+    if (!dragged || !target) return
+    const siblings = all
+      .filter(
+        (n) =>
+          n.id !== draggedId &&
+          n.notebookId === target.notebookId &&
+          (n.parentDocumentId ?? null) === (target.parentDocumentId ?? null),
+      )
+      .sort((a, b) => (a.position < b.position ? -1 : a.position > b.position ? 1 : 0))
+    const idx = siblings.findIndex((n) => n.id === targetId)
+    const before = idx > 0 ? siblings[idx - 1] : null
+    let position: string
+    try {
+      position = generateKeyBetween(before ? before.position : null, target.position)
+    } catch {
+      return
+    }
+    await updateNote(draggedId, {
+      notebookId: target.notebookId,
+      parentDocumentId: target.parentDocumentId ?? null,
+      position,
+    })
+  }
+
   return {
+    reorderNote,
     tree,
     loaded,
     refresh,

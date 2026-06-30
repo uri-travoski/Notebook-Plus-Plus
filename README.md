@@ -1,7 +1,9 @@
 # Notebook++
 
 Single-user, self-hosted notes & knowledge base (Outline-style UX, no team features). Nuxt 3 +
-PostgreSQL 18 + Drizzle, with a React editor island (BlockNote + Excalidraw, bridged via Veaury).
+PostgreSQL 18 + Drizzle, with a React editor island (BlockNote + Excalidraw) bridged into the Vue
+shell via a manual `createRoot` mount. Database tables, Markdown import/export, bring-your-own AI
+keys with fallback, full-text search (Cmd-K), and an installable PWA.
 Full spec in `docs/build-spec.md`; architecture in `docs/architecture.md`.
 
 ## Develop

@@ -18,9 +18,26 @@ const props = defineProps<{
   depth: number
 }>()
 
-const { updateNote } = useTree()
+const { updateNote, reorderNote } = useTree()
 const { isCollapsed, toggleCollapse } = usePreferences()
 const route = useRoute()
+
+// Drag-reorder (desktop). dragId is shared across all SidebarNote rows.
+const dragId = useState<string | null>('sidebar-drag-id', () => null)
+const dragOver = ref(false)
+function onDragStart(e: DragEvent) {
+  dragId.value = props.note.id
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+}
+function onDragOver() {
+  if (dragId.value && dragId.value !== props.note.id) dragOver.value = true
+}
+async function onDrop() {
+  dragOver.value = false
+  const dragged = dragId.value
+  dragId.value = null
+  if (dragged && dragged !== props.note.id) await reorderNote(dragged, props.note.id)
+}
 
 const children = computed(() => props.childrenMap.get(props.note.id) ?? [])
 const hasChildren = computed(() => children.value.length > 0)
@@ -49,8 +66,17 @@ const showMove = ref(false)
   <li>
     <div
       class="group flex items-center gap-1 rounded-md pr-1"
-      :class="active ? 'bg-row-selected' : 'hover:bg-row-hover'"
+      :class="[
+        active ? 'bg-row-selected' : 'hover:bg-row-hover',
+        dragOver ? 'shadow-[inset_0_2px_0_0_var(--color-primary)]' : '',
+      ]"
       :style="{ paddingLeft: `${depth * 12 + 6}px` }"
+      :draggable="!editing"
+      @dragstart="onDragStart"
+      @dragend="dragId = null"
+      @dragover.prevent="onDragOver"
+      @dragleave="dragOver = false"
+      @drop.prevent="onDrop"
     >
       <button
         v-if="hasChildren"
@@ -84,6 +110,7 @@ const showMove = ref(false)
       <NuxtLink
         v-else
         :to="`/doc/${note.id}`"
+        :draggable="false"
         class="min-w-0 flex-1 truncate py-1 text-sm"
         :class="active ? 'font-medium text-heading' : 'text-text'"
       >

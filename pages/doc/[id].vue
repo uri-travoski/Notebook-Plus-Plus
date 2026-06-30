@@ -2,6 +2,10 @@
 import { Download } from 'lucide-vue-next'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
+
+const { prefs, ensure: ensurePrefs } = usePreferences()
+onMounted(ensurePrefs)
+const wide = computed(() => prefs.value.editorWidth === 'wide')
 const { data: doc, error } = await useFetch(`/api/documents/${id.value}`)
 useHead({ title: () => `${doc.value?.title || 'Untitled'} · Notebook++` })
 
@@ -124,8 +128,12 @@ onBeforeUnmount(() => {
   </div>
 
   <!-- Page: reading column + editor + outline -->
-  <div v-else class="relative mx-auto flex w-full max-w-[1080px] gap-10 px-6 py-10">
-    <div class="mx-auto w-full min-w-0 max-w-[760px] flex-1">
+  <div
+    v-else
+    class="relative mx-auto flex w-full gap-10 px-6 py-10"
+    :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
+  >
+    <div class="mx-auto w-full min-w-0 flex-1" :class="wide ? 'max-w-[920px]' : 'max-w-[760px]'">
       <div class="mb-1 flex h-5 items-center justify-end gap-2">
         <span
           class="text-xs text-text-muted transition-opacity"

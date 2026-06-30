@@ -21,6 +21,14 @@ let createElementFn: any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let EditorComp: any
 
+// Track the app theme so BlockNote renders dark on a dark page (otherwise the editor
+// stays a white card with unreadable light text in dark mode).
+const dark = ref(false)
+let observer: MutationObserver | undefined
+function syncDark() {
+  dark.value = document.documentElement.classList.contains('dark')
+}
+
 function render() {
   if (!root || !createElementFn || !EditorComp) return
   root.render(
@@ -28,12 +36,16 @@ function render() {
       initialContent: props.initialContent,
       editable: props.editable ?? true,
       documentId: props.documentId,
+      theme: dark.value ? 'dark' : 'light',
       onChange: (doc: unknown[]) => emit('change', doc),
     }),
   )
 }
 
 onMounted(async () => {
+  syncDark()
+  observer = new MutationObserver(syncDark)
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
   const [{ createElement }, { createRoot }, mod] = await Promise.all([
     import('react'),
     import('react-dom/client'),
@@ -46,8 +58,9 @@ onMounted(async () => {
   render()
 })
 
-watch(() => props.editable, render)
+watch([() => props.editable, dark], render)
 onBeforeUnmount(() => {
+  observer?.disconnect()
   root?.unmount()
   root = undefined
 })

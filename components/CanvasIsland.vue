@@ -21,10 +21,12 @@ onMounted(async () => {
   root = createRoot(host.value)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Canvas = mod.default as any
+  const dark = document.documentElement.classList.contains('dark')
   root.render(
     createElement(Canvas, {
       initialScene: props.initialScene,
       viewMode: props.viewMode ?? false,
+      theme: dark ? 'dark' : 'light',
       onChange: (scene: unknown) => emit('change', scene),
     }),
   )

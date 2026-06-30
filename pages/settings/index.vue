@@ -87,6 +87,8 @@ async function onFiles(e: Event) {
 <template>
   <AppPage title="Settings" subtitle="AI providers, and Markdown import / export.">
     <div class="space-y-5">
+      <PreferencesPanel />
+
       <AiKeysManager />
 
       <section class="rounded-box border border-border bg-surface p-5">
@@ -150,6 +152,8 @@ async function onFiles(e: Event) {
           </div>
         </div>
       </section>
+
+      <SecurityPanel />
     </div>
   </AppPage>
 </template>

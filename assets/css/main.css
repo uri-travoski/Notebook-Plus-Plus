@@ -3,7 +3,9 @@
 /* Self-hosted variable fonts (no CDN). Body + mono defaults; the font picker
    in Settings -> Preferences swaps --font-sans / --font-mono at runtime. */
 @import '@fontsource-variable/inter';
+@import '@fontsource-variable/lora';
 @import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/fira-code';
 
 /* Class-based dark mode (theme toggle adds .dark to <html>). */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -82,6 +84,9 @@
   --color-row-selected: #243049;
   --color-primary: #14b8a6;
   --color-primary-hover: #0f9c8c;
+  --color-primary-active: #0d9488;
+  /* Dark text on the bright dark-mode teal (white on #14b8a6 is only ~2.3:1; this is ~7:1). */
+  --color-primary-contrast: #04231f;
   --color-primary-subtle: #0f2c2a;
   --color-primary-subtle-fg: #5eead4;
 }

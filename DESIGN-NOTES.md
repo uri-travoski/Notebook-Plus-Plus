@@ -2,6 +2,25 @@
 
 Running log of design decisions and fixes (build-spec §3A). Keep consistent across phases.
 
+## Phase 12 (polish & design pass)
+
+- **Font picker shipped** (Settings → Preferences): separate **body** (Inter / Lora / System) and
+  **code** (JetBrains Mono / Fira Code / System) fonts, self-hosted via `@fontsource-variable/*`
+  (no CDN), applied app-wide through `--font-sans` / `--font-mono` with a live preview and persisted
+  in `users.preferences` (`bodyFont` / `monoFont`). A client plugin re-applies on load.
+- **Theme toggle** (light / dark / system) persisted + applied; tracks the OS preference in system
+  mode.
+- **Dark-mode primary AA fix:** the bright dark teal `#14b8a6` carried white button text (~2.3:1,
+  fails AA). Switched dark-mode `--color-primary-contrast` to near-black `#04231f` (dark text on the
+  bright accent, ~7:1) — the standard dark-UI pattern. Resolves the Phase-3 “to be AA-audited” note.
+- **Drag-reorder shipped** (resolves the Phase-3 deferral): notes drag-reorder within a notebook
+  (and drag-move between notebooks) via native HTML5 DnD + fractional indexing (`reorderNote`), with
+  an inset drop indicator. Reorder beyond notes stays available via the Move dialog / menus.
+- **Security:** change-password form (Settings → Security) verifies the current password server-side.
+- Confirmed reduced-motion + visible-focus floors hold; settings/editor-width wired.
+- Screenshots refreshed in `docs/shots/` (incl. dark mode); §24 sim captures go to `e2e/artifacts/`.
+
+
 ## Tokens & theme
 
 - §3 palette lives in `assets/css/main.css` `@theme`; class-based dark mode (`.dark` on `<html>`).
