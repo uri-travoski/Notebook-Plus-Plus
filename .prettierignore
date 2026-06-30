@@ -1,0 +1,18 @@
+node_modules
+.nuxt
+.output
+.data
+dist
+coverage
+e2e/artifacts
+server/db/migrations
+public
+docs
+*.html
+package-lock.json
+CHANGELOG.md
+CLAUDE.md
+AGENTS.md
+global claude.md
+README.md
+.impeccable

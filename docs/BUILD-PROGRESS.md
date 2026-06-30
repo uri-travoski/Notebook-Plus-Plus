@@ -13,7 +13,7 @@
 Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry reachable · 2 CPU / 15G RAM / 169G free. No local Postgres → run it via Docker (`postgres:18-alpine`) for dev too. Running in Anthropic cloud env `env_018QY6Wt2f6EddFza581hxgW`; deploy paths in §20 are for the user's real server (produce the compose/Dockerfile, do not deploy there from here).
 
 ## Phase checklist (build-spec.md §21)
-- [ ] 1. Scaffold + infra (Nuxt 3 + TS + Tailwind v4 §3 tokens, Drizzle + Postgres, docker-compose, migrations, Inter self-hosted) — health page in theme
+- [x] 1. Scaffold + infra (Nuxt 3 + TS + Tailwind v4 §3 tokens, Drizzle + Postgres, docker-compose, migrations, Inter self-hosted) — health page in theme
 - [ ] 2. Auth (register/login/logout/forgot/reset, sealed sessions, guards, ALLOW_REGISTRATION, seed account)
 - [ ] 3. Hierarchy + sidebar (schema + /api/tree, §7 sidebar CRUD, drag-reorder, collapse persist, Overview/Starred/Drafts/Templates/Archive/Trash)
 - [ ] 4. Editor island — pages (Veaury + BlockNote under ClientOnly, §8 chooser, load + debounced autosave, searchText)
@@ -35,3 +35,6 @@ Hourly cron trigger "Notebook++ autonomous build resume" (fresh session per fire
 
 ## Log
 - 2026-06-30: Infra bootstrap — fixed broken git repo, created build-spec.md (source of truth) from the build prompt, set up resume trigger + heartbeat lock + this tracker. Starting Phase 1.
+- 2026-06-30: **Phase 1 done.** Nuxt 3.21.8 + Vue 3.5 + TS 5.9, Tailwind v4 with §3 tokens + dark mode + `--font-sans`/`--font-mono` vars (Inter + JetBrains Mono self-hosted via fontsource). Drizzle schema (10 tables, `uuidv7()` PKs) migrated into PG18 dev container (`notebookpp-dev-db` @ 127.0.0.1:5438). Dockerfile + compose + standalone migrator. Gate green: typecheck/eslint/prettier/build/migrate/vitest. Built server verified: `/api/health` → `database:ok`, index 200 in theme.
+  - **Test harness note:** Playwright + browsers NOT yet installed — Phase 1's only UI is a throwaway health page (replaced by Overview in Phase 3), so E2E + screenshot-critique start in Phase 2 (auth) where the first real user flow exists. Not silently skipped.
+  - **Tooling note:** eslint needs `Object.groupBy` (Node 21+); polyfilled in `eslint.polyfill.mjs` since host is Node 20.19.

@@ -17,6 +17,7 @@ npm-debug.log*
 
 # Build coordination (ephemeral)
 .notebookpp-build/
+.impeccable/
 
 # Test artifacts
 e2e/artifacts/

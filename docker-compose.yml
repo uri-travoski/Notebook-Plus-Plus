@@ -1,0 +1,43 @@
+# Notebook++ — production stack. Deploy at /opt/stacks/notebookpp/docker-compose.yml
+# (always docker-compose.yml, never compose.yml). Persistent data at /srv/docker/notebookpp/.
+# Copy .env.example -> .env and fill DB_PASSWORD, SESSION_PASSWORD, ENCRYPTION_KEY, etc.
+services:
+  app:
+    build: .
+    container_name: notebookpp-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NUXT_DATABASE_URL: postgres://notebookpp:${DB_PASSWORD}@db:5432/notebookpp
+      NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD} # >= 32 chars (sealed cookies)
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY} # AES-256-GCM secret
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL:-http://localhost:3000}
+      SMTP_URL: ${SMTP_URL:-}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true} # lock to "false" after first account
+    volumes:
+      - /srv/docker/notebookpp/uploads:/app/.data/uploads
+    ports:
+      - '127.0.0.1:3000:3000'
+    networks: [default, npm_proxy]
+  db:
+    image: postgres:18-alpine
+    container_name: notebookpp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notebookpp
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: notebookpp
+    volumes:
+      - /srv/docker/notebookpp/pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U notebookpp']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [default]
+networks:
+  default: {}
+  npm_proxy:
+    external: true

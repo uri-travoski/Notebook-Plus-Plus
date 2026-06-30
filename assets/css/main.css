@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+
+/* Self-hosted variable fonts (no CDN). Body + mono defaults; the font picker
+   in Settings -> Preferences swaps --font-sans / --font-mono at runtime. */
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+/* Class-based dark mode (theme toggle adds .dark to <html>). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Brand / primary (teal) */
+  --color-primary: #0e9f8e;
+  --color-primary-hover: #0c8576;
+  --color-primary-active: #0a6f63;
+  --color-primary-contrast: #ffffff;
+  --color-primary-subtle: #e3f4f1;
+  --color-primary-subtle-fg: #0b7264;
+
+  /* Neutrals (light theme — default) */
+  --color-bg: #eef2f7;
+  --color-surface: #ffffff;
+  --color-sidebar: #f7f9fb;
+  --color-surface-subtle: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-heading: #1e293b;
+  --color-text: #334155;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+  --color-row-hover: #eff3f8;
+  --color-row-selected: #e5ebf2;
+
+  /* Callout / notice status colours */
+  --color-info: #2563eb;
+  --color-info-bg: #eff6ff;
+  --color-tip: #0e9f8e;
+  --color-tip-bg: #e3f4f1;
+  --color-success: #059669;
+  --color-success-bg: #ecfdf5;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+
+  /* Radii */
+  --radius-input: 8px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+  --radius-box: 10px;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  /* Layout */
+  --spacing-sidebar: 280px;
+  --spacing-topbar: 56px;
+
+  /* Fonts — user-selectable; runtime override sets these vars on :root. */
+  --font-sans:
+    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono:
+    'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+}
+
+/* Dark theme token overrides */
+.dark {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-sidebar: #111a2e;
+  --color-surface-subtle: #172033;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-heading: #f1f5f9;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+  --color-row-hover: #1b2740;
+  --color-row-selected: #243049;
+  --color-primary: #14b8a6;
+  --color-primary-hover: #0f9c8c;
+  --color-primary-subtle: #0f2c2a;
+  --color-primary-subtle-fg: #5eead4;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
+/* Visible focus everywhere (a11y floor) */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
