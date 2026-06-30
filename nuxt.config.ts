@@ -25,6 +25,15 @@ export default defineNuxtConfig({
     encryptionKey: '', // ENCRYPTION_KEY (AES-256-GCM, 32 bytes)
     smtpUrl: '', // SMTP_URL
     allowRegistration: 'true', // ALLOW_REGISTRATION
+    // nuxt-auth-utils sealed-session cookie. Secure cookies are dropped by browsers
+    // over plain http on a LAN IP (only localhost/HTTPS are "secure contexts"), so
+    // default off for LAN/HTTP access; set NUXT_SESSION_COOKIE_SECURE=true behind HTTPS.
+    session: {
+      cookie: {
+        secure: false,
+        sameSite: 'lax',
+      },
+    },
     public: {
       appUrl: 'http://localhost:3000', // NUXT_PUBLIC_APP_URL
     },
