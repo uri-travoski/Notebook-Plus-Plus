@@ -131,3 +131,25 @@
   border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
   color: var(--color-danger);
 }
+
+/* Math block: editable LaTeX source + live KaTeX preview. */
+.nb-math {
+  margin: 0.4rem 0;
+}
+.nb-math-src {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  padding: 0.3rem 0.5rem;
+}
+.nb-math-preview {
+  padding: 0.45rem 0 0.1rem;
+  overflow-x: auto;
+  color: var(--color-heading);
+}
+.nb-math-preview:empty {
+  display: none;
+}

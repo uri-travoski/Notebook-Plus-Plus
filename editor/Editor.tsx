@@ -7,13 +7,15 @@ import {
 import { BlockNoteView } from '@blocknote/mantine'
 import { BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems } from '@blocknote/core'
 import { Callout } from './blocks/Callout'
+import { MathBlock } from './blocks/MathBlock'
 import '@blocknote/mantine/style.css'
+import 'katex/dist/katex.min.css'
 import './editor.css'
 
 // Default blocks + our custom blocks. createReactBlockSpec returns a factory, so
-// the block is added as `callout: Callout()`. Most of §11 is already native.
+// each block is added as `Callout()` / `MathBlock()`. Most of §11 is already native.
 const schema = BlockNoteSchema.create({
-  blockSpecs: { ...defaultBlockSpecs, callout: Callout() },
+  blockSpecs: { ...defaultBlockSpecs, callout: Callout(), math: MathBlock() },
 })
 
 type Props = {
@@ -46,9 +48,19 @@ export default function Editor({ initialContent, editable = true, onChange }: Pr
         ed.insertBlocks([{ type: 'callout', props: { kind: 'info' } }], block, 'after')
       },
     }
+    const math = {
+      title: 'Math',
+      subtext: 'KaTeX block formula',
+      aliases: ['math', 'katex', 'latex', 'equation', 'formula'],
+      group: 'Basic blocks',
+      onItemClick: () => {
+        const block = ed.getTextCursorPosition().block
+        ed.insertBlocks([{ type: 'math', content: 'e = mc^2' }], block, 'after')
+      },
+    }
     return filterSuggestionItems(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [...getDefaultReactSlashMenuItems(ed), callout as any],
+      [...getDefaultReactSlashMenuItems(ed), callout as any, math as any],
       query,
     )
   }

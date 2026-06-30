@@ -29,6 +29,7 @@ export default defineNuxtConfig({
     // over plain http on a LAN IP (only localhost/HTTPS are "secure contexts"), so
     // default off for LAN/HTTP access; set NUXT_SESSION_COOKIE_SECURE=true behind HTTPS.
     session: {
+      password: '', // overridden by NUXT_SESSION_PASSWORD at runtime
       cookie: {
         secure: false,
         sameSite: 'lax',
