@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Download } from 'lucide-vue-next'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const { data: doc, error } = await useFetch(`/api/documents/${id.value}`)
@@ -67,6 +68,14 @@ function onTitleInput() {
   if (titleTimer) clearTimeout(titleTimer)
   titleTimer = setTimeout(() => patch({ title: title.value.trim() || 'Untitled' }), 800)
 }
+function exportMarkdown() {
+  const a = document.createElement('a')
+  a.href = `/api/documents/${id.value}/markdown`
+  a.download = `${title.value.trim() || 'untitled'}.md`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
 onBeforeUnmount(() => {
   if (contentTimer) clearTimeout(contentTimer)
   if (titleTimer) clearTimeout(titleTimer)
@@ -94,6 +103,15 @@ onBeforeUnmount(() => {
       >
         Saving…
       </span>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        title="Export as Markdown"
+        @click="exportMarkdown"
+      >
+        <Download class="h-3.5 w-3.5" />
+        Export
+      </button>
     </div>
     <div class="min-h-0 flex-1">
       <ClientOnly>
@@ -108,13 +126,22 @@ onBeforeUnmount(() => {
   <!-- Page: reading column + editor + outline -->
   <div v-else class="relative mx-auto flex w-full max-w-[1080px] gap-10 px-6 py-10">
     <div class="mx-auto w-full min-w-0 max-w-[760px] flex-1">
-      <div class="mb-1 flex h-4 items-center justify-end">
+      <div class="mb-1 flex h-5 items-center justify-end gap-2">
         <span
           class="text-xs text-text-muted transition-opacity"
           :class="saving ? 'opacity-100' : 'opacity-0'"
         >
           Saving…
         </span>
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          title="Export as Markdown"
+          @click="exportMarkdown"
+        >
+          <Download class="h-3.5 w-3.5" />
+          Export
+        </button>
       </div>
 
       <input

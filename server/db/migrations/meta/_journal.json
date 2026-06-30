@@ -15,6 +15,13 @@
       "when": 1782827199008,
       "tag": "0001_complex_crusher_hogan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782846781349,
+      "tag": "0002_nosy_spyke",
+      "breakpoints": true
     }
   ]
 }

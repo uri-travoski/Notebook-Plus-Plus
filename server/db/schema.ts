@@ -216,6 +216,24 @@ export const aiKeys = pgTable(
   (t) => [index('ai_keys_user_idx').on(t.userId)],
 )
 
+// Bulk markdown-export jobs (pg-boss): the worker builds a zip and stores it (base64) here;
+// the client polls status then downloads.
+export const exportJobs = pgTable(
+  'export_jobs',
+  {
+    id: pk(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: text('status').notNull().default('pending'), // pending|done|error
+    filename: text('filename'),
+    data: text('data'), // base64 zip, set when status=done
+    error: text('error'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('export_jobs_user_idx').on(t.userId)],
+)
+
 export type User = typeof users.$inferSelect
 export type Project = typeof projects.$inferSelect
 export type Notebook = typeof notebooks.$inferSelect
