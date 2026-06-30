@@ -9,6 +9,7 @@ import { BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems } from '@bloc
 import { Callout } from './blocks/Callout'
 import { MathBlock } from './blocks/MathBlock'
 import { DatabaseTable } from './blocks/DatabaseTable'
+import { Drawing } from './blocks/Drawing'
 import '@blocknote/mantine/style.css'
 import 'katex/dist/katex.min.css'
 import './editor.css'
@@ -21,6 +22,7 @@ const schema = BlockNoteSchema.create({
     callout: Callout(),
     math: MathBlock(),
     databaseTable: DatabaseTable(),
+    drawing: Drawing(),
   },
 })
 
@@ -190,6 +192,16 @@ export default function Editor({
         )
       },
     }
+    const drawing = {
+      title: 'Drawing',
+      subtext: 'Inline Excalidraw sketch',
+      aliases: ['drawing', 'draw', 'sketch', 'excalidraw', 'diagram', 'whiteboard'],
+      group: 'Basic blocks',
+      onItemClick: () => {
+        const block = ed.getTextCursorPosition().block
+        ed.insertBlocks([{ type: 'drawing', props: { scene: '' } }], block, 'after')
+      },
+    }
     return filterSuggestionItems(
       [
         ...getDefaultReactSlashMenuItems(ed),
@@ -199,6 +211,8 @@ export default function Editor({
         math as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         database as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        drawing as any,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(aiItems as any[]),
       ],
