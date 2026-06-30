@@ -153,3 +153,92 @@
 .nb-math-preview:empty {
   display: none;
 }
+
+/* Database table block */
+.nb-db {
+  margin: 0.5rem 0;
+}
+.nb-db-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-box);
+}
+.nb-db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.nb-db-table th,
+.nb-db-table td {
+  border: 1px solid var(--color-border);
+  padding: 0;
+  vertical-align: top;
+}
+.nb-db-table thead th {
+  background: var(--color-surface-subtle);
+}
+.nb-db-th {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  min-width: 130px;
+}
+.nb-db-colname {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-heading);
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+.nb-db-coltype,
+.nb-db-coloptions {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+.nb-db-colx,
+.nb-db-rowx {
+  color: var(--color-text-subtle);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.nb-db-colx:hover,
+.nb-db-rowx:hover {
+  color: var(--color-danger);
+}
+.nb-db-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  outline: none;
+  padding: 6px 8px;
+  font: inherit;
+  color: var(--color-text);
+}
+.nb-db-input:focus {
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+.nb-db-addrow,
+.nb-db-addcol button {
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+.nb-db-addrow:hover,
+.nb-db-addcol button:hover {
+  color: var(--color-primary);
+}
+.nb-db-loading {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  padding: 6px;
+}

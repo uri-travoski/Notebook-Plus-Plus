@@ -126,7 +126,11 @@ onBeforeUnmount(() => {
       />
 
       <ClientOnly>
-        <EditorIsland :initial-content="doc!.content as unknown[]" @change="onContentChange" />
+        <EditorIsland
+          :document-id="id"
+          :initial-content="doc!.content as unknown[]"
+          @change="onContentChange"
+        />
         <template #fallback>
           <div class="space-y-3" aria-hidden="true">
             <div class="h-4 w-2/3 animate-pulse rounded bg-surface-subtle" />

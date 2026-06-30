@@ -7,9 +7,10 @@ import { useTemplateRef } from 'vue'
 // dynamically inside onMounted so SSR never loads react-dom; render under <ClientOnly>.
 // editable defaults true via withDefaults: a bare boolean prop would otherwise
 // coerce to false when absent, leaving the editor read-only.
-const props = withDefaults(defineProps<{ initialContent?: unknown[]; editable?: boolean }>(), {
-  editable: true,
-})
+const props = withDefaults(
+  defineProps<{ initialContent?: unknown[]; editable?: boolean; documentId?: string }>(),
+  { editable: true },
+)
 const emit = defineEmits<{ change: [doc: unknown[]] }>()
 
 const host = useTemplateRef<HTMLElement>('host')
@@ -26,6 +27,7 @@ function render() {
     createElementFn(EditorComp, {
       initialContent: props.initialContent,
       editable: props.editable ?? true,
+      documentId: props.documentId,
       onChange: (doc: unknown[]) => emit('change', doc),
     }),
   )
