@@ -16,7 +16,7 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 - [x] 1. Scaffold + infra (Nuxt 3 + TS + Tailwind v4 §3 tokens, Drizzle + Postgres, docker-compose, migrations, Inter self-hosted) — health page in theme
 - [x] 2. Auth (register/login/logout/forgot/reset, sealed sessions, guards, ALLOW_REGISTRATION, seed account)
 - [x] 3. Hierarchy + sidebar (schema + /api/tree, §7 sidebar CRUD, collapse persist, Overview/Starred/Drafts/Templates/Archive/Trash) — drag-reorder deferred to Phase 12
-- [ ] 4. Editor island — pages (Veaury + BlockNote under ClientOnly, §8 chooser, load + debounced autosave, searchText)
+- [x] 4. Editor island — pages (BlockNote under ClientOnly via manual createRoot bridge — Veaury dropped; §8 chooser, load + debounced autosave, searchText)
 - [ ] 5. Outline-parity formatting (callout/toggle/divider/math/highlight/underline/Shiki/attachments, slash menu, md shortcuts, outline panel, §3 prose theme)
 - [ ] 6. Excalidraw (inline block + canvas doc type, self-hosted assets, scene persistence)
 - [ ] 7. Database table block (databases/databaseRows + API, TanStack grid, typed columns, CRUD, GFM export)
