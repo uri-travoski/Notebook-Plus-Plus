@@ -87,3 +87,47 @@
 .bn-editor [data-is-empty-and-focused] [data-content-type]::before {
   color: var(--color-text-subtle);
 }
+
+/* Callout / notice block (§3 info/tip/success/warning/danger). */
+.nb-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  border: 1px solid;
+  border-radius: var(--radius-box);
+  padding: 0.6rem 0.85rem;
+  margin: 0.3rem 0;
+}
+.nb-callout-emoji {
+  user-select: none;
+  line-height: 1.7;
+}
+.nb-callout-body {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.nb-callout-info {
+  background: var(--color-info-bg);
+  border-color: color-mix(in srgb, var(--color-info) 35%, transparent);
+  color: var(--color-info);
+}
+.nb-callout-tip {
+  background: var(--color-tip-bg);
+  border-color: color-mix(in srgb, var(--color-tip) 35%, transparent);
+  color: var(--color-tip);
+}
+.nb-callout-success {
+  background: var(--color-success-bg);
+  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+  color: var(--color-success);
+}
+.nb-callout-warning {
+  background: var(--color-warning-bg);
+  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  color: var(--color-warning);
+}
+.nb-callout-danger {
+  background: var(--color-danger-bg);
+  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  color: var(--color-danger);
+}
