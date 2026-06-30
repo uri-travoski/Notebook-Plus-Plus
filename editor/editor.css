@@ -1,14 +1,89 @@
-/* Tune the BlockNote surface to the §3 reading experience. The island uses
-   BlockNote's Mantine theme; these overrides align type rhythm + width. */
+/* BlockNote prose tuned to the §3 reading experience. The island uses BlockNote's
+   Mantine theme; these overrides align type rhythm, headings, quote, code, links,
+   and the checklist to the Notebook++ design tokens. */
+
 .bn-editor {
   padding-inline: 0;
   font-family: var(--font-sans);
+  color: var(--color-text);
 }
+
 .bn-editor .bn-block-content {
   font-size: 16px;
   line-height: 1.7;
 }
+
+/* Headings — the doc title is separate (32px); body headings step down per §3. */
+.bn-editor h1 {
+  font-size: 24px;
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--color-heading);
+}
+.bn-editor h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+.bn-editor h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+.bn-editor h4,
+.bn-editor h5,
+.bn-editor h6 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+/* Links */
+.bn-editor a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Inline code + code blocks */
 .bn-editor code,
 .bn-editor pre {
   font-family: var(--font-mono);
+}
+.bn-editor :not(pre) > code {
+  font-size: 0.9em;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 0.1em 0.32em;
+}
+.bn-editor [data-content-type='codeBlock'],
+.bn-editor pre {
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-box);
+  font-size: 14px;
+}
+
+/* Blockquote per §3: teal left rule, subtle bg, italic heading text. */
+.bn-editor [data-content-type='quote'],
+.bn-editor blockquote {
+  border-left: 3px solid var(--color-primary);
+  background: var(--color-surface-subtle);
+  color: var(--color-heading);
+  font-style: italic;
+  padding: 0.4em 1em;
+  border-radius: 0 var(--radius-box) var(--radius-box) 0;
+}
+
+/* Checklist: teal checked box (§3). */
+.bn-editor input[type='checkbox'] {
+  accent-color: var(--color-primary);
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Selection + placeholder use the brand. */
+.bn-editor [data-is-empty-and-focused] [data-content-type]::before {
+  color: var(--color-text-subtle);
 }
