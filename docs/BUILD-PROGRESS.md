@@ -30,6 +30,10 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 ## USER ADDITIONS (must implement — do not drop across resumes)
 - **Fonts in Settings → Preferences:** user must be able to select (a) a default **body/text** font and (b) a separate **code/monospace** font. Persist in `users.preferences` as `bodyFont` + `monoFont`; apply app-wide via CSS variables (`--font-sans` for UI/body/editor prose, `--font-mono` for code blocks + inline code). Ship a small curated, self-hosted font set (no Google Fonts CDN) for each — at minimum Inter + a couple of alternates for body, and a couple of mono options (e.g. JetBrains Mono / a system-mono fallback). Live-preview the change in the editor. Tie into Phase 1 (tokens/variables) and finalize the picker UI in Phase 12 settings completeness.
 
+## Network preview (user-facing)
+The app is served on the LAN at **http://192.168.68.53:8090** (host `0.0.0.0:8090`), login `dev`/`notebookpp`.
+Restart/refresh it with **`bash scripts/preview.sh`** (detached `node .output/server/index.mjs`, survives the shell). Run it after each phase build so the URL reflects the latest. The hourly resume trigger does this automatically.
+
 ## Resume trigger
 Hourly cron trigger "Notebook++ autonomous build resume" (fresh session per fire, env `env_018QY6Wt2f6EddFza581hxgW`) resumes this build and retries through usage limits. The session that satisfies §22 DoD + §24 simulation must DELETE that trigger and post the final summary.
 
