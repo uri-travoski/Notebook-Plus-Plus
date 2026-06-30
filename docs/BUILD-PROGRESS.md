@@ -14,7 +14,7 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 
 ## Phase checklist (build-spec.md §21)
 - [x] 1. Scaffold + infra (Nuxt 3 + TS + Tailwind v4 §3 tokens, Drizzle + Postgres, docker-compose, migrations, Inter self-hosted) — health page in theme
-- [ ] 2. Auth (register/login/logout/forgot/reset, sealed sessions, guards, ALLOW_REGISTRATION, seed account)
+- [x] 2. Auth (register/login/logout/forgot/reset, sealed sessions, guards, ALLOW_REGISTRATION, seed account)
 - [ ] 3. Hierarchy + sidebar (schema + /api/tree, §7 sidebar CRUD, drag-reorder, collapse persist, Overview/Starred/Drafts/Templates/Archive/Trash)
 - [ ] 4. Editor island — pages (Veaury + BlockNote under ClientOnly, §8 chooser, load + debounced autosave, searchText)
 - [ ] 5. Outline-parity formatting (callout/toggle/divider/math/highlight/underline/Shiki/attachments, slash menu, md shortcuts, outline panel, §3 prose theme)
@@ -38,3 +38,6 @@ Hourly cron trigger "Notebook++ autonomous build resume" (fresh session per fire
 - 2026-06-30: **Phase 1 done.** Nuxt 3.21.8 + Vue 3.5 + TS 5.9, Tailwind v4 with §3 tokens + dark mode + `--font-sans`/`--font-mono` vars (Inter + JetBrains Mono self-hosted via fontsource). Drizzle schema (10 tables, `uuidv7()` PKs) migrated into PG18 dev container (`notebookpp-dev-db` @ 127.0.0.1:5438). Dockerfile + compose + standalone migrator. Gate green: typecheck/eslint/prettier/build/migrate/vitest. Built server verified: `/api/health` → `database:ok`, index 200 in theme.
   - **Test harness note:** Playwright + browsers NOT yet installed — Phase 1's only UI is a throwaway health page (replaced by Overview in Phase 3), so E2E + screenshot-critique start in Phase 2 (auth) where the first real user flow exists. Not silently skipped.
   - **Tooling note:** eslint needs `Object.groupBy` (Node 21+); polyfilled in `eslint.polyfill.mjs` since host is Node 20.19.
+- 2026-06-30: **Phase 2 done.** Auth via nuxt-auth-utils sealed cookies: register/login/logout/forgot/reset, scrypt password util (importable by seed; spec's hashPassword isn't), `tokenVersion` session-invalidation on reset, API guard middleware + global page guard, `ALLOW_REGISTRATION` gate, nodemailer with dev console fallback, seed default account (`dev`/`notebookpp`) + sample data. Shared UI components (UiButton/UiInput/FormField) + auth layout + login/register/forgot/reset pages. Gate green incl. 6 Playwright E2E (with axe a11y) + 8 vitest.
+  - **Fixed:** dual-h3 conflict (`@nuxt/eslint`→devframe pulled h3 v2 to top level, breaking `readBody`) → pinned `h3@1.15.11` as a direct dep. `app.vue` was missing `<NuxtLayout>` (layouts never applied). Primary teal nudged darker for AA. E2E webServer uses the **built** server (no dev-lock); run `npm run build` before `npm run test:e2e`.
+  - Debug helpers kept: `e2e/axe-debug.mjs`, `e2e/screens.mjs`.

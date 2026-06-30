@@ -10,9 +10,11 @@
 
 @theme {
   /* Brand / primary (teal) */
-  --color-primary: #0e9f8e;
-  --color-primary-hover: #0c8576;
-  --color-primary-active: #0a6f63;
+  /* Nudged darker than the §3 reference (#0e9f8e) so white button text and teal
+     link text clear WCAG AA 4.5:1 — §3A authorizes this over shipping low contrast. */
+  --color-primary: #0b7c6e;
+  --color-primary-hover: #0a6b5f;
+  --color-primary-active: #08594e;
   --color-primary-contrast: #ffffff;
   --color-primary-subtle: #e3f4f1;
   --color-primary-subtle-fg: #0b7264;

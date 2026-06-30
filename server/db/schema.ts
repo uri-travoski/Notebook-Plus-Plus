@@ -35,6 +35,8 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   username: text('username').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
+  // Incremented to invalidate existing sealed-cookie sessions (e.g. on password reset).
+  tokenVersion: integer('token_version').notNull().default(0),
   displayName: text('display_name'),
   avatarUrl: text('avatar_url'),
   // { theme, bodyFont, monoFont, editorWidth, defaultDocType, dateFormat, markdownShortcuts, sidebarCollapsed[] }

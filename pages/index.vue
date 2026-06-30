@@ -1,42 +1,61 @@
 <script setup lang="ts">
+useHead({ title: 'Notebook++' })
+
+const { user, clear } = useUserSession()
+const loggingOut = ref(false)
+
+async function logout() {
+  loggingOut.value = true
+  try {
+    await $fetch('/api/auth/logout', { method: 'POST' })
+    await clear()
+    await navigateTo('/login')
+  } finally {
+    loggingOut.value = false
+  }
+}
+
 type Health = { app: string; database: 'ok' | 'error'; time: string }
-const { data: health, pending } = await useFetch<Health>('/api/health')
+const { data: health } = await useFetch<Health>('/api/health')
 </script>
 
 <template>
-  <main class="grid min-h-full place-items-center p-6">
-    <section
-      class="w-full max-w-md rounded-card border border-border bg-surface p-8 shadow-card"
-      aria-labelledby="app-title"
-    >
-      <div class="mb-6 flex items-center gap-2.5">
+  <div class="min-h-full">
+    <header class="flex h-14 items-center justify-between border-b border-border bg-surface px-5">
+      <div class="flex items-center gap-2">
         <span class="inline-block h-6 w-1.5 rounded-pill bg-primary" aria-hidden="true" />
-        <h1 id="app-title" class="text-2xl font-bold text-heading">Notebook++</h1>
+        <span class="font-bold text-heading">Notebook++</span>
       </div>
-
-      <p class="mb-6 text-text-muted">Self-hosted notes &amp; knowledge base.</p>
-
-      <div class="rounded-box border border-border bg-surface-subtle p-4 text-sm">
-        <h2 class="mb-3 text-xs font-semibold uppercase tracking-[0.06em] text-text-subtle">
-          System health
-        </h2>
-        <dl class="space-y-1.5">
-          <div class="flex items-center justify-between">
-            <dt class="text-text-muted">App</dt>
-            <dd class="font-medium text-success">online</dd>
-          </div>
-          <div class="flex items-center justify-between">
-            <dt class="text-text-muted">Database</dt>
-            <dd>
-              <span v-if="pending" class="text-text-subtle">checking…</span>
-              <span v-else-if="health?.database === 'ok'" class="font-medium text-success">
-                connected
-              </span>
-              <span v-else class="font-medium text-danger">unavailable</span>
-            </dd>
-          </div>
-        </dl>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="text-text-muted">
+          Signed in as <span class="font-medium text-heading">{{ user?.username }}</span>
+        </span>
+        <UiButton variant="ghost" :loading="loggingOut" @click="logout">Log out</UiButton>
       </div>
-    </section>
-  </main>
+    </header>
+
+    <main class="mx-auto max-w-2xl px-5 py-10">
+      <h1 class="text-2xl font-bold text-heading">
+        Welcome<span v-if="user?.displayName">, {{ user.displayName }}</span
+        >.
+      </h1>
+      <p class="mt-2 text-text-muted">
+        Your knowledge base is ready. The sidebar, editor, and everything else arrive in the next
+        build phases.
+      </p>
+
+      <div
+        class="mt-6 inline-flex items-center gap-2 rounded-box border border-border bg-surface-subtle px-3 py-2 text-sm"
+      >
+        <span
+          class="h-2 w-2 rounded-full"
+          :class="health?.database === 'ok' ? 'bg-success' : 'bg-danger'"
+          aria-hidden="true"
+        />
+        <span class="text-text-muted">
+          Database {{ health?.database === 'ok' ? 'connected' : 'unavailable' }}
+        </span>
+      </div>
+    </main>
+  </div>
 </template>

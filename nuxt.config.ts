@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/eslint'],
+  modules: ['@nuxt/eslint', 'nuxt-auth-utils'],
 
   css: ['~/assets/css/main.css'],
 
@@ -26,6 +26,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'en' },
       title: 'Notebook++',
       meta: [
         { charset: 'utf-8' },
