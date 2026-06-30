@@ -25,7 +25,7 @@
     "db:reset": "tsx server/db/reset.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --grep-invert @sim",
     "test:sim": "playwright test e2e/simulation.spec.ts"
   },
   "dependencies": {

@@ -40,14 +40,29 @@ async function submit() {
     <h2 class="text-base font-semibold text-heading">Security</h2>
     <p class="mt-1 text-sm text-text-muted">Change your password.</p>
     <form class="mt-4 grid max-w-md gap-3" @submit.prevent="submit">
-      <FormField label="Current password">
-        <UiInput v-model="form.currentPassword" type="password" autocomplete="current-password" />
+      <FormField id="current-password" label="Current password">
+        <UiInput
+          id="current-password"
+          v-model="form.currentPassword"
+          type="password"
+          autocomplete="current-password"
+        />
       </FormField>
-      <FormField label="New password">
-        <UiInput v-model="form.newPassword" type="password" autocomplete="new-password" />
+      <FormField id="new-password" label="New password">
+        <UiInput
+          id="new-password"
+          v-model="form.newPassword"
+          type="password"
+          autocomplete="new-password"
+        />
       </FormField>
-      <FormField label="Confirm new password">
-        <UiInput v-model="form.confirm" type="password" autocomplete="new-password" />
+      <FormField id="confirm-password" label="Confirm new password">
+        <UiInput
+          id="confirm-password"
+          v-model="form.confirm"
+          type="password"
+          autocomplete="new-password"
+        />
       </FormField>
       <div class="flex items-center gap-3">
         <UiButton type="submit" :loading="saving">Update password</UiButton>

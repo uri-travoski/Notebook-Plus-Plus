@@ -34,6 +34,6 @@ export default defineEventHandler(async (event) => {
     limit 30
   `)
   // node-postgres driver returns a QueryResult with `.rows`.
-  const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown[])
+  const rows = (result as unknown as { rows?: unknown[] }).rows ?? (result as unknown as unknown[])
   return { results: rows }
 })
