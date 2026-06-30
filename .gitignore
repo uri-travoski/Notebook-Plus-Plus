@@ -1,0 +1,29 @@
+# Secrets / local
+docs/credentials.md
+.claude/settings.local.json
+CLAUDE.local.md
+.env
+.env.*
+!.env.example
+
+# Dependencies / build output
+node_modules/
+.nuxt/
+.output/
+.data/
+dist/
+*.log
+npm-debug.log*
+
+# Build coordination (ephemeral)
+.notebookpp-build/
+
+# Test artifacts
+e2e/artifacts/
+test-results/
+playwright-report/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
