@@ -1,0 +1,14 @@
+/* Tune the BlockNote surface to the §3 reading experience. The island uses
+   BlockNote's Mantine theme; these overrides align type rhythm + width. */
+.bn-editor {
+  padding-inline: 0;
+  font-family: var(--font-sans);
+}
+.bn-editor .bn-block-content {
+  font-size: 16px;
+  line-height: 1.7;
+}
+.bn-editor code,
+.bn-editor pre {
+  font-family: var(--font-mono);
+}

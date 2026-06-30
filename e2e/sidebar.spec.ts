@@ -54,7 +54,7 @@ test('create a project, notebook, and note from the sidebar', async ({ page }) =
   await nbRow.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'New note' }).click()
   await expect(page).toHaveURL(/\/doc\//)
-  await expect(page.getByRole('heading', { level: 1, name: 'Untitled' })).toBeVisible()
+  await expect(page.getByLabel('Note title')).toHaveValue('Untitled')
 
   // Cleanup: delete the probe project via its menu (cascades the notebook + note)
   await page.goto('/')

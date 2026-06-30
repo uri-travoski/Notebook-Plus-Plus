@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import react from '@vitejs/plugin-react'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -10,7 +11,12 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   vite: {
-    plugins: [tailwindcss()],
+    // React (BlockNote/Excalidraw island) JSX is processed ONLY under editor/.
+    // Everything else stays Vue. esbuild-based plugin-react@5 works with Vite 8.
+    plugins: [tailwindcss(), react({ include: /\/editor\// })],
+    optimizeDeps: {
+      include: ['react', 'react-dom', 'react-dom/client'],
+    },
   },
 
   runtimeConfig: {

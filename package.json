@@ -29,6 +29,9 @@
     "test:sim": "playwright test e2e/simulation.spec.ts"
   },
   "dependencies": {
+    "@blocknote/core": "^0.51.4",
+    "@blocknote/mantine": "^0.51.4",
+    "@blocknote/react": "^0.51.4",
     "@fontsource-variable/inter": "5.2.8",
     "@fontsource-variable/jetbrains-mono": "5.2.8",
     "drizzle-orm": "0.45.2",
@@ -39,6 +42,9 @@
     "nuxt": "3.21.8",
     "nuxt-auth-utils": "^0.5.29",
     "pg": "8.22.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "veaury": "^2.6.3",
     "vue": "^3.5.39"
   },
   "devDependencies": {
@@ -48,6 +54,9 @@
     "@tailwindcss/vite": "4.3.2",
     "@types/nodemailer": "^8.0.1",
     "@types/pg": "8.20.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
     "dotenv": "17.4.2",
     "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",

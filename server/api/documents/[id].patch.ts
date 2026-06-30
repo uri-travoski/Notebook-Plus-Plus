@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { useDb, schema } from '../../db'
 import { getUserId } from '../../utils/guard'
+import { blocksToPlainText } from '../../utils/blocks'
 
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
@@ -24,6 +25,12 @@ export default defineEventHandler(async (event) => {
   if (typeof body.isTemplate === 'boolean') patch.isTemplate = body.isTemplate
   if (typeof body.archived === 'boolean') patch.archivedAt = body.archived ? new Date() : null
   if (typeof body.deleted === 'boolean') patch.deletedAt = body.deleted ? new Date() : null
+
+  // Editor autosave: content + derived searchText (page docs are BlockNote arrays).
+  if (body.content !== undefined) {
+    patch.content = body.content as object
+    if (Array.isArray(body.content)) patch.searchText = blocksToPlainText(body.content)
+  }
 
   // Move within the tree.
   if (body.notebookId === null) patch.notebookId = null

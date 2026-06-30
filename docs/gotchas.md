@@ -9,7 +9,16 @@
 - This is the Anthropic cloud env, not the user's server. The §20 `/opt/stacks` + `/srv/docker` paths are produced as deploy artifacts (Dockerfile/compose), not deployed from here.
 
 ## Editor island version-compat (verify before Phase 4)
-- React-island set: peers all accept **React 19** (Excalidraw 0.18 `^17||^18||^19`, BlockNote 0.51 `^18||^19`, Veaury 2.6 `>=16.4`, TanStack table `>=16.8`). Going with React 19. **Veaury's range is broad** — if it breaks under React 19 (createRoot/legacy API), fall back to React 18 (all four also accept it).
+- React-island set: peers all accept **React 19** (Excalidraw 0.18 `^17||^18||^19`, BlockNote 0.51 `^18||^19`, Veaury 2.6 `>=16.4`, TanStack table `>=16.8`). Going with React 19.
+
+## Editor island — CRITICAL (Phase 4, applies to all editor work)
+The React island took real work to land. Keep these or it breaks:
+1. **Veaury 2.6.3 is incompatible with Vue 3.5 + React 19** — it leaks a Vue VNode into React children (`React error #31`) even for a trivial component. We do NOT use Veaury. `components/EditorIsland.vue` is a **thin manual `createRoot` bridge** (regular component, not `.client.vue`, wrapped in `<ClientOnly>`; React deps dynamically imported inside `onMounted` so SSR never loads react-dom). Same island contract (props in / `onChange` out / SSR off).
+2. **No JSX in `editor/*.tsx`** — Nuxt's `@vitejs/plugin-vue-jsx` and `@vitejs/plugin-react` both claim `.tsx`; vue-jsx wins and compiles JSX to **Vue** VNodes → React error #31. Write the island with `createElement` (no JSX syntax). Custom blocks (Phase 5+) must also use `createElement`.
+3. **Vue boolean-prop coercion**: an absent `editable?: boolean` prop is `false`, not `undefined`, so `?? true` doesn't help. Use `withDefaults(defineProps<...>(), { editable: true })` or the editor renders read-only (`contenteditable="false"`).
+4. `@vitejs/plugin-react@6` needs Vite 8 + babel 8 (conflicts with vue-jsx) — pin **`@vitejs/plugin-react@5.2.0`** (esbuild-based). `plugin-react` `include` set to `/\/editor\//`.
+5. Pin **`h3@1.15.11`** as a direct dep (Nuxt 3.21 + nuxt-auth-utils) or `@nuxt/eslint`→devframe hoists h3 v2 and breaks `readBody`.
+6. BlockNote's generic block-schema types don't unify through `createElement` — cast the view (`BlockNoteView as any`); runtime is e2e-verified.
 
 ## Postgres 18 specifics
 - Using native `uuidv7()` for PKs (PG18 built-in) — no JS UUID dep. Requires the DB actually be PG18 (dev container + compose both pin `postgres:18`).
