@@ -6,9 +6,41 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-01',
   devtools: { enabled: true },
 
-  modules: ['@nuxt/eslint', 'nuxt-auth-utils'],
+  modules: ['@nuxt/eslint', 'nuxt-auth-utils', '@vite-pwa/nuxt'],
 
   css: ['~/assets/css/main.css'],
+
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'Notebook++',
+      short_name: 'Notebook++',
+      description: 'Your self-hosted notes & knowledge base.',
+      theme_color: '#0E9F8E',
+      background_color: '#EEF2F7',
+      display: 'standalone',
+      start_url: '/',
+      icons: [
+        { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    workbox: {
+      // Single live user → data must stay fresh: network-first for the API, precache the shell.
+      navigateFallback: undefined,
+      globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+      runtimeCaching: [
+        {
+          urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/api'),
+          handler: 'NetworkFirst',
+          options: { cacheName: 'api', networkTimeoutSeconds: 5 },
+        },
+      ],
+    },
+    client: { installPrompt: true },
+    devOptions: { enabled: false },
+  },
 
   vite: {
     // React (BlockNote/Excalidraw island) JSX is processed ONLY under editor/.
@@ -48,6 +80,14 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#0E9F8E' },
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-title', content: 'Notebook++' },
+      ],
+      link: [
+        { rel: 'manifest', href: '/manifest.webmanifest' },
+        { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/icon.svg' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       ],
     },
   },

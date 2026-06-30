@@ -85,5 +85,6 @@ async function logout() {
 
     <NewDocChooser />
     <CommandPalette />
+    <OfflineBanner />
   </div>
 </template>

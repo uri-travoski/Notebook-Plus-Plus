@@ -16,13 +16,15 @@ type AiKey = {
 
 const PROVIDERS = ['anthropic', 'openai', 'google', 'openrouter', 'groq']
 
-const keys = ref<AiKey[]>([])
-const loading = ref(true)
-async function load() {
-  keys.value = await $fetch<AiKey[]>('/api/ai/keys')
-  loading.value = false
-}
-await load()
+// useFetch forwards the session cookie during SSR (raw $fetch does not -> 401 on hard load).
+const {
+  data: keysData,
+  refresh,
+  pending,
+} = await useFetch<AiKey[]>('/api/ai/keys', {
+  default: () => [],
+})
+const keys = computed<AiKey[]>(() => keysData.value ?? [])
 
 const form = reactive({
   provider: 'anthropic',
@@ -55,7 +57,7 @@ async function addKey() {
     form.label = ''
     form.model = ''
     form.baseUrl = ''
-    await load()
+    await refresh()
   } catch (e) {
     addError.value =
       (e as { data?: { statusMessage?: string } })?.data?.statusMessage || 'Could not add key.'
@@ -69,18 +71,18 @@ async function validateKey(k: AiKey) {
   busy.value = k.id
   try {
     await $fetch(`/api/ai/keys/${k.id}/validate`, { method: 'POST' })
-    await load()
+    await refresh()
   } finally {
     busy.value = null
   }
 }
 async function toggleKey(k: AiKey) {
   await $fetch(`/api/ai/keys/${k.id}`, { method: 'PATCH', body: { enabled: !k.enabled } })
-  await load()
+  await refresh()
 }
 async function removeKey(k: AiKey) {
   await $fetch(`/api/ai/keys/${k.id}`, { method: 'DELETE' })
-  await load()
+  await refresh()
 }
 
 const showBaseUrl = computed(() => form.provider === 'openai' || form.provider === 'openrouter')
@@ -95,7 +97,7 @@ const showBaseUrl = computed(() => form.provider === 'openai' || form.provider =
     </p>
 
     <!-- Existing keys -->
-    <div v-if="loading" class="mt-4 text-sm text-text-muted">Loading…</div>
+    <div v-if="pending" class="mt-4 text-sm text-text-muted">Loading…</div>
     <EmptyState
       v-else-if="!keys.length"
       class="mt-4"

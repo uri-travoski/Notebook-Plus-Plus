@@ -2,8 +2,9 @@
 import { Download, Upload } from 'lucide-vue-next'
 useHead({ title: 'Settings · Notebook++' })
 
+// Load the tree client-side (onMounted) so a hard SSR load of /settings doesn't 401 on /api/tree.
 const { tree, ensure, refresh } = useTree()
-await ensure()
+onMounted(ensure)
 
 const notebookOptions = computed(() => {
   const opts: { id: string; label: string }[] = []

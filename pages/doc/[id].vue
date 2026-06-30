@@ -146,7 +146,7 @@ onBeforeUnmount(() => {
 
       <input
         v-model="title"
-        class="mb-4 w-full border-0 bg-transparent text-[32px] font-bold leading-tight text-heading outline-none placeholder:text-text-subtle"
+        class="mb-4 w-full border-0 bg-transparent text-[26px] font-bold leading-tight text-heading outline-none placeholder:text-text-subtle sm:text-[32px]"
         placeholder="Untitled"
         aria-label="Note title"
         @input="onTitleInput"
