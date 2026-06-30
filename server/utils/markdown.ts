@@ -1,7 +1,7 @@
 import { ServerBlockNoteEditor } from '@blocknote/server-util'
 import { asc, eq } from 'drizzle-orm'
 import { useDb, schema } from '../db'
-import { databaseToGfm } from './gfm'
+import { databaseToGfm, type DbColumn } from './gfm'
 
 // Server-side BlockNote <-> Markdown (GFM). Canonical stored form is BlockNote JSON;
 // Markdown is derived on demand (export) and parsed back on import (§14). Custom blocks
@@ -40,10 +40,10 @@ async function databaseMarkdown(databaseId: string): Promise<string> {
     .from(schema.databaseRows)
     .where(eq(schema.databaseRows.databaseId, databaseId))
     .orderBy(asc(schema.databaseRows.position))
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cols = database.columns as DbColumn[]
   return databaseToGfm(
-    database.columns as any,
-    rows.map((r) => ({ values: r.values as any })),
+    cols,
+    rows.map((r) => ({ values: (r.values ?? {}) as Record<string, unknown> })),
   )
 }
 

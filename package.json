@@ -29,6 +29,10 @@
     "test:sim": "playwright test e2e/simulation.spec.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.4",
+    "@ai-sdk/google": "^4.0.3",
+    "@ai-sdk/groq": "^4.0.2",
+    "@ai-sdk/openai": "^4.0.4",
     "@blocknote/core": "^0.51.4",
     "@blocknote/mantine": "^0.51.4",
     "@blocknote/react": "^0.51.4",
@@ -36,6 +40,7 @@
     "@excalidraw/excalidraw": "^0.18.1",
     "@fontsource-variable/inter": "5.2.8",
     "@fontsource-variable/jetbrains-mono": "5.2.8",
+    "ai": "^7.0.9",
     "drizzle-orm": "0.45.2",
     "fractional-indexing": "^4.0.0",
     "h3": "1.15.11",
@@ -50,7 +55,8 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "veaury": "^2.6.3",
-    "vue": "^3.5.39"
+    "vue": "^3.5.39",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

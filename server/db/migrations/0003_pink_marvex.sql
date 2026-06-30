@@ -1,0 +1,1 @@
+ALTER TABLE "ai_keys" ADD COLUMN "base_url" text;

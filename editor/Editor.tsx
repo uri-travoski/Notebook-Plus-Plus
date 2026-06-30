@@ -44,6 +44,102 @@ export default function Editor({ initialContent, editable = true, documentId, on
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ed = editor as any
 
+  // --- AI (§16): stream a completion from /api/ai/complete into a target block, live. ---
+  function inlineText(content: unknown): string {
+    if (typeof content === 'string') return content
+    if (!Array.isArray(content)) return ''
+    return content
+      .map((c) =>
+        c && typeof c === 'object' && typeof (c as { text?: string }).text === 'string'
+          ? (c as { text: string }).text
+          : '',
+      )
+      .join('')
+  }
+  function docText(): string {
+    return (ed.document as { content?: unknown }[])
+      .map((b) => inlineText(b.content))
+      .filter(Boolean)
+      .join('\n\n')
+  }
+  async function streamInto(targetId: string, body: Record<string, unknown>) {
+    let res: Response
+    try {
+      res = await fetch('/api/ai/complete', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+    } catch {
+      ed.updateBlock(targetId, { type: 'paragraph', content: 'AI request failed.' })
+      return
+    }
+    if (!res.ok || !res.body) {
+      let msg = 'AI error'
+      try {
+        msg = (await res.json()).statusMessage || msg
+      } catch {
+        // non-JSON error
+      }
+      ed.updateBlock(targetId, { type: 'paragraph', content: msg })
+      return
+    }
+    const reader = res.body.getReader()
+    const dec = new TextDecoder()
+    let acc = ''
+    for (;;) {
+      const { done, value } = await reader.read()
+      if (done) break
+      acc += dec.decode(value, { stream: true })
+      ed.updateBlock(targetId, { type: 'paragraph', content: acc })
+    }
+  }
+  function insertAfterCursor(): string {
+    const block = ed.getTextCursorPosition().block
+    const [inserted] = ed.insertBlocks([{ type: 'paragraph', content: '…' }], block, 'after')
+    return inserted.id as string
+  }
+  const aiItems = [
+    {
+      title: 'Continue writing (AI)',
+      subtext: 'Let AI continue your note',
+      aliases: ['ai', 'continue', 'write', 'gpt', 'assistant'],
+      group: 'AI',
+      onItemClick: async () =>
+        streamInto(insertAfterCursor(), { action: 'continue', context: docText() }),
+    },
+    {
+      title: 'Improve writing (AI)',
+      subtext: 'Rewrite this block more clearly',
+      aliases: ['ai', 'improve', 'rewrite', 'clarify'],
+      group: 'AI',
+      onItemClick: async () => {
+        const block = ed.getTextCursorPosition().block
+        const text = inlineText(block.content)
+        if (text.trim()) await streamInto(block.id, { action: 'improve', text })
+      },
+    },
+    {
+      title: 'Fix spelling & grammar (AI)',
+      subtext: 'Correct this block',
+      aliases: ['ai', 'grammar', 'spelling', 'fix', 'proofread'],
+      group: 'AI',
+      onItemClick: async () => {
+        const block = ed.getTextCursorPosition().block
+        const text = inlineText(block.content)
+        if (text.trim()) await streamInto(block.id, { action: 'grammar', text })
+      },
+    },
+    {
+      title: 'Summarize note (AI)',
+      subtext: 'Add a summary of this note',
+      aliases: ['ai', 'summarize', 'summary', 'tldr'],
+      group: 'AI',
+      onItemClick: async () =>
+        streamInto(insertAfterCursor(), { action: 'summarize', text: docText() }),
+    },
+  ]
+
   async function getSlashItems(query: string) {
     const callout = {
       title: 'Callout',
@@ -88,8 +184,17 @@ export default function Editor({ initialContent, editable = true, documentId, on
       },
     }
     return filterSuggestionItems(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      [...getDefaultReactSlashMenuItems(ed), callout as any, math as any, database as any],
+      [
+        ...getDefaultReactSlashMenuItems(ed),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        callout as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        math as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        database as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(aiItems as any[]),
+      ],
       query,
     )
   }

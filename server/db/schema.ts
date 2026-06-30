@@ -203,6 +203,8 @@ export const aiKeys = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     provider: aiProvider('provider').notNull(),
     label: text('label'),
+    // Optional custom endpoint for OpenAI-compatible providers (Alibaba, local LLMs, proxies…).
+    baseUrl: text('base_url'),
     encryptedKey: text('encrypted_key').notNull(),
     iv: text('iv').notNull(),
     authTag: text('auth_tag').notNull(),

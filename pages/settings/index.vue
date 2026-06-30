@@ -84,8 +84,10 @@ async function onFiles(e: Event) {
 </script>
 
 <template>
-  <AppPage title="Settings" subtitle="Import and export your notes as Markdown.">
+  <AppPage title="Settings" subtitle="AI providers, and Markdown import / export.">
     <div class="space-y-5">
+      <AiKeysManager />
+
       <section class="rounded-box border border-border bg-surface p-5">
         <div class="flex items-start gap-3">
           <Upload class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
