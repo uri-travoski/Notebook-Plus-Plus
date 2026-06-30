@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Menu, LogOut, Settings as SettingsIcon } from 'lucide-vue-next'
+import { Menu, LogOut, Settings as SettingsIcon, Search } from 'lucide-vue-next'
 
 const drawerOpen = ref(false)
 const route = useRoute()
 const router = useRouter()
 const { user, clear } = useUserSession()
+const { open: paletteOpen } = useCommandPalette()
 
 watch(
   () => route.fullPath,
@@ -47,6 +48,17 @@ async function logout() {
         </button>
         <span class="font-bold text-heading md:hidden">Notebook++</span>
 
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-input border border-border bg-surface-subtle px-3 py-1.5 text-sm text-text-muted transition-colors hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          aria-label="Search notes"
+          @click="paletteOpen = true"
+        >
+          <Search class="h-4 w-4" />
+          <span class="hidden sm:inline">Search</span>
+          <kbd class="hidden rounded border border-border px-1 text-[10px] md:inline">⌘K</kbd>
+        </button>
+
         <div class="ml-auto flex items-center gap-1">
           <UiDropdown label="Account menu">
             <template #trigger>
@@ -65,11 +77,13 @@ async function logout() {
           </UiDropdown>
         </div>
       </header>
-      <main class="min-h-0 flex-1 overflow-y-auto">
+      <!-- tabindex makes the scroll region keyboard-accessible (axe scrollable-region-focusable). -->
+      <main tabindex="0" class="min-h-0 flex-1 overflow-y-auto outline-none">
         <slot />
       </main>
     </div>
 
     <NewDocChooser />
+    <CommandPalette />
   </div>
 </template>

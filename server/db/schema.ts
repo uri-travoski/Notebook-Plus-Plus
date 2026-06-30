@@ -9,8 +9,17 @@ import {
   boolean,
   integer,
   index,
+  customType,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
+
+// Postgres full-text search vector (§17). Stored generated column kept in sync from
+// title + searchText; queried via a GIN index.
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector'
+  },
+})
 
 // Postgres 18 ships uuidv7(); use it for time-ordered UUID primary keys.
 const pk = () =>
@@ -113,6 +122,9 @@ export const documents = pgTable(
       .notNull()
       .default(sql`'[]'::jsonb`),
     searchText: text('search_text').notNull().default(''),
+    searchVector: tsvector('search_vector').generatedAlwaysAs(
+      sql`to_tsvector('english', coalesce(title, '') || ' ' || coalesce(search_text, ''))`,
+    ),
     isTemplate: boolean('is_template').notNull().default(false),
     isStarred: boolean('is_starred').notNull().default(false),
     isDraft: boolean('is_draft').notNull().default(false),
@@ -126,6 +138,7 @@ export const documents = pgTable(
     index('documents_user_idx').on(t.userId),
     index('documents_notebook_idx').on(t.notebookId),
     index('documents_parent_idx').on(t.parentDocumentId),
+    index('documents_search_idx').using('gin', t.searchVector),
   ],
 )
 
