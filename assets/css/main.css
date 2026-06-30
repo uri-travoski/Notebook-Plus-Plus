@@ -28,7 +28,7 @@
   --color-border-strong: #cbd5e1;
   --color-heading: #1e293b;
   --color-text: #334155;
-  --color-text-muted: #64748b;
+  --color-text-muted: #5b6677; /* darkened from §3 #64748b to clear AA on the app bg (#eef2f7) too */
   --color-text-subtle: #94a3b8;
   --color-row-hover: #eff3f8;
   --color-row-selected: #e5ebf2;

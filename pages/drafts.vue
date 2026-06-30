@@ -1,0 +1,15 @@
+<script setup lang="ts">
+useHead({ title: 'Drafts · Notebook++' })
+const { data: docs } = await useFetch('/api/documents', { query: { view: 'drafts' } })
+</script>
+
+<template>
+  <AppPage title="Drafts" subtitle="Unfiled notes not yet placed in a notebook.">
+    <DocList v-if="docs?.length" :docs="docs" />
+    <EmptyState
+      v-else
+      title="No drafts"
+      hint="New notes created outside a notebook show up here."
+    />
+  </AppPage>
+</template>

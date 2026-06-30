@@ -1,0 +1,46 @@
+import { and, eq } from 'drizzle-orm'
+import { useDb, schema } from '../../db'
+import { getUserId } from '../../utils/guard'
+
+async function ownsProject(db: ReturnType<typeof useDb>, projectId: string, userId: string) {
+  const [p] = await db
+    .select({ id: schema.projects.id })
+    .from(schema.projects)
+    .where(and(eq(schema.projects.id, projectId), eq(schema.projects.userId, userId)))
+    .limit(1)
+  return !!p
+}
+
+export default defineEventHandler(async (event) => {
+  const userId = await getUserId(event)
+  const id = getRouterParam(event, 'id') as string
+  const body = await readBody<Record<string, unknown>>(event)
+  const db = useDb()
+
+  const [existing] = await db
+    .select({ id: schema.notebooks.id })
+    .from(schema.notebooks)
+    .innerJoin(schema.projects, eq(schema.notebooks.projectId, schema.projects.id))
+    .where(and(eq(schema.notebooks.id, id), eq(schema.projects.userId, userId)))
+    .limit(1)
+  if (!existing) throw createError({ statusCode: 404, statusMessage: 'Notebook not found.' })
+
+  const patch: Record<string, unknown> = { updatedAt: new Date() }
+  if (typeof body.name === 'string') patch.name = body.name.trim() || 'Untitled'
+  if (typeof body.icon === 'string') patch.icon = body.icon
+  if (typeof body.position === 'string') patch.position = body.position
+  if (typeof body.archived === 'boolean') patch.archivedAt = body.archived ? new Date() : null
+  if (typeof body.projectId === 'string') {
+    if (!(await ownsProject(db, body.projectId, userId))) {
+      throw createError({ statusCode: 404, statusMessage: 'Target project not found.' })
+    }
+    patch.projectId = body.projectId
+  }
+
+  const [updated] = await db
+    .update(schema.notebooks)
+    .set(patch)
+    .where(eq(schema.notebooks.id, id))
+    .returning()
+  return updated
+})

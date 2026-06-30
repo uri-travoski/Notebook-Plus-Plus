@@ -26,11 +26,11 @@ test('sign in with the seeded account, then log out', async ({ page }) => {
   await page.getByRole('button', { name: 'Sign in' }).click()
 
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.getByText('Signed in as')).toBeVisible()
-  await expect(page.getByText(DEV_USER, { exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
   await page.screenshot({ path: 'e2e/artifacts/home-authed.png', fullPage: true })
 
-  await page.getByRole('button', { name: 'Log out' }).click()
+  await page.getByRole('button', { name: 'Account menu' }).click()
+  await page.getByRole('menuitem', { name: 'Log out' }).click()
   await expect(page).toHaveURL(/\/login$/)
 })
 
