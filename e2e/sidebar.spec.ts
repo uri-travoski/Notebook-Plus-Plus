@@ -53,6 +53,7 @@ test('create a project, notebook, and note from the sidebar', async ({ page }) =
   // New note via the notebook's menu -> navigates to the editor route
   await nbRow.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'New note' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Page' }).click()
   await expect(page).toHaveURL(/\/doc\//)
   await expect(page.getByLabel('Note title')).toHaveValue('Untitled')
 
@@ -91,6 +92,7 @@ test('move a note to another notebook via the Move dialog', async ({ page }) => 
   const nbA = nav.locator('li', { hasText: `A ${sfx}` }).last()
   await nbA.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'New note' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Page' }).click()
   await expect(page).toHaveURL(/\/doc\//)
 
   // Move the Untitled note to notebook B

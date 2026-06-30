@@ -12,13 +12,15 @@ const DEFAULT_PASSWORD = 'notebookpp'
 
 function welcomePage() {
   return [
-    { type: 'heading', props: { level: 1 }, content: 'Welcome to Notebook++' },
     {
       type: 'paragraph',
       content:
         'This is your self-hosted knowledge base. Create pages and canvases from the sidebar.',
     },
     { type: 'paragraph', content: 'Everything autosaves. Try the slash menu by typing "/".' },
+    { type: 'heading', props: { level: 2 }, content: 'Getting started' },
+    { type: 'bulletListItem', content: 'Use the + on a notebook to add a page or canvas.' },
+    { type: 'bulletListItem', content: 'Type "/" for the block menu; drag the handle to reorder.' },
   ]
 }
 

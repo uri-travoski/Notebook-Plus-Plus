@@ -69,5 +69,7 @@ async function logout() {
         <slot />
       </main>
     </div>
+
+    <NewDocChooser />
   </div>
 </template>

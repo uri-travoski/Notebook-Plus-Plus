@@ -28,11 +28,10 @@ const {
   createNotebook,
   updateNotebook,
   deleteNotebook,
-  createNote,
 } = useTree()
 const { ensure: ensurePrefs, isCollapsed, toggleCollapse } = usePreferences()
+const { start: startNewDoc } = useNewDoc()
 const route = useRoute()
-const router = useRouter()
 
 onMounted(() => {
   ensure()
@@ -63,9 +62,8 @@ async function addNotebook(projectId: string) {
   const n = await createNotebook(projectId)
   startRename('notebook', n.id, n.name)
 }
-async function addNote(notebookId: string) {
-  const d = await createNote(notebookId, 'page')
-  router.push(`/doc/${d.id}`)
+function addNote(notebookId: string) {
+  startNewDoc(notebookId)
 }
 
 function buildChildrenMap(notes: TreeNote[]) {
