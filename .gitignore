@@ -25,6 +25,9 @@ test-results/
 playwright-report/
 coverage/
 
+# Self-hosted Excalidraw fonts (copied from node_modules on postinstall)
+public/fonts/
+
 # OS
 .DS_Store
 Thumbs.db

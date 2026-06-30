@@ -17,7 +17,7 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 - [x] 2. Auth (register/login/logout/forgot/reset, sealed sessions, guards, ALLOW_REGISTRATION, seed account)
 - [x] 3. Hierarchy + sidebar (schema + /api/tree, §7 sidebar CRUD, collapse persist, Overview/Starred/Drafts/Templates/Archive/Trash) — drag-reorder deferred to Phase 12
 - [x] 4. Editor island — pages (BlockNote under ClientOnly via manual createRoot bridge — Veaury dropped; §8 chooser, load + debounced autosave, searchText)
-- [~] 5. Outline-parity formatting — DONE: §3 prose theme + headings-outline panel; native blocks (quote/divider/toggle/code/file/image/table/lists) + marks (underline/highlight) via slash menu; **callout custom block + custom slash menu** (createElement factory pattern proven — gotchas #7, unblocks Phase 6/7 blocks). Pending: math (KaTeX), Shiki highlight verify, md-shortcut toggles, selection-toolbar extras.
+- [x] 5. Outline-parity formatting — §3 prose theme + headings-outline panel; native blocks (quote/divider/toggle/code/file/image/table/lists) + marks (underline/highlight) via slash menu; **callout + math custom blocks** + custom slash menu (createElement factory pattern — gotchas #7). Polish deferred to Phase 12: verify native code-block highlighting (Shiki), md-shortcuts/toolbar entry for custom blocks.
 - [ ] 6. Excalidraw (inline block + canvas doc type, self-hosted assets, scene persistence)
 - [ ] 7. Database table block (databases/databaseRows + API, TanStack grid, typed columns, CRUD, GFM export)
 - [ ] 8. Markdown import/export (per-doc + bulk pg-boss zip, lossy handling)

@@ -9,7 +9,7 @@ watch(doc, (d) => {
   if (d) title.value = d.title
 })
 
-// Live content drives the outline; persisted on a debounce.
+// Page outline (headings) — live content drives it; persisted on a debounce.
 type Block = { type?: string; props?: { level?: number }; content?: unknown }
 const liveContent = ref<Block[]>(
   Array.isArray(doc.value?.content) ? (doc.value!.content as Block[]) : [],
@@ -17,7 +17,6 @@ const liveContent = ref<Block[]>(
 watch(doc, (d) => {
   if (d?.type === 'page' && Array.isArray(d.content)) liveContent.value = d.content as Block[]
 })
-
 function inlineText(content: unknown): string {
   if (typeof content === 'string') return content
   if (Array.isArray(content))
@@ -60,6 +59,10 @@ function onContentChange(content: unknown[]) {
   if (contentTimer) clearTimeout(contentTimer)
   contentTimer = setTimeout(() => patch({ content }), 1500)
 }
+function onCanvasChange(scene: unknown) {
+  if (contentTimer) clearTimeout(contentTimer)
+  contentTimer = setTimeout(() => patch({ content: scene }), 1500)
+}
 function onTitleInput() {
   if (titleTimer) clearTimeout(titleTimer)
   titleTimer = setTimeout(() => patch({ title: title.value.trim() || 'Untitled' }), 800)
@@ -74,6 +77,35 @@ onBeforeUnmount(() => {
   <div v-if="error" class="mx-auto max-w-3xl px-6 py-10">
     <EmptyState title="Note not found" hint="It may have been deleted or moved to Trash." />
   </div>
+
+  <!-- Canvas: full-page Excalidraw -->
+  <div v-else-if="doc?.type === 'canvas'" class="flex h-full flex-col">
+    <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-6">
+      <input
+        v-model="title"
+        class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-heading outline-none placeholder:text-text-subtle"
+        placeholder="Untitled canvas"
+        aria-label="Canvas title"
+        @input="onTitleInput"
+      />
+      <span
+        class="text-xs text-text-muted transition-opacity"
+        :class="saving ? 'opacity-100' : 'opacity-0'"
+      >
+        Saving…
+      </span>
+    </div>
+    <div class="min-h-0 flex-1">
+      <ClientOnly>
+        <CanvasIsland :initial-scene="doc.content" @change="onCanvasChange" />
+        <template #fallback>
+          <div class="grid h-full place-items-center text-sm text-text-muted">Loading canvas…</div>
+        </template>
+      </ClientOnly>
+    </div>
+  </div>
+
+  <!-- Page: reading column + editor + outline -->
   <div v-else class="relative mx-auto flex w-full max-w-[1080px] gap-10 px-6 py-10">
     <div class="mx-auto w-full min-w-0 max-w-[760px] flex-1">
       <div class="mb-1 flex h-4 items-center justify-end">
@@ -94,18 +126,7 @@ onBeforeUnmount(() => {
       />
 
       <ClientOnly>
-        <EditorIsland
-          v-if="doc?.type === 'page'"
-          :initial-content="doc.content as unknown[]"
-          @change="onContentChange"
-        />
-        <div
-          v-else
-          class="rounded-card border border-dashed border-border bg-surface-subtle px-6 py-12 text-center text-sm text-text-muted"
-        >
-          The canvas editor arrives in a later phase. This canvas note is saved.
-        </div>
-
+        <EditorIsland :initial-content="doc!.content as unknown[]" @change="onContentChange" />
         <template #fallback>
           <div class="space-y-3" aria-hidden="true">
             <div class="h-4 w-2/3 animate-pulse rounded bg-surface-subtle" />
@@ -117,7 +138,7 @@ onBeforeUnmount(() => {
     </div>
 
     <aside
-      v-if="doc?.type === 'page' && outline.length"
+      v-if="outline.length"
       class="sticky top-10 hidden h-fit w-48 shrink-0 xl:block"
       aria-label="Outline"
     >
