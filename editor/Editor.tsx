@@ -94,8 +94,28 @@ export default function Editor({
   theme = 'light',
   onChange,
 }: Props) {
+  // Upload image / file / video / audio to the app's attachment store; returning a URL
+  // here is what makes BlockNote show the "Upload" tab (without it, only URL embed).
+  async function uploadFile(file: File): Promise<string> {
+    const fd = new FormData()
+    fd.append('file', file)
+    if (documentId) fd.append('documentId', documentId)
+    const res = await fetch('/api/attachments', { method: 'POST', body: fd })
+    if (!res.ok) {
+      let msg = 'Upload failed'
+      try {
+        msg = (await res.json()).statusMessage || msg
+      } catch {
+        // non-JSON error
+      }
+      throw new Error(msg)
+    }
+    return (await res.json()).url as string
+  }
+
   const editor = useCreateBlockNote({
     schema,
+    uploadFile,
     initialContent:
       Array.isArray(initialContent) && initialContent.length
         ? // eslint-disable-next-line @typescript-eslint/no-explicit-any

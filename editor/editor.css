@@ -95,11 +95,23 @@
   border-radius: 0 var(--radius-box) var(--radius-box) 0;
 }
 
-/* Checklist: teal checked box (§3). */
+/* Checklist: teal checked box (§3). BlockNote's own rule sizes the checklist input
+   12x24; override at matching specificity so the box is a legible 18px square. */
 .bn-editor input[type='checkbox'] {
   accent-color: var(--color-primary);
-  width: 1rem;
-  height: 1rem;
+  width: 18px;
+  height: 18px;
+}
+.bn-editor .bn-block-content[data-content-type='checkListItem'] > div > input {
+  width: 18px;
+  height: 18px;
+}
+
+/* Bullet markers default to the 14px reading size, which reads small; enlarge the
+   glyph across all nesting levels (• at L1, ◦ at L2, ▪ at L3). */
+.bn-editor .bn-block-content[data-content-type='bulletListItem']::before {
+  font-size: 1.4em;
+  line-height: 1.2;
 }
 
 /* Selection + placeholder use the brand. */

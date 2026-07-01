@@ -33,7 +33,10 @@ stylesheet tuned to §3.
 ## Key decisions
 - Sessions: sealed cookies (nuxt-auth-utils), no server store.
 - AI keys: AES-256-GCM at rest, server-proxied, ordered fallback across cloud providers.
-- Uploads: local Docker volume now; S3-swappable driver later.
+- Uploads: local filesystem store (`server/utils/storage.ts`, `NUXT_UPLOAD_DIR`, default
+  `<cwd>/.data/uploads`) behind `POST /api/attachments` + Range-enabled `GET /api/attachments/:id`;
+  the editor's `uploadFile` is what enables BlockNote's Upload tab (image/file/video/audio).
+  S3-swappable driver later.
 - Single user → no CRDT, no realtime, no teams.
 
 ## Deploy

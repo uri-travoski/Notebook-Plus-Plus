@@ -57,6 +57,7 @@ export default defineNuxtConfig({
     encryptionKey: '', // ENCRYPTION_KEY (AES-256-GCM, 32 bytes)
     smtpUrl: '', // SMTP_URL
     allowRegistration: 'true', // ALLOW_REGISTRATION
+    uploadDir: '', // NUXT_UPLOAD_DIR — attachment storage dir (default: <cwd>/.data/uploads)
     // nuxt-auth-utils sealed-session cookie. Secure cookies are dropped by browsers
     // over plain http on a LAN IP (only localhost/HTTPS are "secure contexts"), so
     // default off for LAN/HTTP access; set NUXT_SESSION_COOKIE_SECURE=true behind HTTPS.
