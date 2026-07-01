@@ -117,7 +117,7 @@
 /* Bullet markers default to the 14px reading size, which reads small; enlarge the
    glyph across all nesting levels (• at L1, ◦ at L2, ▪ at L3). */
 .bn-editor .bn-block-content[data-content-type='bulletListItem']::before {
-  font-size: 2.8em;
+  font-size: 2.52em;
   line-height: 1;
 }
 
