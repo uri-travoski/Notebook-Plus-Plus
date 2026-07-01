@@ -2,6 +2,7 @@ import { and, eq } from 'drizzle-orm'
 import { useDb, schema } from '../../db'
 import { getUserId } from '../../utils/guard'
 import { blocksToPlainText } from '../../utils/blocks'
+import { snapshotIfDue } from '../../utils/versions'
 
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
@@ -10,11 +11,18 @@ export default defineEventHandler(async (event) => {
   const db = useDb()
 
   const [existing] = await db
-    .select({ id: schema.documents.id })
+    .select({
+      id: schema.documents.id,
+      content: schema.documents.content,
+      title: schema.documents.title,
+    })
     .from(schema.documents)
     .where(and(eq(schema.documents.id, id), eq(schema.documents.userId, userId)))
     .limit(1)
   if (!existing) throw createError({ statusCode: 404, statusMessage: 'Document not found.' })
+
+  // On a content change, snapshot the PRIOR content (throttled) so it can be restored.
+  if (body.content !== undefined) await snapshotIfDue(id, existing.content, existing.title)
 
   const patch: Record<string, unknown> = { updatedAt: new Date() }
   if (typeof body.title === 'string') patch.title = body.title.trim() || 'Untitled'

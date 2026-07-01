@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download } from 'lucide-vue-next'
+import { Download, History } from 'lucide-vue-next'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
@@ -80,6 +80,7 @@ function exportMarkdown() {
   a.click()
   a.remove()
 }
+const historyOpen = ref(false)
 onBeforeUnmount(() => {
   if (contentTimer) clearTimeout(contentTimer)
   if (titleTimer) clearTimeout(titleTimer)
@@ -110,6 +111,15 @@ onBeforeUnmount(() => {
       <button
         type="button"
         class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        title="Version history"
+        @click="historyOpen = true"
+      >
+        <History class="h-3.5 w-3.5" />
+        History
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Export as Markdown"
         @click="exportMarkdown"
       >
@@ -125,6 +135,7 @@ onBeforeUnmount(() => {
         </template>
       </ClientOnly>
     </div>
+    <DocHistory v-model:open="historyOpen" :document-id="id" />
   </div>
 
   <!-- Page: reading column + editor + outline -->
@@ -141,6 +152,15 @@ onBeforeUnmount(() => {
         >
           Saving…
         </span>
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          title="Version history"
+          @click="historyOpen = true"
+        >
+          <History class="h-3.5 w-3.5" />
+          History
+        </button>
         <button
           type="button"
           class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -197,5 +217,7 @@ onBeforeUnmount(() => {
         </li>
       </ul>
     </aside>
+
+    <DocHistory v-model:open="historyOpen" :document-id="id" />
   </div>
 </template>

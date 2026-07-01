@@ -57,12 +57,19 @@
   border-radius: 4px;
   padding: 0.1em 0.32em;
 }
+/* Code blocks use a dark surface so the Shiki (dark-plus) token colours read at full contrast,
+   a deliberate accent in both light and dark app themes. */
 .bn-editor [data-content-type='codeBlock'],
 .bn-editor pre {
-  background: var(--color-surface-subtle);
-  border: 1px solid var(--color-border);
+  background: #1e1e2e;
+  color: #e4e4e7;
+  border: 1px solid #313244;
   border-radius: var(--radius-box);
   font-size: 14px;
+}
+.bn-editor [data-content-type='codeBlock'] code,
+.bn-editor pre code {
+  color: inherit;
 }
 
 /* Blockquote per §3: teal left rule, subtle bg, italic heading text. */

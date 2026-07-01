@@ -15,6 +15,51 @@ const notebookOptions = computed(() => {
 })
 const target = ref('')
 
+// Zip import (folders -> notebooks under a project)
+const projectOptions = computed(() =>
+  (tree.value?.projects ?? []).map((p) => ({ id: p.id, label: p.name })),
+)
+const zipTarget = ref('')
+const importingZip = ref(false)
+const zipInput = ref<HTMLInputElement | null>(null)
+function toBase64(buf: ArrayBuffer) {
+  const bytes = new Uint8Array(buf)
+  let bin = ''
+  const chunk = 0x8000
+  for (let i = 0; i < bytes.length; i += chunk)
+    bin += String.fromCharCode(...bytes.subarray(i, i + chunk))
+  return btoa(bin)
+}
+async function onZip(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  if (!zipTarget.value) {
+    importError.value = 'Choose a project for the zip first.'
+    input.value = ''
+    return
+  }
+  importingZip.value = true
+  importMsg.value = ''
+  importError.value = ''
+  try {
+    const zip = toBase64(await file.arrayBuffer())
+    const res = await $fetch<{ created: unknown[]; notebooks: string[] }>('/api/import/markdown', {
+      method: 'POST',
+      body: { projectId: zipTarget.value, zip },
+    })
+    const n = res.created.length
+    importMsg.value = `Imported ${n} note${n === 1 ? '' : 's'} into ${res.notebooks.length} notebook${res.notebooks.length === 1 ? '' : 's'}.`
+    await refresh()
+  } catch (e) {
+    importError.value =
+      (e as { data?: { statusMessage?: string } })?.data?.statusMessage || 'Zip import failed.'
+  } finally {
+    importingZip.value = false
+    input.value = ''
+  }
+}
+
 // Export all as a Markdown zip (pg-boss job, then download).
 const exporting = ref(false)
 const exportError = ref('')
@@ -127,6 +172,31 @@ async function onFiles(e: Event) {
                 Choose .md files
               </UiButton>
             </div>
+
+            <div class="mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
+              <label class="block">
+                <span class="mb-1 block text-xs font-medium text-text-muted">
+                  Or import a .zip into project
+                </span>
+                <select
+                  v-model="zipTarget"
+                  class="rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+                >
+                  <option value="">Choose a project…</option>
+                  <option v-for="o in projectOptions" :key="o.id" :value="o.id">
+                    {{ o.label }}
+                  </option>
+                </select>
+              </label>
+              <input ref="zipInput" type="file" accept=".zip" class="hidden" @change="onZip" />
+              <UiButton variant="subtle" :loading="importingZip" @click="zipInput?.click()">
+                Choose .zip
+              </UiButton>
+            </div>
+            <p class="mt-1 text-xs text-text-subtle">
+              Top-level folders in the zip become notebooks; each <code class="text-xs">.md</code>
+              becomes a note.
+            </p>
 
             <p v-if="importMsg" class="mt-3 text-sm text-success">{{ importMsg }}</p>
             <p v-if="importError" class="mt-3 text-sm text-danger">{{ importError }}</p>

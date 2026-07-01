@@ -5,7 +5,13 @@ import {
   getDefaultReactSlashMenuItems,
 } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
-import { BlockNoteSchema, defaultBlockSpecs, filterSuggestionItems } from '@blocknote/core'
+import {
+  BlockNoteSchema,
+  defaultBlockSpecs,
+  filterSuggestionItems,
+  createCodeBlockSpec,
+} from '@blocknote/core'
+import { codeBlockOptions } from '@blocknote/code-block'
 import { Callout } from './blocks/Callout'
 import { MathBlock } from './blocks/MathBlock'
 import { DatabaseTable } from './blocks/DatabaseTable'
@@ -19,6 +25,7 @@ import './editor.css'
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
+    codeBlock: createCodeBlockSpec(codeBlockOptions), // Shiki syntax highlighting (§11)
     callout: Callout(),
     math: MathBlock(),
     databaseTable: DatabaseTable(),
