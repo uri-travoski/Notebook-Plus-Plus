@@ -66,6 +66,31 @@ function exportNote() {
   a.click()
   a.remove()
 }
+// Canvas notes export to Excalidraw's native .excalidraw format (JSON scene).
+async function exportCanvas() {
+  const doc = await $fetch<{ content?: unknown }>(`/api/documents/${props.note.id}`)
+  const scene = (doc.content ?? {}) as {
+    elements?: unknown[]
+    appState?: object
+    files?: object
+  }
+  const data = {
+    type: 'excalidraw',
+    version: 2,
+    source: 'notebook++',
+    elements: scene.elements ?? [],
+    appState: scene.appState ?? {},
+    files: scene.files ?? {},
+  }
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }))
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${props.note.title || 'canvas'}.excalidraw`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
 const archive = () => updateNote(props.note.id, { archived: true })
 const trash = () => updateNote(props.note.id, { deleted: true })
 const showMove = ref(false)
@@ -141,7 +166,9 @@ const showMove = ref(false)
           ><Star />{{ note.isStarred ? 'Unstar' : 'Star' }}</UiMenuItem
         >
         <UiMenuItem @click="startRename"><Pencil />Rename</UiMenuItem>
-        <UiMenuItem @click="exportNote"><Download />Export note</UiMenuItem>
+        <UiMenuItem @click="note.type === 'canvas' ? exportCanvas() : exportNote()">
+          <Download />{{ note.type === 'canvas' ? 'Export canvas' : 'Export note' }}
+        </UiMenuItem>
         <UiMenuItem @click="archive"><Archive />Archive</UiMenuItem>
         <UiMenuItem @click="showMove = true"><FolderInput />Move to…</UiMenuItem>
         <UiMenuItem danger @click="trash"><Trash2 />Move to Trash</UiMenuItem>

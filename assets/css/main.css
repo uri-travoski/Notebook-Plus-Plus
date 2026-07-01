@@ -27,7 +27,8 @@
   /* Neutrals (light theme — default) */
   --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-sidebar: #e2e8f0;
+  --color-sidebar: #edf2f9;
+  --color-sidebar-icon: #4e5c6e;
   --color-surface-subtle: #f8fafc;
   --color-border: #e2e8f0;
   --color-border-strong: #cbd5e1;
@@ -120,6 +121,12 @@ samp {
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Default sidebar icons (the decorative text-subtle icons) use a fixed slate; active/brand
+   icons keep text-primary. */
+.bg-sidebar .text-text-subtle {
+  color: var(--color-sidebar-icon);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -2,7 +2,6 @@
 import {
   Plus,
   Folder,
-  BookText,
   ChevronRight,
   MoreHorizontal,
   House,
@@ -16,6 +15,8 @@ import {
   BookPlus,
   FilePlus,
   Upload,
+  Search,
+  PenTool,
 } from 'lucide-vue-next'
 import type { TreeNote } from '~/composables/useTree'
 
@@ -30,7 +31,14 @@ const {
   createNotebook,
   updateNotebook,
   deleteNotebook,
+  createNote,
 } = useTree()
+const { open: paletteOpen } = useCommandPalette()
+
+async function addCanvas(notebookId: string) {
+  const d = await createNote(notebookId, 'canvas', 'Untitled canvas')
+  await navigateTo(`/doc/${d.id}`)
+}
 
 // Import Markdown / text notes into a notebook (via its "…" menu).
 const importInput = ref<HTMLInputElement | null>(null)
@@ -140,20 +148,20 @@ const navClass = (to: string) =>
       @change="onImportFiles"
     />
     <div class="px-3 pb-2 pt-3">
-      <div class="flex items-center gap-2 px-1 py-1">
-        <svg
-          class="h-6 w-6 shrink-0 text-primary"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 256 256"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,208H48V48H80Zm96-56H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"
-          />
-        </svg>
+      <div class="mb-[10px] flex items-center gap-2 px-1 pt-1">
+        <AppMark class="h-6 w-6 shrink-0 text-text-subtle" />
         <span class="font-bold text-heading">Notebook++</span>
       </div>
+      <button
+        type="button"
+        class="flex w-full items-center gap-2 rounded-input border border-border bg-surface px-3 py-2 text-sm text-text-muted transition-colors hover:border-primary hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+        aria-label="Search notes"
+        @click="paletteOpen = true"
+      >
+        <Search class="h-4 w-4 shrink-0" />
+        <span class="flex-1 text-left">Search notes…</span>
+        <kbd class="hidden rounded border border-border px-1 text-[10px] sm:inline">⌘K</kbd>
+      </button>
     </div>
 
     <nav class="flex-1 overflow-y-auto px-2 pb-4" aria-label="Sidebar">
@@ -259,7 +267,7 @@ const navClass = (to: string) =>
                     :class="isCollapsed(nb.id) ? '' : 'rotate-90'"
                   />
                 </button>
-                <BookText class="h-4 w-4 shrink-0 text-text-subtle" />
+                <AppMark class="h-4 w-4 shrink-0 text-text-subtle" />
                 <input
                   v-if="editing?.kind === 'notebook' && editing.id === nb.id"
                   v-model="draft"
@@ -291,6 +299,7 @@ const navClass = (to: string) =>
                     ><Pencil />Rename</UiMenuItem
                   >
                   <UiMenuItem @click="addNote(nb.id)"><FilePlus />New note</UiMenuItem>
+                  <UiMenuItem @click="addCanvas(nb.id)"><PenTool />New canvas</UiMenuItem>
                   <UiMenuItem @click="startImport(nb.id)"><Upload />Import note</UiMenuItem>
                   <UiMenuItem @click="updateNotebook(nb.id, { archived: true })"
                     ><Archive />Archive</UiMenuItem

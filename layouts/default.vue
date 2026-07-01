@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { Menu, LogOut, Settings as SettingsIcon, Search } from 'lucide-vue-next'
+import { Menu, LogOut, Settings as SettingsIcon } from 'lucide-vue-next'
 
 const drawerOpen = ref(false)
 const route = useRoute()
 const router = useRouter()
 const { user, clear } = useUserSession()
-const { open: paletteOpen } = useCommandPalette()
 
 watch(
   () => route.fullPath,
@@ -49,15 +48,6 @@ async function logout() {
         <span class="font-bold text-heading md:hidden">Notebook++</span>
 
         <div class="ml-auto flex items-center gap-1">
-          <button
-            type="button"
-            class="rounded-md p-2 text-text-muted transition-colors hover:bg-row-hover hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            aria-label="Search notes (Ctrl or Cmd K)"
-            title="Search (⌘K)"
-            @click="paletteOpen = true"
-          >
-            <Search class="h-5 w-5" />
-          </button>
           <UiDropdown label="Account menu">
             <template #trigger>
               <span class="flex items-center gap-2 px-1">

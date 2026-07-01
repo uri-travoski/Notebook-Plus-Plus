@@ -94,48 +94,74 @@
   color: var(--color-text-subtle);
 }
 
-/* Callout / notice block (§3 info/tip/success/warning/danger). */
+/* Callout / notice block — 4 types: info (blue), warning (orange), important (red), tip (green).
+   Tinted card with a coloured left rule + coloured icon; body text stays dark for readability. */
 .nb-callout {
   display: flex;
   align-items: flex-start;
-  gap: 0.55rem;
-  border: 1px solid;
+  gap: 0.6rem;
+  border-left: 4px solid;
   border-radius: var(--radius-box);
-  padding: 0.6rem 0.85rem;
-  margin: 0.3rem 0;
+  padding: 0.7rem 0.9rem;
+  margin: 0.35rem 0;
 }
-.nb-callout-emoji {
+.nb-callout-icon {
+  flex-shrink: 0;
+  margin-top: 0.12rem;
+  line-height: 0;
   user-select: none;
-  line-height: 1.7;
+}
+.nb-callout-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
 }
 .nb-callout-body {
   flex: 1 1 0;
   min-width: 0;
+  color: var(--color-text);
 }
 .nb-callout-info {
   background: var(--color-info-bg);
-  border-color: color-mix(in srgb, var(--color-info) 35%, transparent);
+  border-color: var(--color-info);
+}
+.nb-callout-info .nb-callout-icon {
   color: var(--color-info);
-}
-.nb-callout-tip {
-  background: var(--color-tip-bg);
-  border-color: color-mix(in srgb, var(--color-tip) 35%, transparent);
-  color: var(--color-tip);
-}
-.nb-callout-success {
-  background: var(--color-success-bg);
-  border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
-  color: var(--color-success);
 }
 .nb-callout-warning {
   background: var(--color-warning-bg);
-  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  border-color: var(--color-warning);
+}
+.nb-callout-warning .nb-callout-icon {
   color: var(--color-warning);
 }
-.nb-callout-danger {
+.nb-callout-important {
   background: var(--color-danger-bg);
-  border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+  border-color: var(--color-danger);
+}
+.nb-callout-important .nb-callout-icon {
   color: var(--color-danger);
+}
+.nb-callout-tip {
+  background: var(--color-success-bg);
+  border-color: var(--color-success);
+}
+.nb-callout-tip .nb-callout-icon {
+  color: var(--color-success);
+}
+/* Callout dropdown in the formatting toolbar. */
+.nb-callout-select {
+  height: 28px;
+  margin: 0 2px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+.nb-callout-select:hover {
+  background: var(--color-surface-subtle);
 }
 
 /* Math block: editable LaTeX source + live KaTeX preview. */

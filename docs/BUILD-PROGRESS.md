@@ -27,6 +27,13 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 - [x] 12. Polish & design pass — font picker (body+mono), theme toggle + dark-mode islands, drag-reorder, change-password, inline Excalidraw block, a11y/contrast, DESIGN-NOTES. (Doc version snapshots deferred — not a §22 DoD item; TODO stub.)
 - [x] 13. Automated user-simulation & visual QA (§24) — GREEN. 10 page notes w/ 5-row tables + 5 canvas mindmaps via UI, persist on reload, screenshots in `e2e/artifacts/`.
 
+## User UI customizations round 3 (2026-07-01)
+- **Sidebar:** bg **#edf2f9**; default icons **#4E5C6E** (`--color-sidebar-icon`, scoped override `.bg-sidebar .text-text-subtle`); new **AppMark** SVG used for both the app icon (sidebar header) and every notebook icon (replaced BookText); a **search box** now sits under the app name (opens the palette) with a **10px gap** below the name — and the topbar search was removed.
+- **Sidebar menus:** notebook "…" gains **New canvas** (under New note; `addCanvas` → createNote canvas + navigate); a canvas note's "…" shows **Export canvas** (downloads the scene as a native **.excalidraw** JSON file) instead of Export note.
+- **Callouts:** 4 types — **info** (blue), **warning** (orange), **important** (red), **tip** (green) — each a tinted card with a coloured left rule + filled Phosphor icon (Info / Warning / WarningOctagon / Lightbulb), dark body text (matches the user's reference image). Old success/danger kinds removed.
+- **Callout dropdown in the formatting toolbar:** a `CalloutSelect` (native `<select>` via `useBlockNoteEditor`) appended to the custom `FormattingToolbar` converts the current block to a callout of the chosen kind.
+- Tests: `e2e/customize2.spec.ts` (callout dropdown, New canvas, Export canvas). Gate: typecheck 0, lint, 16 vitest, build, **41 E2E**.
+
 ## User UI customizations round 2 (2026-07-01)
 - **Selection toolbar** now includes an inline **code** toggle (custom `FormattingToolbarController` = `getFormattingToolbarItems()` + a `BasicTextStyleButton basicTextStyle="code"`, all createElement).
 - **Code surfaces** (inline + block) → **#f0f5f9**.
