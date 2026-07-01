@@ -15,6 +15,7 @@ import {
   Pencil,
   BookPlus,
   FilePlus,
+  Upload,
 } from 'lucide-vue-next'
 import type { TreeNote } from '~/composables/useTree'
 
@@ -22,6 +23,7 @@ const {
   tree,
   loaded,
   ensure,
+  refresh,
   createProject,
   updateProject,
   deleteProject,
@@ -29,6 +31,32 @@ const {
   updateNotebook,
   deleteNotebook,
 } = useTree()
+
+// Import Markdown / text notes into a notebook (via its "…" menu).
+const importInput = ref<HTMLInputElement | null>(null)
+const importTargetNb = ref<string | null>(null)
+function startImport(notebookId: string) {
+  importTargetNb.value = notebookId
+  importInput.value?.click()
+}
+async function onImportFiles(e: Event) {
+  const input = e.target as HTMLInputElement
+  const list = input.files
+  if (!list || !list.length || !importTargetNb.value) return
+  const files = await Promise.all(
+    Array.from(list).map(async (f) => ({ name: f.name, markdown: await f.text() })),
+  )
+  try {
+    await $fetch('/api/import/markdown', {
+      method: 'POST',
+      body: { notebookId: importTargetNb.value, files },
+    })
+    await refresh()
+  } finally {
+    input.value = ''
+    importTargetNb.value = null
+  }
+}
 const { ensure: ensurePrefs, isCollapsed, toggleCollapse } = usePreferences()
 const { start: startNewDoc } = useNewDoc()
 const route = useRoute()
@@ -90,9 +118,9 @@ const decoratedProjects = computed(() =>
 const navItems = [
   { to: '/', label: 'Overview', icon: House },
   { to: '/starred', label: 'Starred', icon: Star },
+  { to: '/drafts', label: 'Drafts', icon: FileStack },
 ]
 const systemItems = [
-  { to: '/drafts', label: 'Drafts', icon: FileStack },
   { to: '/templates', label: 'Templates', icon: LayoutTemplate },
   { to: '/archive', label: 'Archive', icon: Archive },
   { to: '/trash', label: 'Trash', icon: Trash2 },
@@ -103,14 +131,29 @@ const navClass = (to: string) =>
 
 <template>
   <div class="flex h-full flex-col bg-sidebar">
+    <input
+      ref="importInput"
+      type="file"
+      accept=".md,.txt,text/markdown,text/plain"
+      multiple
+      class="hidden"
+      @change="onImportFiles"
+    />
     <div class="px-3 pb-2 pt-3">
-      <div class="mb-3 flex items-center gap-2 px-1">
-        <span class="inline-block h-5 w-1.5 rounded-pill bg-primary" aria-hidden="true" />
+      <div class="flex items-center gap-2 px-1 py-1">
+        <svg
+          class="h-6 w-6 shrink-0 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 256 256"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,208H48V48H80Zm96-56H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H112a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z"
+          />
+        </svg>
         <span class="font-bold text-heading">Notebook++</span>
       </div>
-      <UiButton block class="!justify-start gap-2" @click="addProject">
-        <Plus class="h-4 w-4" /> New project
-      </UiButton>
     </div>
 
     <nav class="flex-1 overflow-y-auto px-2 pb-4" aria-label="Sidebar">
@@ -248,6 +291,7 @@ const navClass = (to: string) =>
                     ><Pencil />Rename</UiMenuItem
                   >
                   <UiMenuItem @click="addNote(nb.id)"><FilePlus />New note</UiMenuItem>
+                  <UiMenuItem @click="startImport(nb.id)"><Upload />Import note</UiMenuItem>
                   <UiMenuItem @click="updateNotebook(nb.id, { archived: true })"
                     ><Archive />Archive</UiMenuItem
                   >

@@ -9,6 +9,7 @@ import {
   Trash2,
   Pencil,
   FolderInput,
+  Download,
 } from 'lucide-vue-next'
 import type { TreeNote } from '~/composables/useTree'
 
@@ -57,6 +58,14 @@ async function commitRename() {
   if (t && t !== props.note.title) await updateNote(props.note.id, { title: t })
 }
 const toggleStar = () => updateNote(props.note.id, { isStarred: !props.note.isStarred })
+function exportNote() {
+  const a = document.createElement('a')
+  a.href = `/api/documents/${props.note.id}/markdown`
+  a.download = `${props.note.title || 'untitled'}.md`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+}
 const archive = () => updateNote(props.note.id, { archived: true })
 const trash = () => updateNote(props.note.id, { deleted: true })
 const showMove = ref(false)
@@ -132,6 +141,7 @@ const showMove = ref(false)
           ><Star />{{ note.isStarred ? 'Unstar' : 'Star' }}</UiMenuItem
         >
         <UiMenuItem @click="startRename"><Pencil />Rename</UiMenuItem>
+        <UiMenuItem @click="exportNote"><Download />Export note</UiMenuItem>
         <UiMenuItem @click="archive"><Archive />Archive</UiMenuItem>
         <UiMenuItem @click="showMove = true"><FolderInput />Move to…</UiMenuItem>
         <UiMenuItem danger @click="trash"><Trash2 />Move to Trash</UiMenuItem>

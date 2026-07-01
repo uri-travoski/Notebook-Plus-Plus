@@ -52,7 +52,7 @@ const THEMES = [
       <label class="block">
         <span class="mb-1 block text-xs font-medium text-text-muted">Body font</span>
         <select
-          :value="get('bodyFont', 'inter')"
+          :value="get('bodyFont', 'noto')"
           class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
           @change="set('bodyFont', ($event.target as HTMLSelectElement).value)"
         >
@@ -62,7 +62,7 @@ const THEMES = [
       <label class="block">
         <span class="mb-1 block text-xs font-medium text-text-muted">Code font</span>
         <select
-          :value="get('monoFont', 'jetbrains')"
+          :value="get('monoFont', 'googlecode')"
           class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
           @change="set('monoFont', ($event.target as HTMLSelectElement).value)"
         >

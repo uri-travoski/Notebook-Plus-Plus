@@ -17,7 +17,7 @@ test('preferences: body + code fonts and theme apply to CSS vars and persist on 
     fetch('/api/me/preferences', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ bodyFont: 'lora', monoFont: 'fira', theme: 'dark' }),
+      body: JSON.stringify({ bodyFont: 'merriweather', monoFont: 'fira', theme: 'dark' }),
     }),
   )
   await page.reload()
@@ -28,16 +28,16 @@ test('preferences: body + code fonts and theme apply to CSS vars and persist on 
     mono: getComputedStyle(document.documentElement).getPropertyValue('--font-mono'),
     dark: document.documentElement.classList.contains('dark'),
   }))
-  expect(v.sans).toContain('Lora')
+  expect(v.sans).toContain('Merriweather')
   expect(v.mono).toContain('Fira')
   expect(v.dark).toBe(true)
 
-  // restore defaults so the preview/login stay clean
+  // restore the new defaults so the preview/login stay clean
   await page.evaluate(() =>
     fetch('/api/me/preferences', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ bodyFont: 'inter', monoFont: 'jetbrains', theme: 'light' }),
+      body: JSON.stringify({ bodyFont: 'noto', monoFont: 'googlecode', theme: 'light' }),
     }),
   )
 })

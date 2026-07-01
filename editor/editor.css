@@ -57,13 +57,12 @@
   border-radius: 4px;
   padding: 0.1em 0.32em;
 }
-/* Code blocks use a dark surface so the Shiki (dark-plus) token colours read at full contrast,
-   a deliberate accent in both light and dark app themes. */
+/* Light code surface; Shiki (light theme) colours tokens by language over a #51637B base. */
 .bn-editor [data-content-type='codeBlock'],
 .bn-editor pre {
-  background: #1e1e2e;
-  color: #e4e4e7;
-  border: 1px solid #313244;
+  background: #eaf0f5;
+  color: rgb(81 99 123);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
   font-size: 14px;
 }

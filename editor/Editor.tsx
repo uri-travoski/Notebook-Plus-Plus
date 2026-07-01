@@ -12,6 +12,7 @@ import {
   createCodeBlockSpec,
 } from '@blocknote/core'
 import { codeBlockOptions } from '@blocknote/code-block'
+import { createHighlighter } from 'shiki'
 import { Callout } from './blocks/Callout'
 import { MathBlock } from './blocks/MathBlock'
 import { DatabaseTable } from './blocks/DatabaseTable'
@@ -20,12 +21,53 @@ import '@blocknote/mantine/style.css'
 import 'katex/dist/katex.min.css'
 import './editor.css'
 
+// Shiki highlighting forced to a single LIGHT theme so tokens read on the light code surface
+// (the package otherwise applies github-dark regardless of editor theme).
+const CODE_LANGS = [
+  'javascript',
+  'typescript',
+  'jsx',
+  'tsx',
+  'json',
+  'html',
+  'css',
+  'scss',
+  'bash',
+  'python',
+  'go',
+  'rust',
+  'java',
+  'c',
+  'cpp',
+  'csharp',
+  'php',
+  'ruby',
+  'sql',
+  'yaml',
+  'markdown',
+  'vue',
+  'xml',
+  'dockerfile',
+  'toml',
+  'diff',
+  'graphql',
+  'kotlin',
+  'swift',
+]
+const codeBlock = {
+  ...codeBlockOptions,
+  supportedLanguages: Object.fromEntries(
+    Object.entries(codeBlockOptions.supportedLanguages).filter(([k]) => CODE_LANGS.includes(k)),
+  ),
+  createHighlighter: () => createHighlighter({ themes: ['github-light'], langs: CODE_LANGS }),
+}
+
 // Default blocks + our custom blocks. createReactBlockSpec returns a factory, so
 // each block is added as `Callout()` / `MathBlock()`. Most of §11 is already native.
 const schema = BlockNoteSchema.create({
   blockSpecs: {
     ...defaultBlockSpecs,
-    codeBlock: createCodeBlockSpec(codeBlockOptions), // Shiki syntax highlighting (§11)
+    codeBlock: createCodeBlockSpec(codeBlock), // Shiki syntax highlighting (§11)
     callout: Callout(),
     math: MathBlock(),
     databaseTable: DatabaseTable(),

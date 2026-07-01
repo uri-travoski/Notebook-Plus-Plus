@@ -1,9 +1,14 @@
 @import 'tailwindcss';
 
-/* Self-hosted variable fonts (no CDN). Body + mono defaults; the font picker
-   in Settings -> Preferences swaps --font-sans / --font-mono at runtime. */
+/* Self-hosted fonts (no CDN). Body + mono defaults; the font picker in
+   Settings -> Preferences swaps --font-sans / --font-mono at runtime. */
+@import '@fontsource-variable/noto-sans';
 @import '@fontsource-variable/inter';
-@import '@fontsource-variable/lora';
+@import '@fontsource/google-sans';
+@import '@fontsource/ibm-plex-serif';
+@import '@fontsource/libre-baskerville';
+@import '@fontsource-variable/merriweather';
+@import '@fontsource-variable/google-sans-code';
 @import '@fontsource-variable/jetbrains-mono';
 @import '@fontsource-variable/fira-code';
 
@@ -22,9 +27,9 @@
   --color-primary-subtle-fg: #0b7264;
 
   /* Neutrals (light theme — default) */
-  --color-bg: #eef2f7;
+  --color-bg: #ffffff;
   --color-surface: #ffffff;
-  --color-sidebar: #f7f9fb;
+  --color-sidebar: #e2e8f0;
   --color-surface-subtle: #f8fafc;
   --color-border: #e2e8f0;
   --color-border-strong: #cbd5e1;
@@ -62,10 +67,11 @@
 
   /* Fonts — user-selectable; runtime override sets these vars on :root. */
   --font-sans:
-    'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+    'Noto Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
   --font-mono:
-    'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+    'Google Sans Code Variable', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas,
+    monospace;
 }
 
 /* Dark theme token overrides */

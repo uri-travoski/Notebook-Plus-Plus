@@ -11,7 +11,7 @@ async function login(page: import('@playwright/test').Page) {
 
 test('overview app shell has no serious a11y violations', async ({ page }) => {
   await login(page)
-  await page.getByText('Workspace').waitFor()
+  await page.getByRole('link', { name: 'Overview' }).waitFor()
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()
   const serious = results.violations.filter(
     (v) => v.impact === 'serious' || v.impact === 'critical',
@@ -26,24 +26,30 @@ test('overview app shell has no serious a11y violations', async ({ page }) => {
   ).toEqual([])
 })
 
-test('create a project, notebook, and note from the sidebar', async ({ page }) => {
+test('create a notebook and note from the sidebar', async ({ page }) => {
   await login(page)
   const nav = page.getByRole('navigation', { name: 'Sidebar' })
   const sfx = Date.now().toString(36)
 
-  // New project (auto-enters inline rename)
-  await page.getByRole('button', { name: 'New project' }).click()
-  let input = nav.locator('input')
-  await input.waitFor()
-  await input.fill(`Proj ${sfx}`)
-  await input.press('Enter')
+  // Seed a project via API (the New-project button was removed by request), then reload.
+  await page.evaluate(
+    (sfx) =>
+      fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: `Proj ${sfx}` }),
+      }),
+    sfx,
+  )
+  await page.reload()
+  await nav.getByRole('link', { name: 'Overview' }).waitFor()
+  const input = nav.locator('input') // lazy — resolves the current rename input at action time
   const projectRow = nav.locator('li', { hasText: `Proj ${sfx}` }).first()
   await expect(projectRow.getByRole('button', { name: `Proj ${sfx}`, exact: true })).toBeVisible()
 
   // New notebook via the project's menu
   await projectRow.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'New notebook' }).click()
-  input = nav.locator('input')
   await input.waitFor()
   await input.fill(`NB ${sfx}`)
   await input.press('Enter')
@@ -59,7 +65,7 @@ test('create a project, notebook, and note from the sidebar', async ({ page }) =
 
   // Cleanup: delete the probe project via its menu (cascades the notebook + note)
   await page.goto('/')
-  await nav.getByText('Workspace').waitFor()
+  await nav.getByRole('link', { name: 'Overview' }).waitFor()
   const row = nav.locator('li', { hasText: `Proj ${sfx}` }).first()
   await row.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'Delete project' }).click()
@@ -71,17 +77,23 @@ test('move a note to another notebook via the Move dialog', async ({ page }) => 
   const nav = page.getByRole('navigation', { name: 'Sidebar' })
   const sfx = Date.now().toString(36)
 
-  await page.getByRole('button', { name: 'New project' }).click()
-  let input = nav.locator('input')
-  await input.waitFor()
-  await input.fill(`MP ${sfx}`)
-  await input.press('Enter')
+  await page.evaluate(
+    (sfx) =>
+      fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: `MP ${sfx}` }),
+      }),
+    sfx,
+  )
+  await page.reload()
+  await nav.getByRole('link', { name: 'Overview' }).waitFor()
+  const input = nav.locator('input') // lazy — resolves the current rename input at action time
   const proj = nav.locator('li', { hasText: `MP ${sfx}` }).first()
 
   for (const nb of [`A ${sfx}`, `B ${sfx}`]) {
     await proj.getByRole('button', { name: 'More actions' }).first().click()
     await page.getByRole('menuitem', { name: 'New notebook' }).click()
-    input = nav.locator('input')
     await input.waitFor()
     await input.fill(nb)
     await input.press('Enter')
@@ -97,7 +109,7 @@ test('move a note to another notebook via the Move dialog', async ({ page }) => 
 
   // Move the Untitled note to notebook B
   await page.goto('/')
-  await nav.getByText('Workspace').waitFor()
+  await nav.getByRole('link', { name: 'Overview' }).waitFor()
   const noteRow = nav.locator('li', { hasText: 'Untitled' }).last()
   await noteRow.getByRole('button', { name: 'More actions' }).first().click()
   await page.getByRole('menuitem', { name: 'Move to…' }).click()

@@ -1,15 +1,22 @@
 // Curated, self-hosted font choices (no CDN). Keys are stored in users.preferences
 // (bodyFont / monoFont); the stacks below are applied to --font-sans / --font-mono at runtime.
 export const BODY_FONTS = {
+  noto: { label: 'Noto Sans', stack: "'Noto Sans Variable', ui-sans-serif, system-ui, sans-serif" },
   inter: { label: 'Inter', stack: "'Inter Variable', ui-sans-serif, system-ui, sans-serif" },
-  lora: { label: 'Lora (serif)', stack: "'Lora Variable', Georgia, 'Times New Roman', serif" },
-  system: {
-    label: 'System',
-    stack: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  googlesans: {
+    label: 'Google Sans',
+    stack: "'Google Sans', ui-sans-serif, system-ui, sans-serif",
   },
+  ibmplexserif: { label: 'IBM Plex Serif', stack: "'IBM Plex Serif', Georgia, serif" },
+  librebaskerville: { label: 'Libre Baskerville', stack: "'Libre Baskerville', Georgia, serif" },
+  merriweather: { label: 'Merriweather', stack: "'Merriweather Variable', Georgia, serif" },
 } as const
 
 export const MONO_FONTS = {
+  googlecode: {
+    label: 'Google Sans Code',
+    stack: "'Google Sans Code Variable', ui-monospace, Menlo, Consolas, monospace",
+  },
   jetbrains: {
     label: 'JetBrains Mono',
     stack: "'JetBrains Mono Variable', ui-monospace, Menlo, Consolas, monospace",
@@ -40,9 +47,9 @@ export function applyTheme(theme: ThemePref) {
 export function applyAppearance(prefs: Record<string, unknown>) {
   if (typeof document === 'undefined') return
   const root = document.documentElement
-  const body = (prefs.bodyFont as BodyFont) in BODY_FONTS ? (prefs.bodyFont as BodyFont) : 'inter'
+  const body = (prefs.bodyFont as BodyFont) in BODY_FONTS ? (prefs.bodyFont as BodyFont) : 'noto'
   const mono =
-    (prefs.monoFont as MonoFont) in MONO_FONTS ? (prefs.monoFont as MonoFont) : 'jetbrains'
+    (prefs.monoFont as MonoFont) in MONO_FONTS ? (prefs.monoFont as MonoFont) : 'googlecode'
   root.style.setProperty('--font-sans', BODY_FONTS[body].stack)
   root.style.setProperty('--font-mono', MONO_FONTS[mono].stack)
   applyTheme((prefs.theme as ThemePref) || 'system')
