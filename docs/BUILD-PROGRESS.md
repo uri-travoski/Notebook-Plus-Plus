@@ -27,6 +27,15 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 - [x] 12. Polish & design pass — font picker (body+mono), theme toggle + dark-mode islands, drag-reorder, change-password, inline Excalidraw block, a11y/contrast, DESIGN-NOTES. (Doc version snapshots deferred — not a §22 DoD item; TODO stub.)
 - [x] 13. Automated user-simulation & visual QA (§24) — GREEN. 10 page notes w/ 5-row tables + 5 canvas mindmaps via UI, persist on reload, screenshots in `e2e/artifacts/`.
 
+## User UI customizations round 2 (2026-07-01)
+- **Selection toolbar** now includes an inline **code** toggle (custom `FormattingToolbarController` = `getFormattingToolbarItems()` + a `BasicTextStyleButton basicTextStyle="code"`, all createElement).
+- **Code surfaces** (inline + block) → **#f0f5f9**.
+- **Fonts:** removed Libre Baskerville + Google Sans body options (now Noto Sans / Inter / IBM Plex Serif / Merriweather); **default mono = JetBrains Mono**. Added a **font-size** preference (10–22px, default 14) applied via `--reading-font-size` on the editor body (`useAppearance` + `FONT_SIZE`).
+- **AI keys are now editable:** the PATCH endpoint accepts label/model/baseUrl/priority **and an optional new `key`** (re-encrypt + re-validate); AiKeysManager has an inline Edit form (Pencil).
+- **Header search** is now an **icon** in the right cluster next to the avatar (was a text field on the left).
+- **Database tables scroll horizontally:** cells use `width:160px` (+ `min-width:100%` on the table, action cells `width:1%`) so many columns overflow the `.nb-db-scroll` (contained in the note column, no page overflow). The old `width:100%`/`max-content` just compressed columns.
+- Tests: `e2e/ui-tweaks.spec.ts` (font size, AI edit, table scroll, code toolbar). `search.spec` palette test now opens via the header icon (the Ctrl+K shortcut flaked under load). Gate: typecheck 0, lint, 16 vitest, build, **38 E2E**.
+
 ## User UI customizations (2026-07-01)
 - **Theme:** app bg now **white** (`--color-bg #ffffff`), sidebar **#e2e8f0** (`--color-sidebar`). Code blocks are a **light** surface **#eaf0f5** with base text **rgb(81 99 123)**; Shiki forced to a single **github-light** theme (via `shiki` `createHighlighter`, `CODE_LANGS` list) so tokens read on the light bg (the package otherwise applies github-dark regardless of editor theme).
 - **Sidebar:** replaced the teal bar mark with the provided **app icon** (Phosphor-style notebook SVG, `text-primary`); **removed the "New project" button** entirely (project creation now only via the zero-projects empty-state link); **moved Drafts** into the top nav under Starred.

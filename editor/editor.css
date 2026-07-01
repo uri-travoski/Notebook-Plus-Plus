@@ -9,7 +9,7 @@
 }
 
 .bn-editor .bn-block-content {
-  font-size: 16px;
+  font-size: var(--reading-font-size, 14px);
   line-height: 1.7;
 }
 
@@ -52,7 +52,7 @@
 }
 .bn-editor :not(pre) > code {
   font-size: 0.9em;
-  background: var(--color-surface-subtle);
+  background: #f0f5f9;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 0.1em 0.32em;
@@ -60,7 +60,7 @@
 /* Light code surface; Shiki (light theme) colours tokens by language over a #51637B base. */
 .bn-editor [data-content-type='codeBlock'],
 .bn-editor pre {
-  background: #eaf0f5;
+  background: #f0f5f9;
   color: rgb(81 99 123);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
@@ -173,14 +173,18 @@
 /* Database table block */
 .nb-db {
   margin: 0.5rem 0;
+  max-width: 100%;
 }
 .nb-db-scroll {
   overflow-x: auto;
+  max-width: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-box);
 }
+/* Fixed column widths so many columns overflow (container scrolls) instead of compressing;
+   min-width:100% keeps a small table filling the note column. */
 .nb-db-table {
-  width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -189,6 +193,12 @@
   border: 1px solid var(--color-border);
   padding: 0;
   vertical-align: top;
+  width: 160px;
+}
+/* Action cells (add-column, delete-row) stay narrow. */
+.nb-db-table th.nb-db-addcol,
+.nb-db-table td.nb-db-rowx {
+  width: 1%;
 }
 .nb-db-table thead th {
   background: var(--color-surface-subtle);

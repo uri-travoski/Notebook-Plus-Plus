@@ -3,6 +3,10 @@ import {
   useCreateBlockNote,
   SuggestionMenuController,
   getDefaultReactSlashMenuItems,
+  FormattingToolbarController,
+  FormattingToolbar,
+  getFormattingToolbarItems,
+  BasicTextStyleButton,
 } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
 import {
@@ -284,6 +288,19 @@ export default function Editor({
     createElement(SuggestionMenuController as any, {
       triggerCharacter: '/',
       getItems: getSlashItems,
+    }),
+    // Custom selection toolbar = default items + an inline "code" toggle.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createElement(FormattingToolbarController as any, {
+      formattingToolbar: () =>
+        createElement(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          FormattingToolbar as any,
+          null,
+          ...getFormattingToolbarItems(),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          createElement(BasicTextStyleButton as any, { key: 'code', basicTextStyle: 'code' }),
+        ),
     }),
   )
 }

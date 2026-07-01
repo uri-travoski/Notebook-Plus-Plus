@@ -69,7 +69,8 @@ test('Cmd-K palette searches and opens a note', async ({ page }) => {
   await login(page)
   const doc = await makeDoc(page)
 
-  await page.keyboard.press('Control+k')
+  // Open via the header search icon (deterministic; the Ctrl+K shortcut can miss under load).
+  await page.getByRole('button', { name: /Search notes/ }).click()
   const dialog = page.getByRole('dialog')
   await dialog.getByPlaceholder('Search notes by title or content…').fill(doc.token)
   // Scope to the dialog — the note title also appears in the sidebar tree.

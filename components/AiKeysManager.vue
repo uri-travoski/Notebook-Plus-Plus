@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, AlertTriangle, Trash2, RefreshCw } from 'lucide-vue-next'
+import { Check, AlertTriangle, Trash2, RefreshCw, Pencil } from 'lucide-vue-next'
 
 type AiKey = {
   id: string
@@ -80,6 +80,38 @@ async function toggleKey(k: AiKey) {
   await $fetch(`/api/ai/keys/${k.id}`, { method: 'PATCH', body: { enabled: !k.enabled } })
   await refresh()
 }
+// Edit an existing key (label / model / base URL / priority, and optionally replace the secret).
+const editingId = ref<string | null>(null)
+const editForm = reactive({ label: '', model: '', baseUrl: '', priority: 0, key: '' })
+const savingEdit = ref(false)
+function startEdit(k: AiKey) {
+  editingId.value = k.id
+  editForm.label = k.label ?? ''
+  editForm.model = k.model ?? ''
+  editForm.baseUrl = k.baseUrl ?? ''
+  editForm.priority = k.priority
+  editForm.key = ''
+}
+async function saveEdit(k: AiKey) {
+  savingEdit.value = true
+  try {
+    await $fetch(`/api/ai/keys/${k.id}`, {
+      method: 'PATCH',
+      body: {
+        label: editForm.label,
+        model: editForm.model,
+        baseUrl: editForm.baseUrl,
+        priority: editForm.priority,
+        ...(editForm.key.trim() ? { key: editForm.key.trim() } : {}),
+      },
+    })
+    editingId.value = null
+    await refresh()
+  } finally {
+    savingEdit.value = false
+  }
+}
+
 async function removeKey(k: AiKey) {
   await $fetch(`/api/ai/keys/${k.id}`, { method: 'DELETE' })
   await refresh()
@@ -105,57 +137,121 @@ const showBaseUrl = computed(() => form.provider === 'openai' || form.provider =
       hint="Add a provider key below to enable the editor's AI actions."
     />
     <ul v-else class="mt-4 divide-y divide-border rounded-input border border-border">
-      <li v-for="k in keys" :key="k.id" class="flex items-center gap-3 p-3">
-        <span
-          class="grid h-7 w-7 shrink-0 place-items-center rounded-full"
-          :class="
-            k.lastError
-              ? 'bg-danger/10 text-danger'
-              : k.lastOkAt
-                ? 'bg-success/10 text-success'
-                : 'bg-surface-subtle text-text-muted'
-          "
-          :title="k.lastError || (k.lastOkAt ? 'Validated' : 'Not validated')"
-        >
-          <AlertTriangle v-if="k.lastError" class="h-4 w-4" />
-          <Check v-else-if="k.lastOkAt" class="h-4 w-4" />
-        </span>
-        <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium text-heading">
-            {{ k.label || k.provider }}
-            <span class="ml-1 text-xs font-normal text-text-muted">{{ k.provider }}</span>
-          </p>
-          <p class="truncate text-xs text-text-muted">
-            {{ k.preview }} · {{ k.model || 'default model' }} · priority {{ k.priority }}
-            <span v-if="k.lastError" class="text-danger"> · {{ k.lastError }}</span>
-          </p>
+      <li v-for="k in keys" :key="k.id" class="p-3">
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-7 w-7 shrink-0 place-items-center rounded-full"
+            :class="
+              k.lastError
+                ? 'bg-danger/10 text-danger'
+                : k.lastOkAt
+                  ? 'bg-success/10 text-success'
+                  : 'bg-surface-subtle text-text-muted'
+            "
+            :title="k.lastError || (k.lastOkAt ? 'Validated' : 'Not validated')"
+          >
+            <AlertTriangle v-if="k.lastError" class="h-4 w-4" />
+            <Check v-else-if="k.lastOkAt" class="h-4 w-4" />
+          </span>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-medium text-heading">
+              {{ k.label || k.provider }}
+              <span class="ml-1 text-xs font-normal text-text-muted">{{ k.provider }}</span>
+            </p>
+            <p class="truncate text-xs text-text-muted">
+              {{ k.preview }} · {{ k.model || 'default model' }} · priority {{ k.priority }}
+              <span v-if="k.lastError" class="text-danger"> · {{ k.lastError }}</span>
+            </p>
+          </div>
+          <label class="flex shrink-0 items-center gap-1.5 text-xs text-text-muted">
+            <input
+              type="checkbox"
+              :checked="k.enabled"
+              class="accent-primary"
+              @change="toggleKey(k)"
+            />
+            Enabled
+          </label>
+          <button
+            type="button"
+            class="rounded-input p-1.5 text-text-muted hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-primary"
+            title="Re-validate"
+            :disabled="busy === k.id"
+            @click="validateKey(k)"
+          >
+            <RefreshCw class="h-4 w-4" :class="busy === k.id ? 'animate-spin' : ''" />
+          </button>
+          <button
+            type="button"
+            class="rounded-input p-1.5 text-text-muted hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-primary"
+            title="Edit key"
+            @click="editingId === k.id ? (editingId = null) : startEdit(k)"
+          >
+            <Pencil class="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            class="rounded-input p-1.5 text-text-muted hover:bg-danger/10 hover:text-danger focus-visible:outline-2 focus-visible:outline-danger"
+            title="Delete key"
+            @click="removeKey(k)"
+          >
+            <Trash2 class="h-4 w-4" />
+          </button>
         </div>
-        <label class="flex shrink-0 items-center gap-1.5 text-xs text-text-muted">
-          <input
-            type="checkbox"
-            :checked="k.enabled"
-            class="accent-primary"
-            @change="toggleKey(k)"
-          />
-          Enabled
-        </label>
-        <button
-          type="button"
-          class="rounded-input p-1.5 text-text-muted hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-primary"
-          title="Re-validate"
-          :disabled="busy === k.id"
-          @click="validateKey(k)"
+
+        <form
+          v-if="editingId === k.id"
+          class="mt-3 grid gap-3 border-t border-border pt-3 sm:grid-cols-2"
+          @submit.prevent="saveEdit(k)"
         >
-          <RefreshCw class="h-4 w-4" :class="busy === k.id ? 'animate-spin' : ''" />
-        </button>
-        <button
-          type="button"
-          class="rounded-input p-1.5 text-text-muted hover:bg-danger/10 hover:text-danger focus-visible:outline-2 focus-visible:outline-danger"
-          title="Delete key"
-          @click="removeKey(k)"
-        >
-          <Trash2 class="h-4 w-4" />
-        </button>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-text-muted">Label</span>
+            <input
+              v-model="editForm.label"
+              class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-text-muted">Model</span>
+            <input
+              v-model="editForm.model"
+              placeholder="provider default"
+              class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-text-muted">Priority</span>
+            <input
+              v-model.number="editForm.priority"
+              type="number"
+              class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-text-muted">Base URL (optional)</span>
+            <input
+              v-model="editForm.baseUrl"
+              placeholder="https://…/v1"
+              class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+            />
+          </label>
+          <label class="block sm:col-span-2">
+            <span class="mb-1 block text-xs font-medium text-text-muted">
+              Replace key (leave blank to keep the current one)
+            </span>
+            <input
+              v-model="editForm.key"
+              type="password"
+              autocomplete="off"
+              placeholder="new key…"
+              class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+            />
+          </label>
+          <div class="flex items-center gap-3 sm:col-span-2">
+            <UiButton type="submit" :loading="savingEdit">Save changes</UiButton>
+            <UiButton variant="ghost" @click="editingId = null">Cancel</UiButton>
+          </div>
+        </form>
       </li>
     </ul>
 

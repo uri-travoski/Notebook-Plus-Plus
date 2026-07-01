@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Sun, Moon, Monitor } from 'lucide-vue-next'
+import { BODY_FONTS, MONO_FONTS, FONT_SIZE } from '~/composables/useAppearance'
 
 const { prefs, ensure, patch } = usePreferences()
 onMounted(ensure)
@@ -48,7 +49,7 @@ const THEMES = [
     </div>
 
     <!-- Fonts -->
-    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+    <div class="mt-5 grid gap-4 sm:grid-cols-3">
       <label class="block">
         <span class="mb-1 block text-xs font-medium text-text-muted">Body font</span>
         <select
@@ -62,18 +63,32 @@ const THEMES = [
       <label class="block">
         <span class="mb-1 block text-xs font-medium text-text-muted">Code font</span>
         <select
-          :value="get('monoFont', 'googlecode')"
+          :value="get('monoFont', 'jetbrains')"
           class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
           @change="set('monoFont', ($event.target as HTMLSelectElement).value)"
         >
           <option v-for="(f, key) in MONO_FONTS" :key="key" :value="key">{{ f.label }}</option>
         </select>
       </label>
+      <label class="block">
+        <span class="mb-1 block text-xs font-medium text-text-muted">Font size (px)</span>
+        <input
+          type="number"
+          :min="FONT_SIZE.min"
+          :max="FONT_SIZE.max"
+          :value="get('fontSize', String(FONT_SIZE.default))"
+          class="w-full rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-primary"
+          @change="set('fontSize', ($event.target as HTMLInputElement).value)"
+        />
+      </label>
     </div>
 
     <!-- Live preview (uses the app font vars, so it updates instantly) -->
     <div class="mt-4 rounded-input border border-border bg-surface-subtle p-4">
-      <p class="text-[15px] leading-relaxed text-heading">
+      <p
+        class="leading-relaxed text-heading"
+        :style="{ fontSize: 'var(--reading-font-size, 14px)' }"
+      >
         The quick brown fox jumps over the lazy dog — your notes render in this font.
       </p>
       <pre

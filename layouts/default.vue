@@ -48,18 +48,16 @@ async function logout() {
         </button>
         <span class="font-bold text-heading md:hidden">Notebook++</span>
 
-        <button
-          type="button"
-          class="flex items-center gap-2 rounded-input border border-border bg-surface-subtle px-3 py-1.5 text-sm text-text-muted transition-colors hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          aria-label="Search notes"
-          @click="paletteOpen = true"
-        >
-          <Search class="h-4 w-4" />
-          <span class="hidden sm:inline">Search</span>
-          <kbd class="hidden rounded border border-border px-1 text-[10px] md:inline">⌘K</kbd>
-        </button>
-
         <div class="ml-auto flex items-center gap-1">
+          <button
+            type="button"
+            class="rounded-md p-2 text-text-muted transition-colors hover:bg-row-hover hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            aria-label="Search notes (Ctrl or Cmd K)"
+            title="Search (⌘K)"
+            @click="paletteOpen = true"
+          >
+            <Search class="h-5 w-5" />
+          </button>
           <UiDropdown label="Account menu">
             <template #trigger>
               <span class="flex items-center gap-2 px-1">

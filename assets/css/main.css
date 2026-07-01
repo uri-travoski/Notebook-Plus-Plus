@@ -4,12 +4,10 @@
    Settings -> Preferences swaps --font-sans / --font-mono at runtime. */
 @import '@fontsource-variable/noto-sans';
 @import '@fontsource-variable/inter';
-@import '@fontsource/google-sans';
 @import '@fontsource/ibm-plex-serif';
-@import '@fontsource/libre-baskerville';
 @import '@fontsource-variable/merriweather';
-@import '@fontsource-variable/google-sans-code';
 @import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/google-sans-code';
 @import '@fontsource-variable/fira-code';
 
 /* Class-based dark mode (theme toggle adds .dark to <html>). */
@@ -70,8 +68,7 @@
     'Noto Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif;
   --font-mono:
-    'Google Sans Code Variable', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas,
-    monospace;
+    'JetBrains Mono Variable', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
 /* Dark theme token overrides */
