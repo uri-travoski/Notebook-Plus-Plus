@@ -8,6 +8,12 @@
   color: var(--color-text);
 }
 
+/* Dark mode: match the document surface to the app background (BlockNote's dark
+   theme otherwise paints the editor #1f1f1f, which reads as a separate panel). */
+.dark .bn-editor {
+  background-color: var(--color-bg);
+}
+
 .bn-editor .bn-block-content {
   font-size: var(--reading-font-size, 14px);
   line-height: 1.7;
