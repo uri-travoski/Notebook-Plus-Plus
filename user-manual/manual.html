@@ -20,13 +20,36 @@
 <nav>
   <h2>Contents</h2>
   <ul>
-    <li class="empty">No modules yet.</li>
+    <li><a href="#database-table">Database table block (Table &amp; Board views)</a></li>
   </ul>
 </nav>
 
 <section>
   <h2>Modules</h2>
-  <p class="empty">No modules yet.</p>
+
+  <h3 id="database-table">Database table block</h3>
+  <p><strong>What it is.</strong> An embedded, spreadsheet-style database you drop into any page
+  note (via the <code>/</code> slash menu → "Database table"). Column data is stored relationally,
+  so the same database can be queried outside the document.</p>
+  <p><strong>Columns.</strong> Each column has a name and a type: text, number, select,
+  multiselect, date, checkbox, or url. Add a column with the <code>+</code> in the header row;
+  rename or retype it inline; <code>select</code>/<code>multiselect</code> columns take a
+  comma-separated options list.</p>
+  <p><strong>Views.</strong> A toolbar above the block switches between two views (the choice is
+  saved per block):</p>
+  <ul>
+    <li><strong>Table</strong> — the editable grid. Add rows with "+ New row"; edit any cell in
+    place; delete a row or column with its <code>×</code>. Scrolls horizontally when wide.</li>
+    <li><strong>Board</strong> (Kanban) — groups rows into lanes by a Select column chosen in the
+    "Group by" picker. Each row is a card showing its title (first text column) plus its other
+    field values as chips. There is always a "No &lt;column&gt;" lane for rows with no value.
+    Add a card to a lane with "+ New" (it presets that lane's value), and
+    <strong>drag a card between lanes</strong> to change its Select value. The board scrolls
+    horizontally.</li>
+  </ul>
+  <p><strong>Connections.</strong> Lives inside a page note's content; the editor island renders
+  it but reads/writes rows through the <code>/api/databases</code> endpoints (the Vue shell owns
+  document autosave). Needs at least one Select column to use Board view.</p>
 </section>
 
 </body>

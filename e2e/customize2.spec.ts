@@ -24,7 +24,7 @@ async function setup(page: import('@playwright/test').Page, token: string) {
   }, token)
 }
 
-test('callout toolbar dropdown converts a block to a callout', async ({ page }) => {
+test('in-block callout picker changes the callout type', async ({ page }) => {
   await login(page)
   const id = await page.evaluate(async () => {
     const t = await fetch('/api/tree').then((r) => r.json())
@@ -38,18 +38,15 @@ test('callout toolbar dropdown converts a block to a callout', async ({ page }) 
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        content: [
-          { type: 'paragraph', content: [{ type: 'text', text: 'convert me', styles: {} }] },
-        ],
+        content: [{ type: 'callout', props: { kind: 'info' }, content: 'a callout' }],
       }),
     })
     return d.id as string
   })
   await page.goto('/doc/' + id)
-  await page.locator('[contenteditable="true"]').first().click()
-  await page.getByText('convert me').selectText()
-  await page.waitForTimeout(500)
-  await page.locator('.nb-callout-select').selectOption('warning')
+  await expect(page.locator('.nb-callout-info')).toBeVisible()
+  // The in-block type picker (replaced the non-working formatting-toolbar dropdown).
+  await page.locator('.nb-callout-kind').selectOption('warning')
   await expect(page.locator('.nb-callout-warning')).toBeVisible()
   await page.evaluate((id) => fetch('/api/documents/' + id, { method: 'DELETE' }), id)
 })

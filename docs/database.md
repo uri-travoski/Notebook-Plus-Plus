@@ -20,8 +20,11 @@ Drizzle ORM + PostgreSQL 18. Schema: `server/db/schema.ts`. Migrations live in
   `{elements,appState,files}` (canvas). `searchText` = derived plaintext for FTS.
 - **documentVersions** — content/title snapshots.
 - **databases + databaseRows** — the in-document table block, stored relationally and queryable;
-  the BlockNote block holds only `databaseId`. Columns typed in `columns` jsonb; row data in
-  `values` jsonb keyed by column id.
+  the BlockNote block holds `databaseId` plus per-block view prefs (`view` = `table|kanban`,
+  `groupBy` = a Select column id), round-tripped through the document JSON (no dedicated DB
+  column). Columns typed in `columns` jsonb; row data in `values` jsonb keyed by column id. The
+  Kanban board groups rows by the chosen Select column (plus a "No &lt;column&gt;" lane for unset
+  rows); dragging a card between lanes updates that column's value.
 - **attachments** — uploaded files (`key` in the storage driver, content-type, size).
 - **aiKeys** — encrypted provider keys (AES-256-GCM: `encryptedKey` + `iv` + `authTag`),
   `priority` (lower tried first), `enabled`, `lastOkAt`/`lastError`.

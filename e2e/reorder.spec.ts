@@ -28,6 +28,13 @@ test('drag-reorder a note within its notebook', async ({ page }) => {
       }).then((r) => r.json())
     const a = await mk('Note Alpha')
     const b = await mk('Note Beta')
+    // Expand the whole tree so the notebook's note links render in the sidebar
+    // (the dev user's persisted collapse state may hide projects[0] otherwise).
+    await fetch('/api/me/preferences', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sidebarCollapsed: [] }),
+    })
     return { notebookId: nb.id, a: a.id, b: b.id }
   })
 
@@ -44,9 +51,8 @@ test('drag-reorder a note within its notebook', async ({ page }) => {
 
   // Drag Beta onto Alpha -> Beta should land before Alpha.
   await page.reload()
-  await page
-    .getByRole('link', { name: 'Note Beta' })
-    .dragTo(page.getByRole('link', { name: 'Note Alpha' }))
+  // Target the exact notes by doc id (title alone is ambiguous if other notebooks reuse it).
+  await page.locator(`a[href="/doc/${ids.b}"]`).dragTo(page.locator(`a[href="/doc/${ids.a}"]`))
   await expect.poll(order).toEqual([ids.b, ids.a])
 
   await page.evaluate((id) => fetch('/api/notebooks/' + id, { method: 'DELETE' }), ids.notebookId)

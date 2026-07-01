@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import {
   Plus,
-  Folder,
   ChevronRight,
   MoreHorizontal,
-  House,
-  Star,
-  FileStack,
   LayoutTemplate,
   Archive,
   Trash2,
@@ -19,6 +15,9 @@ import {
   PenTool,
   LogOut,
 } from 'lucide-vue-next'
+import IconOverview from '~/components/IconOverview.vue'
+import IconStarred from '~/components/IconStarred.vue'
+import IconDrafts from '~/components/IconDrafts.vue'
 import type { TreeNote } from '~/composables/useTree'
 
 const {
@@ -136,9 +135,9 @@ const decoratedProjects = computed(() =>
 )
 
 const navItems = [
-  { to: '/', label: 'Overview', icon: House },
-  { to: '/starred', label: 'Starred', icon: Star },
-  { to: '/drafts', label: 'Drafts', icon: FileStack },
+  { to: '/', label: 'Overview', icon: IconOverview },
+  { to: '/starred', label: 'Starred', icon: IconStarred },
+  { to: '/drafts', label: 'Drafts', icon: IconDrafts },
 ]
 const systemItems = [
   { to: '/templates', label: 'Templates', icon: LayoutTemplate },
@@ -194,10 +193,19 @@ const navClass = (to: string) =>
         </li>
       </ul>
 
-      <div class="mb-1 mt-4 border-t border-border px-2 pt-4">
+      <div class="mb-1 mt-4 flex items-center justify-between border-t border-border px-2 pt-4">
         <span class="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted"
-          >Workspace</span
+          >Projects</span
         >
+        <button
+          type="button"
+          class="shrink-0 rounded p-0.5 text-primary transition-colors hover:bg-row-hover hover:text-primary-hover focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+          aria-label="Add project"
+          title="Add project"
+          @click="addProject"
+        >
+          <Plus class="h-4 w-4" />
+        </button>
       </div>
 
       <p v-if="loaded && !decoratedProjects.length" class="px-2 py-3 text-sm text-text-muted">
@@ -221,7 +229,9 @@ const navClass = (to: string) =>
                 :class="isCollapsed(project.id) ? '' : 'rotate-90'"
               />
             </button>
-            <Folder class="h-[18px] w-[18px] shrink-0 text-text-subtle md:h-4 md:w-4" />
+            <IconFolder
+              class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[18px] md:w-[18px]"
+            />
             <input
               v-if="editing?.kind === 'project' && editing.id === project.id"
               v-model="draft"
@@ -281,7 +291,9 @@ const navClass = (to: string) =>
                     :class="isCollapsed(nb.id) ? '' : 'rotate-90'"
                   />
                 </button>
-                <AppMark class="h-[18px] w-[18px] shrink-0 text-text-subtle md:h-4 md:w-4" />
+                <AppMark
+                  class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[18px] md:w-[18px]"
+                />
                 <input
                   v-if="editing?.kind === 'notebook' && editing.id === nb.id"
                   v-model="draft"

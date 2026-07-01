@@ -70,6 +70,19 @@
 .bn-editor pre code {
   color: inherit;
 }
+/* Language picker at the top of a code block (was white/invisible on the light surface).
+   !important overrides the vendor rule that assumes a dark code surface. */
+.bn-editor [data-content-type='codeBlock'] select {
+  color: var(--color-text-muted) !important;
+  background: transparent;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+.bn-editor [data-content-type='codeBlock'] select option {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
 
 /* Blockquote per §3: teal left rule, subtle bg, italic heading text. */
 .bn-editor [data-content-type='quote'],
@@ -148,20 +161,25 @@
 .nb-callout-tip .nb-callout-icon {
   color: var(--color-success);
 }
-/* Callout dropdown in the formatting toolbar. */
-.nb-callout-select {
-  height: 28px;
-  margin: 0 2px;
+/* In-block callout type picker (top-right of a callout). */
+.nb-callout-kind {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0.1rem;
   border: 0;
-  border-radius: 6px;
   background: transparent;
-  color: var(--color-text);
-  font-size: 13px;
-  padding: 0 4px;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  opacity: 0.75;
   cursor: pointer;
 }
-.nb-callout-select:hover {
-  background: var(--color-surface-subtle);
+.nb-callout-kind:hover {
+  opacity: 1;
+}
+.nb-callout-kind option {
+  color: var(--color-text);
+  background: var(--color-surface);
 }
 
 /* Math block: editable LaTeX source + live KaTeX preview. */
@@ -293,4 +311,192 @@
   color: var(--color-text-muted);
   font-size: 13px;
   padding: 6px;
+}
+
+/* Database block toolbar: Table / Board view switch + group-by picker. */
+.nb-db-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.nb-db-views {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-subtle);
+}
+.nb-db-viewbtn {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.nb-db-viewbtn:hover {
+  color: var(--color-text);
+}
+.nb-db-viewbtn.is-active {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+.nb-db-groupby {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+.nb-db-groupby select {
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: 12px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+/* Kanban board: horizontally scrollable lanes grouped by a select column. */
+.nb-kanban {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  align-items: flex-start;
+}
+.nb-kanban-lane {
+  flex: 0 0 250px;
+  min-width: 250px;
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nb-kanban-lane.is-over {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+.nb-kanban-lane-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+}
+.nb-kanban-lane-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.nb-kanban-lane-count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: var(--radius-pill);
+  padding: 0 7px;
+  min-width: 20px;
+  text-align: center;
+}
+.nb-kanban-lane-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 8px;
+}
+.nb-kanban-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-input);
+  padding: 8px 24px 8px 10px;
+  cursor: grab;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+}
+.nb-kanban-card:active {
+  cursor: grabbing;
+}
+.nb-kanban-card:hover {
+  border-color: var(--color-border-strong);
+}
+.nb-kanban-title {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  padding: 0;
+}
+.nb-kanban-title:focus {
+  outline: none;
+}
+.nb-kanban-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.nb-kanban-chip {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nb-kanban-cardx {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-subtle);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  opacity: 0;
+}
+.nb-kanban-card:hover .nb-kanban-cardx {
+  opacity: 1;
+}
+.nb-kanban-cardx:hover {
+  color: var(--color-danger);
+}
+.nb-kanban-add {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  text-align: left;
+  padding: 4px;
+  cursor: pointer;
+  border-radius: var(--radius-input);
+}
+.nb-kanban-add:hover {
+  color: var(--color-primary);
+  background: var(--color-surface);
+}
+.nb-kanban-empty {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  padding: 16px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-card);
 }

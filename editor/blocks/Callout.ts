@@ -30,11 +30,36 @@ export const Callout = createReactBlockSpec(
         { viewBox: '0 0 256 256', fill: 'currentColor', xmlns: 'http://www.w3.org/2000/svg' },
         createElement('path', { d: ICON_PATHS[kind] || ICON_PATHS.info }),
       )
+      // In-block type picker (reliable way to change the type after inserting via "/").
+      const picker = createElement(
+        'select',
+        {
+          className: 'nb-callout-kind',
+          contentEditable: false,
+          value: kind,
+          title: 'Callout type',
+          'aria-label': 'Callout type',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          onChange: (e: any) =>
+            props.editor.updateBlock(props.block, {
+              type: 'callout',
+              props: { kind: e.target.value },
+            }),
+        },
+        ...['info', 'warning', 'important', 'tip'].map((k) =>
+          createElement(
+            'option',
+            { key: k, value: k },
+            k.charAt(0).toUpperCase() + k.slice(1),
+          ),
+        ),
+      )
       return createElement(
         'div',
         { className: `nb-callout nb-callout-${kind}`, 'data-kind': kind },
         createElement('span', { className: 'nb-callout-icon', contentEditable: false }, icon),
         createElement('div', { className: 'nb-callout-body', ref: props.contentRef }),
+        picker,
       )
     },
   },

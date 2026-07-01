@@ -1,9 +1,10 @@
 import { createElement as h, useEffect, useState } from 'react'
 
-// Notion-style editable table. Hand-rolled grid (createElement, no JSX) — for a
-// single in-document editable view this is simpler and lighter than wiring
-// TanStack Table's headless API through createElement. Data lives relationally;
-// the block only stores { databaseId }.
+// Notion-style editable database block with two views: a spreadsheet Table and a
+// Kanban board grouped by a Select column. Hand-rolled (createElement, no JSX) —
+// for a single in-document view this is simpler and lighter than wiring TanStack
+// Table's headless API through createElement. Data lives relationally; the block
+// stores only { databaseId, view, groupBy }.
 
 const TYPES = ['text', 'number', 'select', 'multiselect', 'date', 'checkbox', 'url'] as const
 
@@ -11,6 +12,13 @@ type Column = { id: string; name: string; type: string; options?: string[] }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Row = { id: string; values: Record<string, any> }
 type DbData = { id: string; name: string; columns: Column[]; rows: Row[] }
+
+type Props = {
+  databaseId: string
+  view?: string
+  groupBy?: string
+  onView?: (view: string, groupBy: string) => void
+}
 
 // crypto.randomUUID needs a secure context (fails over http on a LAN IP), so use a plain id.
 function cid() {
@@ -29,8 +37,11 @@ async function api(path: string, method = 'GET', body?: any) {
   return text ? JSON.parse(text) : null
 }
 
-export default function DatabaseTableView({ databaseId }: { databaseId: string }) {
+export default function DatabaseTableView({ databaseId, view, groupBy, onView }: Props) {
   const [db, setDb] = useState<DbData | null>(null)
+  const [mode, setMode] = useState<string>(view === 'kanban' ? 'kanban' : 'table')
+  const [groupCol, setGroupCol] = useState<string>(groupBy || '')
+  const [overLane, setOverLane] = useState<string | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -45,6 +56,16 @@ export default function DatabaseTableView({ databaseId }: { databaseId: string }
   if (!db) return h('div', { className: 'nb-db-loading' }, 'Loading table…')
   const columns = db.columns || []
   const rows = db.rows || []
+  const selectCols = columns.filter((c) => c.type === 'select')
+
+  const changeMode = (m: string) => {
+    setMode(m)
+    onView?.(m, groupCol)
+  }
+  const changeGroup = (g: string) => {
+    setGroupCol(g)
+    onView?.(mode, g)
+  }
 
   const saveColumns = (cols: Column[]) => {
     setDb((p) => (p ? { ...p, columns: cols } : p))
@@ -56,8 +77,9 @@ export default function DatabaseTableView({ databaseId }: { databaseId: string }
     saveColumns(columns.map((c) => (c.id === id ? { ...c, ...patch } : c)))
   const deleteColumn = (id: string) => saveColumns(columns.filter((c) => c.id !== id))
 
-  const addRow = async () => {
-    const row = await api('/api/databases/' + databaseId + '/rows', 'POST', { values: {} })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const addRow = async (preset: Record<string, any> = {}) => {
+    const row = await api('/api/databases/' + databaseId + '/rows', 'POST', { values: preset })
     if (row) setDb((p) => (p ? { ...p, rows: [...p.rows, row] } : p))
   }
   const deleteRow = (id: string) => {
@@ -186,10 +208,9 @@ export default function DatabaseTableView({ databaseId }: { databaseId: string }
     )
   }
 
-  return h(
-    'div',
-    { className: 'nb-db', contentEditable: false },
-    h(
+  // ---- Table view ----
+  function tableView() {
+    return h(
       'div',
       { className: 'nb-db-scroll' },
       h(
@@ -230,7 +251,176 @@ export default function DatabaseTableView({ databaseId }: { databaseId: string }
           ),
         ),
       ),
+    )
+  }
+
+  // ---- Kanban view ----
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function chipText(col: Column, v: any) {
+    if (v === undefined || v === null || v === '') return ''
+    if (col.type === 'checkbox') return v ? '✓' : ''
+    if (col.type === 'multiselect') return Array.isArray(v) ? v.join(', ') : String(v)
+    return String(v)
+  }
+
+  function card(row: Row, groupColId: string, titleCol?: Column) {
+    const chips = columns
+      .filter((c) => c.id !== groupColId && c.id !== titleCol?.id)
+      .map((c) => ({ c, t: chipText(c, row.values?.[c.id]) }))
+      .filter((x) => x.t)
+    return h(
+      'div',
+      {
+        key: row.id,
+        className: 'nb-kanban-card',
+        draggable: true,
+        onDragStart: (e: { dataTransfer: DataTransfer }) =>
+          e.dataTransfer.setData('text/plain', row.id),
+      },
+      titleCol
+        ? h('input', {
+            className: 'nb-kanban-title',
+            defaultValue: row.values?.[titleCol.id] ?? '',
+            placeholder: 'Untitled',
+            onBlur: (e: { target: { value: string } }) =>
+              updateCell(row.id, titleCol.id, e.target.value),
+          })
+        : h('span', { className: 'nb-kanban-title' }, 'Card'),
+      chips.length
+        ? h(
+            'div',
+            { className: 'nb-kanban-chips' },
+            ...chips.map(({ c, t }) =>
+              h('span', { key: c.id, className: 'nb-kanban-chip', title: c.name }, t),
+            ),
+          )
+        : null,
+      h(
+        'button',
+        {
+          className: 'nb-kanban-cardx',
+          type: 'button',
+          title: 'Delete card',
+          onClick: () => deleteRow(row.id),
+        },
+        '×',
+      ),
+    )
+  }
+
+  function lane(value: string, label: string, groupColId: string, titleCol?: Column) {
+    const laneRows = rows.filter((r) => (r.values?.[groupColId] ?? '') === value)
+    return h(
+      'div',
+      {
+        key: value || '__none__',
+        className: 'nb-kanban-lane' + (overLane === (value || '__none__') ? ' is-over' : ''),
+        onDragOver: (e: { preventDefault: () => void }) => e.preventDefault(),
+        onDragEnter: () => setOverLane(value || '__none__'),
+        onDragLeave: () => setOverLane((p) => (p === (value || '__none__') ? null : p)),
+        onDrop: (e: { preventDefault: () => void; dataTransfer: DataTransfer }) => {
+          e.preventDefault()
+          setOverLane(null)
+          const rowId = e.dataTransfer.getData('text/plain')
+          if (rowId) updateCell(rowId, groupColId, value || null)
+        },
+      },
+      h(
+        'div',
+        { className: 'nb-kanban-lane-h' },
+        h('span', { className: 'nb-kanban-lane-name' }, label),
+        h('span', { className: 'nb-kanban-lane-count' }, String(laneRows.length)),
+      ),
+      h(
+        'div',
+        { className: 'nb-kanban-lane-body' },
+        ...laneRows.map((r) => card(r, groupColId, titleCol)),
+      ),
+      h(
+        'button',
+        {
+          className: 'nb-kanban-add',
+          type: 'button',
+          onClick: () => addRow(value ? { [groupColId]: value } : {}),
+        },
+        '+ New',
+      ),
+    )
+  }
+
+  function kanbanView() {
+    const groupColId =
+      groupCol && columns.some((c) => c.id === groupCol) ? groupCol : selectCols[0]?.id
+    const groupColumn = columns.find((c) => c.id === groupColId)
+    if (!groupColumn)
+      return h(
+        'div',
+        { className: 'nb-kanban-empty' },
+        'The board view groups cards by a Select column. Add a Select column in Table view first.',
+      )
+    const titleCol =
+      columns.find((c) => c.type === 'text') || columns.find((c) => c.id !== groupColId)
+    const lanes = [
+      ...(groupColumn.options ?? []).map((o) => lane(o, o, groupColId!, titleCol)),
+      lane('', 'No ' + groupColumn.name, groupColId!, titleCol),
+    ]
+    return h('div', { className: 'nb-kanban' }, ...lanes)
+  }
+
+  // ---- Toolbar ----
+  const toolbar = h(
+    'div',
+    { className: 'nb-db-toolbar' },
+    h(
+      'div',
+      { className: 'nb-db-views' },
+      h(
+        'button',
+        {
+          type: 'button',
+          className: 'nb-db-viewbtn' + (mode !== 'kanban' ? ' is-active' : ''),
+          onClick: () => changeMode('table'),
+        },
+        'Table',
+      ),
+      h(
+        'button',
+        {
+          type: 'button',
+          className: 'nb-db-viewbtn' + (mode === 'kanban' ? ' is-active' : ''),
+          onClick: () => changeMode('kanban'),
+        },
+        'Board',
+      ),
     ),
-    h('button', { className: 'nb-db-addrow', type: 'button', onClick: addRow }, '+ New row'),
+    mode === 'kanban' && selectCols.length
+      ? h(
+          'label',
+          { className: 'nb-db-groupby' },
+          'Group by',
+          h(
+            'select',
+            {
+              value: groupCol || selectCols[0].id,
+              onChange: (e: { target: { value: string } }) => changeGroup(e.target.value),
+            },
+            ...selectCols.map((c) => h('option', { key: c.id, value: c.id }, c.name)),
+          ),
+        )
+      : null,
+  )
+
+  return h(
+    'div',
+    { className: 'nb-db', contentEditable: false },
+    toolbar,
+    mode === 'kanban' ? kanbanView() : tableView(),
+    mode !== 'kanban'
+      ? h(
+          'button',
+          { className: 'nb-db-addrow', type: 'button', onClick: () => addRow() },
+          '+ New row',
+        )
+      : null,
   )
 }

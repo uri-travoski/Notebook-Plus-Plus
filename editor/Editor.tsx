@@ -1,7 +1,6 @@
 import { createElement } from 'react'
 import {
   useCreateBlockNote,
-  useBlockNoteEditor,
   SuggestionMenuController,
   getDefaultReactSlashMenuItems,
   FormattingToolbarController,
@@ -79,38 +78,6 @@ const schema = BlockNoteSchema.create({
     drawing: Drawing(),
   },
 })
-
-// Toolbar dropdown that converts the current block into a callout of the chosen type.
-const CALLOUT_OPTIONS = [
-  { kind: 'info', label: 'Info' },
-  { kind: 'warning', label: 'Warning' },
-  { kind: 'important', label: 'Important' },
-  { kind: 'tip', label: 'Tip' },
-]
-function CalloutSelect() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ed = useBlockNoteEditor() as any
-  const block = ed.getTextCursorPosition().block
-  const current = block?.type === 'callout' ? block.props?.kind : ''
-  return createElement(
-    'select',
-    {
-      className: 'nb-callout-select',
-      title: 'Convert block to a callout',
-      'aria-label': 'Callout type',
-      value: current || '',
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      onChange: (e: any) => {
-        const kind = e.target.value
-        if (!kind) return
-        const b = ed.getTextCursorPosition().block
-        ed.updateBlock(b, { type: 'callout', props: { kind } })
-      },
-    },
-    createElement('option', { value: '' }, 'Callout'),
-    ...CALLOUT_OPTIONS.map((o) => createElement('option', { key: o.kind, value: o.kind }, o.label)),
-  )
-}
 
 type Props = {
   initialContent?: unknown[]
@@ -333,7 +300,6 @@ export default function Editor({
           ...getFormattingToolbarItems(),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           createElement(BasicTextStyleButton as any, { key: 'code', basicTextStyle: 'code' }),
-          createElement(CalloutSelect, { key: 'callout' }),
         ),
     }),
   )
