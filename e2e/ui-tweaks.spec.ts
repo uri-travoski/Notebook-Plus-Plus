@@ -89,9 +89,9 @@ test('a wide database table is horizontally scrollable within the note', async (
   })
   await page.setViewportSize({ width: 900, height: 700 })
   await page.goto('/doc/' + id)
-  await expect(page.locator('.nb-db-scroll')).toBeVisible()
+  await expect(page.locator('.nb-db-grid')).toBeVisible()
   const s = await page.evaluate(() => {
-    const el = document.querySelector('.nb-db-scroll') as HTMLElement
+    const el = document.querySelector('.nb-db-grid') as HTMLElement
     return {
       scrollable: el.scrollWidth > el.clientWidth + 5,
       pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,

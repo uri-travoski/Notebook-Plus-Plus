@@ -34,15 +34,16 @@ test('database block: renders, adds a row, persists across reload', async ({ pag
     return doc.id as string
   })
 
+  const bodyRows = page.locator('.nb-db-grid > .nb-db-row:not(.nb-db-head)')
   await page.goto('/doc/' + id)
-  await expect(page.locator('.nb-db-table')).toBeVisible()
+  await expect(page.locator('.nb-db-grid')).toBeVisible()
 
-  await page.locator('.nb-db-addrow').click()
-  await expect(page.locator('.nb-db-table tbody tr')).toHaveCount(1)
+  await page.locator('.nb-db-newrow').click()
+  await expect(bodyRows).toHaveCount(1)
 
   await page.reload()
-  await expect(page.locator('.nb-db-table')).toBeVisible()
-  await expect(page.locator('.nb-db-table tbody tr')).toHaveCount(1)
+  await expect(page.locator('.nb-db-grid')).toBeVisible()
+  await expect(bodyRows).toHaveCount(1)
 
   await page.evaluate((docId) => fetch('/api/documents/' + docId, { method: 'DELETE' }), id)
 })

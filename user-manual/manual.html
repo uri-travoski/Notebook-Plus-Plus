@@ -31,15 +31,20 @@
   <p><strong>What it is.</strong> An embedded, spreadsheet-style database you drop into any page
   note (via the <code>/</code> slash menu → "Database table"). Column data is stored relationally,
   so the same database can be queried outside the document.</p>
-  <p><strong>Columns.</strong> Each column has a name and a type: text, number, select,
-  multiselect, date, checkbox, or url. Add a column with the <code>+</code> in the header row;
-  rename or retype it inline; <code>select</code>/<code>multiselect</code> columns take a
-  comma-separated options list.</p>
+  <p><strong>Columns (properties).</strong> Each column has a name and a type: text, number,
+  select, multi-select, date, checkbox, or url, each shown with a type icon in the header. Add a
+  column with the <code>+</code> at the right edge of the header (name it and pick a type). Click a
+  column header to open its menu: rename, change type, insert a column left or right, or delete it.
+  Drag a column's right edge to resize it (double-click the edge to reset). For select/multi-select,
+  options are created as you type them into a cell.</p>
   <p><strong>Views.</strong> A toolbar above the block switches between two views (the choice is
   saved per block):</p>
   <ul>
-    <li><strong>Table</strong> — the editable grid. Add rows with "+ New row"; edit any cell in
-    place; delete a row or column with its <code>×</code>. Scrolls horizontally when wide.</li>
+    <li><strong>Table</strong> — a Notion-style grid with a sticky header and a frozen first column.
+    Click any cell to edit it inline; select cells open a colour-pill option picker; checkboxes and
+    dates edit in place. Add rows with the <strong>+ New</strong> footer. Hover a row to reveal its
+    <code>⠿</code> grip — drag it to reorder rows, or click it for duplicate / delete. Scrolls in
+    both directions for wide or long tables.</li>
     <li><strong>Board</strong> (Kanban) — groups rows into lanes by a Select column chosen in the
     "Group by" picker. Each row is a card showing its title (first text column) plus its other
     field values as chips. There is always a "No &lt;column&gt;" lane for rows with no value.

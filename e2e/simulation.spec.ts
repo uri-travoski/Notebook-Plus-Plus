@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test'
+import { test, expect, type Page, type Locator } from '@playwright/test'
 import fs from 'node:fs'
 
 // §24 automated user-simulation. Drives the running app through the real UI: creates 2 projects ×
@@ -58,7 +58,7 @@ async function cleanup(page: Page) {
 const renameInput = (page: Page) => page.locator('input.border-primary')
 
 async function createProject(page: Page, name: string) {
-  await page.getByRole('button', { name: 'New project' }).click()
+  await page.getByRole('button', { name: 'Add project' }).click()
   await renameInput(page).fill(name)
   await renameInput(page).press('Enter')
   await expect(page.getByRole('button', { name, exact: true })).toBeVisible()
@@ -93,30 +93,57 @@ async function typeRotating(page: Page, kind: (typeof ROTATING)[number], n: numb
   await page.keyboard.press('Enter') // empty item -> back to a plain paragraph
 }
 
+const TYPE_LABEL: Record<string, string> = {
+  text: 'Text',
+  number: 'Number',
+  select: 'Select',
+  multiselect: 'Multi-select',
+  date: 'Date',
+  checkbox: 'Checkbox',
+  url: 'URL',
+}
+// Cells are index 0 = gutter, so column i lives at cell nth(i+1).
+async function fillTextCell(row: Locator, colIndex: number, val: string) {
+  const cell = row.locator('.nb-db-cell').nth(colIndex + 1)
+  await cell.click()
+  const input = cell.locator('.nb-db-input')
+  await input.fill(val)
+  await input.blur()
+}
+async function fillSelectCell(page: Page, row: Locator, colIndex: number, val: string) {
+  await row
+    .locator('.nb-db-cell')
+    .nth(colIndex + 1)
+    .click()
+  const menu = page.locator('.nb-db-menu')
+  await menu.locator('.nb-db-menu-input').fill(val)
+  await page.keyboard.press('Enter') // adds the option (if new) and selects it
+  await menu.waitFor({ state: 'detached' }).catch(() => {})
+}
+
 async function buildTable(page: Page) {
-  await expect(page.locator('.nb-db-table')).toBeVisible()
-  // Start with 1 column; add 4 more for 5 total.
+  await expect(page.locator('.nb-db-grid')).toBeVisible()
+  // Start with 1 column; add 4 more (trailing "+" -> new-property popover -> Add).
   for (let i = 0; i < 4; i++) {
-    await page.locator('.nb-db-addcol button').click()
-    await expect(page.locator('.nb-db-th')).toHaveCount(i + 2)
+    await page.locator('.nb-db-addcol-btn').click()
+    await page.locator('.nb-db-menu-cta').click()
+    await expect(page.locator('.nb-db-head .nb-db-headbtn')).toHaveCount(i + 2)
   }
-  const cols: [string, string, string][] = [
-    ['Name', 'text', ''],
-    ['Status', 'select', 'Todo, Doing, Done'],
-    ['Priority', 'select', 'Low, Med, High'],
-    ['Due', 'date', ''],
-    ['Done', 'checkbox', ''],
+  const cols: [string, string][] = [
+    ['Name', 'text'],
+    ['Status', 'select'],
+    ['Priority', 'select'],
+    ['Due', 'date'],
+    ['Done', 'checkbox'],
   ]
   for (let i = 0; i < cols.length; i++) {
-    const [name, type, options] = cols[i]
-    const th = page.locator('.nb-db-th').nth(i)
-    await th.locator('.nb-db-coltype').selectOption(type)
-    if (options) {
-      await th.locator('.nb-db-coloptions').fill(options)
-      await th.locator('.nb-db-coloptions').blur()
-    }
-    await th.locator('.nb-db-colname').fill(name)
-    await th.locator('.nb-db-colname').blur()
+    const [name, type] = cols[i]
+    await page.locator('.nb-db-head .nb-db-headbtn').nth(i).click()
+    const menu = page.locator('.nb-db-menu')
+    await menu.locator('.nb-db-menu-input').first().fill(name)
+    await menu.getByRole('button', { name: TYPE_LABEL[type], exact: true }).click()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.nb-db-menu')).toHaveCount(0)
   }
 
   const rows = [
@@ -126,17 +153,17 @@ async function buildTable(page: Page) {
     { Name: 'Publish v1', Status: 'Todo', Priority: 'Low', Due: '2026-07-14', Done: false },
     { Name: 'Retro notes', Status: 'Doing', Priority: 'Med', Due: '2026-07-18', Done: true },
   ]
+  const bodyRows = page.locator('.nb-db-grid > .nb-db-row:not(.nb-db-head)')
   for (let r = 0; r < rows.length; r++) {
-    await page.locator('.nb-db-addrow').click()
-    await expect(page.locator('.nb-db-table tbody tr')).toHaveCount(r + 1)
-    const row = page.locator('.nb-db-table tbody tr').nth(r)
+    await page.locator('.nb-db-newrow').click()
+    await expect(bodyRows).toHaveCount(r + 1)
+    const row = bodyRows.nth(r)
     const data = rows[r]
-    await row.locator('[data-col="Name"]').fill(data.Name)
-    await row.locator('[data-col="Name"]').blur()
-    await row.locator('[data-col="Status"]').selectOption(data.Status)
-    await row.locator('[data-col="Priority"]').selectOption(data.Priority)
-    await row.locator('[data-col="Due"]').fill(data.Due)
-    if (data.Done) await row.locator('[data-col="Done"]').check()
+    await fillTextCell(row, 0, data.Name)
+    await fillSelectCell(page, row, 1, data.Status)
+    await fillSelectCell(page, row, 2, data.Priority)
+    await fillTextCell(row, 3, data.Due)
+    if (data.Done) await row.locator('.nb-db-cell').nth(5).locator('.nb-db-check').check()
   }
 }
 
@@ -308,8 +335,8 @@ test('@sim §24 user-simulation: 10 page notes with tables + 5 canvas mindmaps',
     await page.goto('/doc/' + id)
     await expect(page.getByLabel('Note title')).toHaveValue(title)
     await expect(page.getByText(heading)).toBeVisible()
-    await expect(page.locator('.nb-db-table tbody tr')).toHaveCount(5)
-    await page.locator('.nb-db-table').scrollIntoViewIfNeeded()
+    await expect(page.locator('.nb-db-grid > .nb-db-row:not(.nb-db-head)')).toHaveCount(5)
+    await page.locator('.nb-db-grid').scrollIntoViewIfNeeded()
     await page.screenshot({ path: `${ART}/note-${nn}.png`, fullPage: true })
     summary.push({ kind: 'page', title, project: projName, notebook: nbName, rows: 5 })
   }

@@ -22,9 +22,13 @@ Drizzle ORM + PostgreSQL 18. Schema: `server/db/schema.ts`. Migrations live in
 - **databases + databaseRows** — the in-document table block, stored relationally and queryable;
   the BlockNote block holds `databaseId` plus per-block view prefs (`view` = `table|kanban`,
   `groupBy` = a Select column id), round-tripped through the document JSON (no dedicated DB
-  column). Columns typed in `columns` jsonb; row data in `values` jsonb keyed by column id. The
-  Kanban board groups rows by the chosen Select column (plus a "No &lt;column&gt;" lane for unset
-  rows); dragging a card between lanes updates that column's value.
+  column). Columns typed in `columns` jsonb; each column also carries an optional `width` (px, set
+  by dragging the header edge). Row data in `values` jsonb keyed by column id; `databaseRows.position`
+  is a fractional-indexing key that orders rows and is rewritten on drag-reorder. The Notion-style
+  Table view has a sticky header + frozen first column, click-to-edit cells, coloured Select/Multi-
+  select pills (colour derived from the option label), and a per-column header menu (rename, change
+  type, insert left/right, delete). The Kanban board groups rows by the chosen Select column (plus a
+  "No &lt;column&gt;" lane for unset rows); dragging a card between lanes updates that column's value.
 - **attachments** — uploaded files (`key` in the storage driver, content-type, size).
 - **aiKeys** — encrypted provider keys (AES-256-GCM: `encryptedKey` + `iv` + `authTag`),
   `priority` (lower tried first), `enabled`, `lastOkAt`/`lastError`.
