@@ -115,20 +115,20 @@ const showMove = ref(false)
       <button
         v-if="hasChildren"
         type="button"
-        class="shrink-0 rounded p-0.5 text-text-subtle hover:text-text"
+        class="shrink-0 rounded p-1 text-text-subtle hover:text-text md:p-0.5"
         :aria-label="collapsed ? 'Expand' : 'Collapse'"
         @click="toggleCollapse(note.id)"
       >
         <ChevronRight
-          class="h-3.5 w-3.5 transition-transform"
+          class="h-4 w-4 transition-transform md:h-3.5 md:w-3.5"
           :class="collapsed ? '' : 'rotate-90'"
         />
       </button>
-      <span v-else class="w-[18px] shrink-0" />
+      <span v-else class="w-[22px] shrink-0 md:w-[18px]" />
 
       <component
         :is="note.type === 'canvas' ? PenTool : FileText"
-        class="h-4 w-4 shrink-0"
+        class="h-[18px] w-[18px] shrink-0 md:h-4 md:w-4"
         :class="active ? 'text-primary' : 'text-text-subtle'"
       />
 
@@ -145,7 +145,7 @@ const showMove = ref(false)
         v-else
         :to="`/doc/${note.id}`"
         :draggable="false"
-        class="min-w-0 flex-1 truncate py-1 text-sm"
+        class="min-w-0 flex-1 truncate py-1.5 text-[15px] md:py-1 md:text-sm"
         :class="active ? 'font-medium text-heading' : 'text-text'"
       >
         {{ note.title || 'Untitled' }}
@@ -159,7 +159,7 @@ const showMove = ref(false)
 
       <UiDropdown
         v-if="!editing"
-        class="shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+        class="shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
       >
         <template #trigger><MoreHorizontal class="h-4 w-4" /></template>
         <UiMenuItem @click="toggleStar"

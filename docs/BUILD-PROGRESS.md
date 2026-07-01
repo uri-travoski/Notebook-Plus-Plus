@@ -27,6 +27,12 @@ Node 20.19.2 · npm 9.2 · Docker 26.1 + Compose v5 · git 2.47 · npm registry 
 - [x] 12. Polish & design pass — font picker (body+mono), theme toggle + dark-mode islands, drag-reorder, change-password, inline Excalidraw block, a11y/contrast, DESIGN-NOTES. (Doc version snapshots deferred — not a §22 DoD item; TODO stub.)
 - [x] 13. Automated user-simulation & visual QA (§24) — GREEN. 10 page notes w/ 5-row tables + 5 canvas mindmaps via UI, persist on reload, screenshots in `e2e/artifacts/`.
 
+## User UI customizations round 4 — mobile-friendly menu (2026-07-01)
+- **App icon back to green** (`text-primary`); larger on mobile.
+- **Mobile-friendly sidebar/drawer** (Outline-style): comfortable tap targets on mobile that stay compact on desktop via `md:` overrides (nav/search/tree/footer rows ~15px + more padding on mobile). **Critical fix:** tree action buttons (Add/⋯) were `opacity-0 group-hover` — invisible on touch; now `opacity-100 md:opacity-0 md:group-hover:opacity-100` so they're always visible on mobile. Section **dividers** (border-t) before Workspace/System. Wider mobile **drawer** (`w-[86vw] max-w-[330px]`, `shadow-2xl`).
+- **Self-contained drawer:** added a **user footer** (avatar + name + Log out) to the sidebar; the **account/logout moved off the top bar** into the sidebar, and the top bar is now **mobile-only** (`md:hidden`, hamburger + wordmark). Desktop has no top bar (sidebar carries search + account).
+- Tests: `auth.spec` logout now clicks the sidebar Log out button; `pwa.spec` drawer assert uses `shadow-2xl`. Gate: typecheck 0, lint, 16 vitest, build, **41 E2E**.
+
 ## User UI customizations round 3 (2026-07-01)
 - **Sidebar:** bg **#edf2f9**; default icons **#4E5C6E** (`--color-sidebar-icon`, scoped override `.bg-sidebar .text-text-subtle`); new **AppMark** SVG used for both the app icon (sidebar header) and every notebook icon (replaced BookText); a **search box** now sits under the app name (opens the palette) with a **10px gap** below the name — and the topbar search was removed.
 - **Sidebar menus:** notebook "…" gains **New canvas** (under New note; `addCanvas` → createNote canvas + navigate); a canvas note's "…" shows **Export canvas** (downloads the scene as a native **.excalidraw** JSON file) instead of Export note.

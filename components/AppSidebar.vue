@@ -17,6 +17,7 @@ import {
   Upload,
   Search,
   PenTool,
+  LogOut,
 } from 'lucide-vue-next'
 import type { TreeNote } from '~/composables/useTree'
 
@@ -34,6 +35,17 @@ const {
   createNote,
 } = useTree()
 const { open: paletteOpen } = useCommandPalette()
+
+const { user, clear } = useUserSession()
+const userInitial = computed(() =>
+  (user.value?.displayName || user.value?.username || '?').charAt(0).toUpperCase(),
+)
+const userName = computed(() => user.value?.displayName || user.value?.username || 'Account')
+async function logout() {
+  await $fetch('/api/auth/logout', { method: 'POST' })
+  await clear()
+  await navigateTo('/login')
+}
 
 async function addCanvas(notebookId: string) {
   const d = await createNote(notebookId, 'canvas', 'Untitled canvas')
@@ -149,18 +161,18 @@ const navClass = (to: string) =>
     />
     <div class="px-3 pb-2 pt-3">
       <div class="mb-[10px] flex items-center gap-2 px-1 pt-1">
-        <AppMark class="h-6 w-6 shrink-0 text-text-subtle" />
-        <span class="font-bold text-heading">Notebook++</span>
+        <AppMark class="h-7 w-7 shrink-0 text-primary md:h-6 md:w-6" />
+        <span class="text-lg font-bold text-heading md:text-base">Notebook++</span>
       </div>
       <button
         type="button"
-        class="flex w-full items-center gap-2 rounded-input border border-border bg-surface px-3 py-2 text-sm text-text-muted transition-colors hover:border-primary hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+        class="flex w-full items-center gap-2 rounded-input border border-border bg-surface px-3 py-2.5 text-[15px] text-text-muted transition-colors hover:border-primary hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary md:py-2 md:text-sm"
         aria-label="Search notes"
         @click="paletteOpen = true"
       >
-        <Search class="h-4 w-4 shrink-0" />
+        <Search class="h-5 w-5 shrink-0 md:h-4 md:w-4" />
         <span class="flex-1 text-left">Search notes…</span>
-        <kbd class="hidden rounded border border-border px-1 text-[10px] sm:inline">⌘K</kbd>
+        <kbd class="hidden rounded border border-border px-1 text-[10px] md:inline">⌘K</kbd>
       </button>
     </div>
 
@@ -169,12 +181,12 @@ const navClass = (to: string) =>
         <li v-for="item in navItems" :key="item.to">
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+            class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
             :class="navClass(item.to)"
           >
             <component
               :is="item.icon"
-              class="h-4 w-4"
+              class="h-5 w-5 shrink-0 md:h-4 md:w-4"
               :class="route.path === item.to ? 'text-primary' : 'text-text-subtle'"
             />
             {{ item.label }}
@@ -182,7 +194,7 @@ const navClass = (to: string) =>
         </li>
       </ul>
 
-      <div class="mb-1 mt-5 px-2">
+      <div class="mb-1 mt-4 border-t border-border px-2 pt-4">
         <span class="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted"
           >Workspace</span
         >
@@ -200,16 +212,16 @@ const navClass = (to: string) =>
           <div class="group flex items-center gap-1 rounded-md pr-1 hover:bg-row-hover">
             <button
               type="button"
-              class="shrink-0 rounded p-0.5 text-text-subtle hover:text-text"
+              class="shrink-0 rounded p-1 text-text-subtle hover:text-text md:p-0.5"
               :aria-label="isCollapsed(project.id) ? 'Expand' : 'Collapse'"
               @click="toggleCollapse(project.id)"
             >
               <ChevronRight
-                class="h-3.5 w-3.5 transition-transform"
+                class="h-4 w-4 transition-transform md:h-3.5 md:w-3.5"
                 :class="isCollapsed(project.id) ? '' : 'rotate-90'"
               />
             </button>
-            <Folder class="h-4 w-4 shrink-0 text-text-subtle" />
+            <Folder class="h-[18px] w-[18px] shrink-0 text-text-subtle md:h-4 md:w-4" />
             <input
               v-if="editing?.kind === 'project' && editing.id === project.id"
               v-model="draft"
@@ -222,20 +234,22 @@ const navClass = (to: string) =>
             <button
               v-else
               type="button"
-              class="min-w-0 flex-1 truncate py-1 text-left text-sm font-medium text-heading"
+              class="min-w-0 flex-1 truncate py-1.5 text-left text-[15px] font-medium text-heading md:py-1 md:text-sm"
               @click="toggleCollapse(project.id)"
             >
               {{ project.name }}
             </button>
             <button
               type="button"
-              class="shrink-0 rounded p-1 text-text-muted opacity-0 transition-opacity hover:bg-row-hover hover:text-text group-hover:opacity-100"
+              class="shrink-0 rounded p-1.5 text-text-muted opacity-100 transition-opacity hover:bg-row-hover hover:text-text md:p-1 md:opacity-0 md:group-hover:opacity-100"
               aria-label="Add notebook"
               @click="addNotebook(project.id)"
             >
               <Plus class="h-4 w-4" />
             </button>
-            <UiDropdown class="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+            <UiDropdown
+              class="shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+            >
               <template #trigger><MoreHorizontal class="h-4 w-4" /></template>
               <UiMenuItem @click="startRename('project', project.id, project.name)"
                 ><Pencil />Rename</UiMenuItem
@@ -258,16 +272,16 @@ const navClass = (to: string) =>
               <div class="group flex items-center gap-1 rounded-md pr-1 pl-3.5 hover:bg-row-hover">
                 <button
                   type="button"
-                  class="shrink-0 rounded p-0.5 text-text-subtle hover:text-text"
+                  class="shrink-0 rounded p-1 text-text-subtle hover:text-text md:p-0.5"
                   :aria-label="isCollapsed(nb.id) ? 'Expand' : 'Collapse'"
                   @click="toggleCollapse(nb.id)"
                 >
                   <ChevronRight
-                    class="h-3.5 w-3.5 transition-transform"
+                    class="h-4 w-4 transition-transform md:h-3.5 md:w-3.5"
                     :class="isCollapsed(nb.id) ? '' : 'rotate-90'"
                   />
                 </button>
-                <AppMark class="h-4 w-4 shrink-0 text-text-subtle" />
+                <AppMark class="h-[18px] w-[18px] shrink-0 text-text-subtle md:h-4 md:w-4" />
                 <input
                   v-if="editing?.kind === 'notebook' && editing.id === nb.id"
                   v-model="draft"
@@ -280,20 +294,22 @@ const navClass = (to: string) =>
                 <button
                   v-else
                   type="button"
-                  class="min-w-0 flex-1 truncate py-1 text-left text-sm text-text"
+                  class="min-w-0 flex-1 truncate py-1.5 text-left text-[15px] text-text md:py-1 md:text-sm"
                   @click="toggleCollapse(nb.id)"
                 >
                   {{ nb.name }}
                 </button>
                 <button
                   type="button"
-                  class="shrink-0 rounded p-1 text-text-muted opacity-0 transition-opacity hover:bg-row-hover hover:text-text group-hover:opacity-100"
+                  class="shrink-0 rounded p-1.5 text-text-muted opacity-100 transition-opacity hover:bg-row-hover hover:text-text md:p-1 md:opacity-0 md:group-hover:opacity-100"
                   aria-label="Add note"
                   @click="addNote(nb.id)"
                 >
                   <Plus class="h-4 w-4" />
                 </button>
-                <UiDropdown class="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                <UiDropdown
+                  class="shrink-0 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+                >
                   <template #trigger><MoreHorizontal class="h-4 w-4" /></template>
                   <UiMenuItem @click="startRename('notebook', nb.id, nb.name)"
                     ><Pencil />Rename</UiMenuItem
@@ -326,7 +342,7 @@ const navClass = (to: string) =>
         </li>
       </ul>
 
-      <div class="mb-1 mt-5 px-2">
+      <div class="mb-1 mt-4 border-t border-border px-2 pt-4">
         <span class="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted"
           >System</span
         >
@@ -335,12 +351,12 @@ const navClass = (to: string) =>
         <li v-for="item in systemItems" :key="item.to">
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+            class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
             :class="navClass(item.to)"
           >
             <component
               :is="item.icon"
-              class="h-4 w-4"
+              class="h-5 w-5 shrink-0 md:h-4 md:w-4"
               :class="route.path === item.to ? 'text-primary' : 'text-text-subtle'"
             />
             {{ item.label }}
@@ -349,14 +365,36 @@ const navClass = (to: string) =>
       </ul>
     </nav>
 
-    <div class="border-t border-border px-2 py-2">
+    <div class="space-y-0.5 border-t border-border p-2">
       <NuxtLink
         to="/settings"
-        class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
+        class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
         :class="navClass('/settings')"
       >
-        <Settings class="h-4 w-4 text-text-subtle" /> Settings
+        <Settings
+          class="h-5 w-5 shrink-0 md:h-4 md:w-4"
+          :class="route.path === '/settings' ? 'text-primary' : 'text-text-subtle'"
+        />
+        Settings
       </NuxtLink>
+      <div class="flex items-center gap-2.5 rounded-md px-2 py-2">
+        <span
+          class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-subtle text-sm font-semibold text-primary-subtle-fg"
+          >{{ userInitial }}</span
+        >
+        <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
+          userName
+        }}</span>
+        <button
+          type="button"
+          class="shrink-0 rounded-md p-2 text-text-muted transition-colors hover:bg-row-hover hover:text-danger focus-visible:outline-2 focus-visible:outline-danger md:p-1.5"
+          aria-label="Log out"
+          title="Log out"
+          @click="logout"
+        >
+          <LogOut class="h-[18px] w-[18px] md:h-4 md:w-4" />
+        </button>
+      </div>
     </div>
   </div>
 </template>

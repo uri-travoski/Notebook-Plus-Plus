@@ -40,8 +40,8 @@ test('mobile drawer opens the sidebar', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await login(page)
   await page.getByLabel('Open menu').click()
-  // The drawer aside is the only one with shadow-xl (desktop sidebar is display:none on mobile).
-  const drawer = page.locator('aside.shadow-xl')
+  // The drawer aside is the only one with shadow-2xl (desktop sidebar is display:none on mobile).
+  const drawer = page.locator('aside.shadow-2xl')
   await expect(drawer).toBeVisible()
   await expect(drawer.getByRole('link', { name: 'Overview' })).toBeVisible()
 })
