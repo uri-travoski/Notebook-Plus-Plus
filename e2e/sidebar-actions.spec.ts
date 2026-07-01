@@ -60,6 +60,8 @@ test('notebook menu: Import note adds a Markdown file as a note', async ({ page 
   const { projectId, nbName } = await setup(page, token)
   await page.reload()
 
+  // The seeded project has no recent note, so it starts collapsed by default — expand it.
+  await page.getByRole('button', { name: 'SB ' + token, exact: true }).click()
   const nbRow = page.getByRole('button', { name: nbName, exact: true }).locator('..')
   await nbRow.hover()
   await nbRow.getByRole('button').last().click() // the "…" dropdown trigger

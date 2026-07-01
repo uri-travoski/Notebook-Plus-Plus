@@ -53,8 +53,11 @@ test('in-block callout picker changes the callout type', async ({ page }) => {
 
 test('notebook menu: New canvas creates a canvas note', async ({ page }) => {
   await login(page)
-  const { projectId, nbName } = await setup(page, 'nc' + Date.now().toString(36))
+  const token = 'nc' + Date.now().toString(36)
+  const { projectId, nbName } = await setup(page, token)
   await page.reload()
+  // Seeded project has no recent note -> collapsed by default; expand it.
+  await page.getByRole('button', { name: 'C2 ' + token, exact: true }).click()
   const nbRow = page.getByRole('button', { name: nbName, exact: true }).locator('..')
   await nbRow.hover()
   await nbRow.getByRole('button').last().click() // "…" menu

@@ -4,6 +4,7 @@ const route = useRoute()
 const id = computed(() => String(route.params.id))
 
 const { prefs, ensure: ensurePrefs } = usePreferences()
+const { setNoteTitle } = useTree()
 onMounted(ensurePrefs)
 const wide = computed(() => prefs.value.editorWidth === 'wide')
 const { data: doc, error } = await useFetch(`/api/documents/${id.value}`)
@@ -69,6 +70,8 @@ function onCanvasChange(scene: unknown) {
   contentTimer = setTimeout(() => patch({ content: scene }), 1500)
 }
 function onTitleInput() {
+  // Live-sync the sidebar name as the title is typed; persist on a debounce.
+  setNoteTitle(id.value, title.value.trim() || 'Untitled')
   if (titleTimer) clearTimeout(titleTimer)
   titleTimer = setTimeout(() => patch({ title: title.value.trim() || 'Untitled' }), 800)
 }

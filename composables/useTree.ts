@@ -9,6 +9,7 @@ export type TreeNote = {
   parentDocumentId: string | null
   position: string
   isStarred: boolean
+  updatedAt: string
 }
 export type TreeNotebook = {
   id: string
@@ -83,6 +84,19 @@ export function useTree() {
     await $fetch(`/api/documents/${id}`, { method: 'PATCH', body })
     await refresh()
   }
+  // Optimistic, no-refetch title update so the sidebar name tracks the note title live
+  // as it's typed on the document page.
+  const setNoteTitle = (id: string, title: string) => {
+    const t = tree.value
+    if (!t) return
+    for (const p of t.projects)
+      for (const nb of p.notebooks)
+        for (const n of nb.notes)
+          if (n.id === id) {
+            n.title = title
+            return
+          }
+  }
 
   // Drag-reorder: place `draggedId` immediately before `targetId`, adopting the target's
   // notebook/parent (so a drag can both reorder within a list and move between notebooks).
@@ -129,5 +143,6 @@ export function useTree() {
     deleteNotebook,
     createNote,
     updateNote,
+    setNoteTitle,
   }
 }

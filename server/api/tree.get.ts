@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
       parentDocumentId: schema.documents.parentDocumentId,
       position: schema.documents.position,
       isStarred: schema.documents.isStarred,
+      updatedAt: schema.documents.updatedAt,
     })
     .from(schema.documents)
     .where(

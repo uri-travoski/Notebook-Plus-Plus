@@ -44,6 +44,7 @@ async function logout() {
 }
 
 async function addCanvas(notebookId: string) {
+  expand(notebookId)
   const d = await createNote(notebookId, 'canvas', 'Untitled canvas')
   await navigateTo(`/doc/${d.id}`)
 }
@@ -62,24 +63,79 @@ async function onImportFiles(e: Event) {
   const files = await Promise.all(
     Array.from(list).map(async (f) => ({ name: f.name, markdown: await f.text() })),
   )
+  const nbId = importTargetNb.value
   try {
     await $fetch('/api/import/markdown', {
       method: 'POST',
-      body: { notebookId: importTargetNb.value, files },
+      body: { notebookId: nbId, files },
     })
+    expand(nbId)
     await refresh()
   } finally {
     input.value = ''
     importTargetNb.value = null
   }
 }
-const { ensure: ensurePrefs, isCollapsed, toggleCollapse } = usePreferences()
+const {
+  prefs,
+  loaded: prefsLoaded,
+  ensure: ensurePrefs,
+  isCollapsed,
+  toggleCollapse,
+  expand,
+} = usePreferences()
 const { start: startNewDoc } = useNewDoc()
 const route = useRoute()
 
 onMounted(() => {
   ensure()
   ensurePrefs()
+})
+
+// Default sidebar state: collapse everything except the path (project -> notebook ->
+// ancestors) to the most-recently-edited note, so opening the app focuses on recent
+// work. Runs once per load (client-only); manual toggles take over from there.
+let defaultApplied = false
+watchEffect(() => {
+  if (defaultApplied || !loaded.value || !prefsLoaded.value) return
+  const t = tree.value
+  if (!t) return
+  defaultApplied = true
+
+  const parentOf = new Map<string, string | null>()
+  let last: { id: string; notebookId: string; projectId: string; updatedAt: string } | null = null
+  for (const p of t.projects) {
+    for (const nb of p.notebooks) {
+      for (const n of nb.notes) {
+        parentOf.set(n.id, n.parentDocumentId)
+        if (n.updatedAt && (!last || n.updatedAt > last.updatedAt)) {
+          last = { id: n.id, notebookId: nb.id, projectId: p.id, updatedAt: n.updatedAt }
+        }
+      }
+    }
+  }
+
+  const keep = new Set<string>()
+  if (last) {
+    keep.add(last.projectId)
+    keep.add(last.notebookId)
+    keep.add(last.id)
+    let cur = parentOf.get(last.id) ?? null
+    while (cur) {
+      keep.add(cur)
+      cur = parentOf.get(cur) ?? null
+    }
+  }
+
+  const collapsed: string[] = []
+  for (const p of t.projects) {
+    if (!keep.has(p.id)) collapsed.push(p.id)
+    for (const nb of p.notebooks) {
+      if (!keep.has(nb.id)) collapsed.push(nb.id)
+      for (const n of nb.notes) if (!keep.has(n.id)) collapsed.push(n.id)
+    }
+  }
+  prefs.value = { ...prefs.value, sidebarCollapsed: collapsed }
 })
 
 const editing = ref<{ kind: 'project' | 'notebook'; id: string } | null>(null)
@@ -103,10 +159,12 @@ async function addProject() {
   startRename('project', p.id, p.name)
 }
 async function addNotebook(projectId: string) {
+  expand(projectId)
   const n = await createNotebook(projectId)
   startRename('notebook', n.id, n.name)
 }
 function addNote(notebookId: string) {
+  expand(notebookId)
   startNewDoc(notebookId)
 }
 

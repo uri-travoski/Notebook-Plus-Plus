@@ -138,9 +138,13 @@
 .bn-editor .bn-block-content[data-content-type='bulletListItem']::before {
   font-size: 2.14em;
   line-height: 1;
-  align-self: baseline;
-  /* Nudge the large glyph up so it sits on the first text line instead of below it. */
-  transform: translateY(0.08em);
+  /* Give the marker a box the height of the text's first line (1.7em of the 14px
+     body = 0.795em of this 2.14em marker) and center the glyph in it, top-aligned —
+     so the bullet sits on the middle of the first line, not the baseline. */
+  align-self: flex-start;
+  height: 0.795em;
+  display: flex;
+  align-items: center;
 }
 
 /* Selection + placeholder use the brand. */

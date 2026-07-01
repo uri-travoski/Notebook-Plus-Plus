@@ -4,6 +4,7 @@ import type { TreeNote } from '~/composables/useTree'
 const props = defineProps<{ note: TreeNote }>()
 const open = defineModel<boolean>('open', { default: false })
 const { tree, updateNote } = useTree()
+const { expand } = usePreferences()
 
 const options = computed(() => {
   const out: { id: string; label: string }[] = []
@@ -14,7 +15,17 @@ const options = computed(() => {
 })
 
 async function move(notebookId: string) {
-  if (notebookId !== props.note.notebookId) await updateNote(props.note.id, { notebookId })
+  if (notebookId !== props.note.notebookId) {
+    // Expand the target notebook + its project so the moved note is visible.
+    for (const p of tree.value?.projects ?? []) {
+      if (p.notebooks.some((nb) => nb.id === notebookId)) {
+        expand(p.id)
+        break
+      }
+    }
+    expand(notebookId)
+    await updateNote(props.note.id, { notebookId })
+  }
   open.value = false
 }
 </script>
