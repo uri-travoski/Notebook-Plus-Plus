@@ -75,8 +75,12 @@ async function submit() {
 </template>
 
 <style scoped>
-/* Taller block padding on the login inputs (scoped so shared UiInput is untouched). */
+/* Login inputs + Sign in button: block padding (scoped so shared UiInput/UiButton are untouched). */
 form :deep(input) {
-  padding-block: calc(var(--spacing) * 4);
+  padding-block: calc(var(--spacing) * 3);
+  background: #f4f6fb;
+}
+form :deep(button) {
+  padding-block: calc(var(--spacing) * 3);
 }
 </style>

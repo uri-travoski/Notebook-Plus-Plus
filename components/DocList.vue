@@ -8,7 +8,9 @@ type Doc = {
   updatedAt: string
   isStarred?: boolean
 }
-defineProps<{ docs: Doc[]; linkable?: boolean }>()
+// linkable defaults to true — an absent Boolean prop coerces to false in Vue (see gotchas),
+// which would render every row as a non-clickable span.
+withDefaults(defineProps<{ docs: Doc[]; linkable?: boolean }>(), { linkable: true })
 
 function fmt(d: string) {
   return new Date(d).toLocaleDateString(undefined, {
@@ -30,14 +32,16 @@ function fmt(d: string) {
         :is="doc.type === 'canvas' ? PenTool : FileText"
         class="h-4 w-4 shrink-0 text-text-subtle"
       />
-      <component
-        :is="linkable === false ? 'span' : 'NuxtLink'"
-        :to="linkable === false ? undefined : `/doc/${doc.id}`"
-        class="min-w-0 flex-1 truncate text-sm font-medium text-heading"
-        :class="linkable === false ? '' : 'hover:text-primary'"
+      <NuxtLink
+        v-if="linkable !== false"
+        :to="`/doc/${doc.id}`"
+        class="min-w-0 flex-1 truncate text-sm font-medium text-heading hover:text-primary"
       >
         {{ doc.title || 'Untitled' }}
-      </component>
+      </NuxtLink>
+      <span v-else class="min-w-0 flex-1 truncate text-sm font-medium text-heading">
+        {{ doc.title || 'Untitled' }}
+      </span>
       <Star v-if="doc.isStarred" class="h-3.5 w-3.5 shrink-0 text-primary" aria-label="Starred" />
       <span class="shrink-0 text-xs text-text-muted">{{ fmt(doc.updatedAt) }}</span>
       <div class="shrink-0">
