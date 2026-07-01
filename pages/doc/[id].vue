@@ -63,7 +63,10 @@ async function patch(body: Record<string, unknown>) {
 function onContentChange(content: unknown[]) {
   liveContent.value = content as Block[]
   if (contentTimer) clearTimeout(contentTimer)
-  contentTimer = setTimeout(() => patch({ content }), 1500)
+  contentTimer = setTimeout(() => {
+    contentTimer = undefined
+    patch({ content })
+  }, 1500)
 }
 function onCanvasChange(scene: unknown) {
   if (contentTimer) clearTimeout(contentTimer)
@@ -83,6 +86,7 @@ function exportMarkdown() {
   a.click()
   a.remove()
 }
+
 const historyOpen = ref(false)
 onBeforeUnmount(() => {
   if (contentTimer) clearTimeout(contentTimer)

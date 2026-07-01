@@ -3,6 +3,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Notebook++** — a single-user, self-hosted notes & knowledge base (Outline-style UX, no team features). The full specification, build phases, Definition of Done, and the autonomous one-shot build directive live in `docs/build-spec.md` — **that file is the source of truth**. Keep the docs below distilled from it. Until the build is complete, follow the autonomous build rules: build end-to-end, don't stop for confirmation, decide from documented defaults, self-verify (typecheck/lint/build/migrate/test) after every phase, and run the user-simulation pass (`docs/build-spec.md` §24) before finishing.
 
+## Commands
+Shared host — **port 3000 and 5432/5433/5434 are taken** (see `@docs/gotchas.md`). Dev Postgres runs in a container on `127.0.0.1:5438`: `docker start notebookpp-dev-db`. Default login `dev` / `notebookpp`.
+- **Dev server** — `npm run dev -- --port 3939 --host 127.0.0.1` (never the default 3000). HMR covers most edits; restart only for server/route/schema changes.
+- **Quality gate** (run in this order after every phase; fix each failure, never weaken a test): `npm run typecheck` → `npm run lint` → `npm run format:check` → `npm run build` → `npm run db:migrate` → `npm test` → `npm run test:e2e`.
+- **Unit tests (Vitest)** — all: `npm test`; one file: `npx vitest run <path>`; one test: `npx vitest run -t "<name>"`; watch: `npm run test:watch`.
+- **E2E (Playwright)** — **`npm run build` FIRST**: the webServer runs the built `.output`, not the dev server. Then `npm run test:e2e` (excludes `@sim`). One spec: `npx playwright test e2e/<file>.spec.ts`; one test: add `-g "<name>"`. Port defaults to 3939 (`E2E_PORT`); needs the dev DB up.
+- **§24 user-simulation** — `npm run test:sim` (the `@sim` spec; also needs a fresh build).
+- **DB lifecycle** — `db:generate` (migration from schema diff) · `db:migrate` (apply) · `db:seed` (default account + samples) · `db:reset` (drop + recreate) · `db:studio`.
+
 ## Tech stack
 For any tech stack, always search for the latest version of each tech to be used and use the newest version that's mutually compatible.
 **Locked — do not substitute the libraries (newest compatible *versions* are fine):** Nuxt 3 (Vue 3 + TS) full-stack · PostgreSQL + Drizzle ORM · Tailwind v4 · nuxt-auth-utils (sealed-cookie sessions) · pg-boss (jobs — **no Redis**) · @vite-pwa/nuxt. The editor is an isolated **React island** (BlockNote + Excalidraw + TanStack Table) bridged into Vue with **Veaury**. AI via Vercel AI SDK — **cloud providers only, never self-host models**. Two runtime services only: app + Postgres.

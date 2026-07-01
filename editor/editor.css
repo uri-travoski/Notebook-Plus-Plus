@@ -886,6 +886,62 @@
   border-color: var(--color-primary);
   box-shadow: inset 0 0 0 1px var(--color-primary);
 }
+/* Per-board light tint, hue-matched to the lane's select pill (pillIdx) so each
+   board reads as its own colour while the header pill still stands out. */
+.nb-kanban-lane--0 {
+  background: #f6f6f5;
+}
+.nb-kanban-lane--1 {
+  background: #faf5f0;
+}
+.nb-kanban-lane--2 {
+  background: #fdf4ec;
+}
+.nb-kanban-lane--3 {
+  background: #fcf8e9;
+}
+.nb-kanban-lane--4 {
+  background: #eff8f2;
+}
+.nb-kanban-lane--5 {
+  background: #eff6fb;
+}
+.nb-kanban-lane--6 {
+  background: #f6f1fb;
+}
+.nb-kanban-lane--7 {
+  background: #fcf1f7;
+}
+.nb-kanban-lane--8 {
+  background: #fef0ee;
+}
+.dark .nb-kanban-lane--0 {
+  background: #ffffff0d;
+}
+.dark .nb-kanban-lane--1 {
+  background: #a56a4414;
+}
+.dark .nb-kanban-lane--2 {
+  background: #d17f2b14;
+}
+.dark .nb-kanban-lane--3 {
+  background: #cbab2b14;
+}
+.dark .nb-kanban-lane--4 {
+  background: #3fa06a14;
+}
+.dark .nb-kanban-lane--5 {
+  background: #3f8ac014;
+}
+.dark .nb-kanban-lane--6 {
+  background: #8a5fc214;
+}
+.dark .nb-kanban-lane--7 {
+  background: #c25f9a14;
+}
+.dark .nb-kanban-lane--8 {
+  background: #c25a5214;
+}
 .nb-kanban-lane-h {
   display: flex;
   align-items: center;

@@ -17,7 +17,6 @@ import {
 } from 'lucide-vue-next'
 import IconOverview from '~/components/IconOverview.vue'
 import IconStarred from '~/components/IconStarred.vue'
-import IconDrafts from '~/components/IconDrafts.vue'
 import type { TreeNote } from '~/composables/useTree'
 
 const {
@@ -33,8 +32,6 @@ const {
   deleteNotebook,
   createNote,
 } = useTree()
-const { open: paletteOpen } = useCommandPalette()
-
 const { user, clear } = useUserSession()
 const userName = computed(() => user.value?.displayName || user.value?.username || 'Account')
 async function logout() {
@@ -191,8 +188,8 @@ const decoratedProjects = computed(() =>
 
 const navItems = [
   { to: '/', label: 'Overview', icon: IconOverview },
+  { to: '/search', label: 'Search', icon: Search },
   { to: '/starred', label: 'Starred', icon: IconStarred },
-  { to: '/drafts', label: 'Drafts', icon: IconDrafts },
 ]
 const systemItems = [
   { to: '/templates', label: 'Templates', icon: LayoutTemplate },
@@ -213,24 +210,14 @@ const navClass = (to: string) =>
       class="hidden"
       @change="onImportFiles"
     />
-    <div class="px-3 pb-2 pt-3">
-      <div class="mb-[10px] flex items-center gap-2 px-1 pt-1">
+    <div class="border-b border-border px-3 pb-2 pt-3">
+      <div class="flex items-center gap-2 px-1 pt-1">
         <AppMark class="h-7 w-7 shrink-0 text-primary md:h-6 md:w-6" />
-        <span class="text-lg font-bold text-heading md:text-base">Notebook++</span>
+        <span class="text-lg font-bold text-heading">Notebook++</span>
       </div>
-      <button
-        type="button"
-        class="flex w-full items-center gap-2 rounded-input border border-border bg-surface px-3 py-2.5 text-[15px] text-text-muted transition-colors hover:border-primary hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary md:py-2 md:text-sm"
-        aria-label="Search notes"
-        @click="paletteOpen = true"
-      >
-        <Search class="h-5 w-5 shrink-0 md:h-4 md:w-4" />
-        <span class="flex-1 text-left">Search notes…</span>
-        <kbd class="hidden rounded border border-border px-1 text-[10px] md:inline">⌘K</kbd>
-      </button>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-2 pb-4" aria-label="Sidebar">
+    <nav class="flex-1 overflow-y-auto px-2 pb-4 pt-[10px]" aria-label="Sidebar">
       <ul class="space-y-0.5">
         <li v-for="item in navItems" :key="item.to">
           <NuxtLink

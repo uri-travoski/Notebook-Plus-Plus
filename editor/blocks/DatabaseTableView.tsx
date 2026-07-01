@@ -828,7 +828,10 @@ export default function DatabaseTableView({ databaseId, view, groupBy, onView }:
       'div',
       {
         key: value || '__none__',
-        className: 'nb-kanban-lane' + (overLane === (value || '__none__') ? ' is-over' : ''),
+        className:
+          'nb-kanban-lane nb-kanban-lane--' +
+          pillIdx(label) +
+          (overLane === (value || '__none__') ? ' is-over' : ''),
         onDragOver: (e: { preventDefault: () => void }) => e.preventDefault(),
         onDragEnter: () => setOverLane(value || '__none__'),
         onDragLeave: () => setOverLane((p) => (p === (value || '__none__') ? null : p)),

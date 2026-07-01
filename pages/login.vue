@@ -28,29 +28,26 @@ async function submit() {
 
 <template>
   <div>
-    <h1 class="mb-1 text-lg font-semibold text-heading">Welcome back</h1>
-    <p class="mb-6 text-sm text-text-muted">Sign in to your notebook.</p>
+    <h1 class="mb-6 text-lg font-semibold text-heading">Please login</h1>
 
     <form class="space-y-4" novalidate @submit.prevent="submit">
-      <FormField id="identifier" label="Username or email">
-        <UiInput
-          id="identifier"
-          v-model="identifier"
-          autocomplete="username"
-          placeholder="dev"
-          required
-        />
-      </FormField>
-      <FormField id="password" label="Password">
-        <UiInput
-          id="password"
-          v-model="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="••••••••"
-          required
-        />
-      </FormField>
+      <UiInput
+        id="identifier"
+        v-model="identifier"
+        autocomplete="username"
+        placeholder="Username or email"
+        aria-label="Username or email"
+        required
+      />
+      <UiInput
+        id="password"
+        v-model="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Password"
+        aria-label="Password"
+        required
+      />
 
       <p
         v-if="error"
@@ -76,3 +73,10 @@ async function submit() {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Taller block padding on the login inputs (scoped so shared UiInput is untouched). */
+form :deep(input) {
+  padding-block: calc(var(--spacing) * 4);
+}
+</style>
