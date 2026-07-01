@@ -73,11 +73,18 @@
 /* Language picker at the top of a code block (was white/invisible on the light surface).
    !important overrides the vendor rule that assumes a dark code surface. */
 .bn-editor [data-content-type='codeBlock'] select {
-  color: var(--color-text-muted) !important;
+  color: var(--color-text) !important;
   background: transparent;
   font-size: 12px;
+  font-weight: 500;
   font-family: var(--font-sans);
   cursor: pointer;
+}
+/* BlockNote fades the language picker to 50% on hover; force it fully opaque so the
+   dark label is easily readable when the block is hovered or the picker focused. */
+.bn-editor [data-content-type='codeBlock']:hover select,
+.bn-editor [data-content-type='codeBlock'] select:focus {
+  opacity: 1 !important;
 }
 .bn-editor [data-content-type='codeBlock'] select option {
   color: var(--color-text);
@@ -110,8 +117,8 @@
 /* Bullet markers default to the 14px reading size, which reads small; enlarge the
    glyph across all nesting levels (• at L1, ◦ at L2, ▪ at L3). */
 .bn-editor .bn-block-content[data-content-type='bulletListItem']::before {
-  font-size: 1.4em;
-  line-height: 1.2;
+  font-size: 2.8em;
+  line-height: 1;
 }
 
 /* Selection + placeholder use the brand. */
