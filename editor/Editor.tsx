@@ -1,4 +1,4 @@
-import { createElement } from 'react'
+import { createElement, useMemo } from 'react'
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -25,8 +25,8 @@ import '@blocknote/mantine/style.css'
 import 'katex/dist/katex.min.css'
 import './editor.css'
 
-// Shiki highlighting forced to a single LIGHT theme so tokens read on the light code surface
-// (the package otherwise applies github-dark regardless of editor theme).
+// Shiki highlighting: load both github themes so the code block can render dark tokens
+// in dark mode and light tokens in light mode (see the .dark code-block CSS override).
 const CODE_LANGS = [
   'javascript',
   'typescript',
@@ -58,26 +58,35 @@ const CODE_LANGS = [
   'kotlin',
   'swift',
 ]
-const codeBlock = {
-  ...codeBlockOptions,
-  supportedLanguages: Object.fromEntries(
-    Object.entries(codeBlockOptions.supportedLanguages).filter(([k]) => CODE_LANGS.includes(k)),
-  ),
-  createHighlighter: () => createHighlighter({ themes: ['github-light'], langs: CODE_LANGS }),
-}
+const SUPPORTED_LANGS = Object.fromEntries(
+  Object.entries(codeBlockOptions.supportedLanguages).filter(([k]) => CODE_LANGS.includes(k)),
+)
 
-// Default blocks + our custom blocks. createReactBlockSpec returns a factory, so
-// each block is added as `Callout()` / `MathBlock()`. Most of §11 is already native.
-const schema = BlockNoteSchema.create({
-  blockSpecs: {
-    ...defaultBlockSpecs,
-    codeBlock: createCodeBlockSpec(codeBlock), // Shiki syntax highlighting (§11)
-    callout: Callout(),
-    math: MathBlock(),
-    databaseTable: DatabaseTable(),
-    drawing: Drawing(),
-  },
-})
+// BlockNote applies the highlighter's first theme statically (it does not follow the
+// editor colour scheme), so build the schema per theme: github-dark tokens in dark
+// mode (readable on the dark code surface), github-light in light mode.
+function makeSchema(theme: 'light' | 'dark') {
+  const codeBlock = {
+    ...codeBlockOptions,
+    supportedLanguages: SUPPORTED_LANGS,
+    createHighlighter: () =>
+      createHighlighter({
+        themes: [theme === 'dark' ? 'github-dark' : 'github-light'],
+        langs: CODE_LANGS,
+      }),
+  }
+  // createReactBlockSpec returns a factory, so each block is added as `Callout()`.
+  return BlockNoteSchema.create({
+    blockSpecs: {
+      ...defaultBlockSpecs,
+      codeBlock: createCodeBlockSpec(codeBlock), // Shiki syntax highlighting (§11)
+      callout: Callout(),
+      math: MathBlock(),
+      databaseTable: DatabaseTable(),
+      drawing: Drawing(),
+    },
+  })
+}
 
 type Props = {
   initialContent?: unknown[]
@@ -113,6 +122,10 @@ export default function Editor({
     return (await res.json()).url as string
   }
 
+  // Schema is theme-specific (Shiki github-dark vs github-light). The island remounts
+  // this component on a theme flip (via a React key), so this runs fresh with the right
+  // schema and the live content — no in-place editor mutation needed.
+  const schema = useMemo(() => makeSchema(theme), [theme])
   const editor = useCreateBlockNote({
     schema,
     uploadFile,
@@ -302,6 +315,9 @@ export default function Editor({
       editable,
       theme,
       slashMenu: false,
+      // Disable the built-in toolbar; we render our own FormattingToolbarController
+      // below. Without this, BOTH render and overlap, and neither applies styles.
+      formattingToolbar: false,
       onChange: () => onChange?.(editor.document as unknown[]),
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

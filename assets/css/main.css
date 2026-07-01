@@ -93,6 +93,13 @@
   --color-primary-contrast: #04231f;
   --color-primary-subtle: #0f2c2a;
   --color-primary-subtle-fg: #5eead4;
+  /* Callout tints: dark versions of the light #eff6ff-style backgrounds so the boxes
+     stay dark with readable light body text and coloured icons/rules. */
+  --color-info-bg: #10233b;
+  --color-tip-bg: #0e2d28;
+  --color-success-bg: #0e2a1f;
+  --color-warning-bg: #2c2510;
+  --color-danger-bg: #331a1a;
 }
 
 html,

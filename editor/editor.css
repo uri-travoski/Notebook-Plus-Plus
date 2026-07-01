@@ -92,6 +92,19 @@
 .bn-editor [data-content-type='codeBlock'] select:focus {
   opacity: 1 !important;
 }
+/* Dark mode: inline code + code block sit on dark surfaces (light mode keeps the
+   #f0f5f9 card). Shiki renders github-dark tokens here so they read on dark. */
+.dark .bn-editor :not(pre) > code {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+.dark .bn-editor [data-content-type='codeBlock'],
+.dark .bn-editor pre {
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
 .bn-editor [data-content-type='codeBlock'] select option {
   color: var(--color-text);
   background: var(--color-surface);
@@ -123,8 +136,11 @@
 /* Bullet markers default to the 14px reading size, which reads small; enlarge the
    glyph across all nesting levels (• at L1, ◦ at L2, ▪ at L3). */
 .bn-editor .bn-block-content[data-content-type='bulletListItem']::before {
-  font-size: 2.52em;
+  font-size: 2.14em;
   line-height: 1;
+  align-self: baseline;
+  /* Nudge the large glyph up so it sits on the first text line instead of below it. */
+  transform: translateY(0.08em);
 }
 
 /* Selection + placeholder use the brand. */

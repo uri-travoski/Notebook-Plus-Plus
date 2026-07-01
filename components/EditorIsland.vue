@@ -33,6 +33,8 @@ function render() {
   if (!root || !createElementFn || !EditorComp) return
   root.render(
     createElementFn(EditorComp, {
+      // Remount on theme flip so the editor rebuilds with the matching Shiki code theme.
+      key: dark.value ? 'dark' : 'light',
       initialContent: props.initialContent,
       editable: props.editable ?? true,
       documentId: props.documentId,

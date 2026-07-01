@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
       <ClientOnly>
         <EditorIsland
           :document-id="id"
-          :initial-content="doc!.content as unknown[]"
+          :initial-content="liveContent as unknown[]"
           @change="onContentChange"
         />
         <template #fallback>
