@@ -29,8 +29,9 @@ test('sign in with the seeded account, then log out', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible()
   await page.screenshot({ path: 'e2e/artifacts/home-authed.png', fullPage: true })
 
-  // Log out from the sidebar footer (account moved off the top bar).
-  await page.getByRole('button', { name: 'Log out' }).click()
+  // Log out via the sidebar account menu (Settings + Log out live under the user).
+  await page.getByRole('button', { name: 'Account menu' }).click()
+  await page.getByRole('menuitem', { name: 'Log out' }).click()
   await expect(page).toHaveURL(/\/login$/)
 })
 

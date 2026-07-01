@@ -36,9 +36,6 @@ const {
 const { open: paletteOpen } = useCommandPalette()
 
 const { user, clear } = useUserSession()
-const userInitial = computed(() =>
-  (user.value?.displayName || user.value?.username || '?').charAt(0).toUpperCase(),
-)
 const userName = computed(() => user.value?.displayName || user.value?.username || 'Account')
 async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
@@ -275,9 +272,6 @@ const navClass = (to: string) =>
           </div>
 
           <ul v-if="!isCollapsed(project.id)" class="space-y-0.5">
-            <li v-if="!project.notebooks.length" class="py-1 pl-8 text-xs text-text-muted">
-              No notebooks yet
-            </li>
             <li v-for="nb in project.notebooks" :key="nb.id">
               <div class="group flex items-center gap-1 rounded-md pr-1 pl-3.5 hover:bg-row-hover">
                 <button
@@ -377,36 +371,27 @@ const navClass = (to: string) =>
       </ul>
     </nav>
 
-    <div class="space-y-0.5 border-t border-border p-2">
-      <NuxtLink
-        to="/settings"
-        class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
-        :class="navClass('/settings')"
+    <div class="border-t border-border p-2">
+      <UiDropdown
+        up
+        block
+        label="Account menu"
+        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-primary"
       >
-        <Settings
-          class="h-5 w-5 shrink-0 md:h-4 md:w-4"
-          :class="route.path === '/settings' ? 'text-primary' : 'text-text-subtle'"
-        />
-        Settings
-      </NuxtLink>
-      <div class="flex items-center gap-2.5 rounded-md px-2 py-2">
-        <span
-          class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-subtle text-sm font-semibold text-primary-subtle-fg"
-          >{{ userInitial }}</span
-        >
-        <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
-          userName
-        }}</span>
-        <button
-          type="button"
-          class="shrink-0 rounded-md p-2 text-text-muted transition-colors hover:bg-row-hover hover:text-danger focus-visible:outline-2 focus-visible:outline-danger md:p-1.5"
-          aria-label="Log out"
-          title="Log out"
-          @click="logout"
-        >
-          <LogOut class="h-[18px] w-[18px] md:h-4 md:w-4" />
-        </button>
-      </div>
+        <template #trigger>
+          <span
+            class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
+          >
+            <IconUser class="h-[18px] w-[18px]" />
+          </span>
+          <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
+            userName
+          }}</span>
+          <ChevronRight class="h-4 w-4 shrink-0 -rotate-90 text-text-subtle md:h-3.5 md:w-3.5" />
+        </template>
+        <UiMenuItem @click="navigateTo('/settings')"><Settings />Settings</UiMenuItem>
+        <UiMenuItem danger @click="logout"><LogOut />Log out</UiMenuItem>
+      </UiDropdown>
     </div>
   </div>
 </template>
