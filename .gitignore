@@ -36,6 +36,11 @@ coverage/
 # Self-hosted Excalidraw fonts (copied from node_modules on postinstall)
 public/fonts/
 
+# Bundled DB seed DATA (baked into the private image, not committed to git). The dir
+# itself is kept via .gitkeep so a source build ships an empty (skipped) seed.
+server/db/seed/seed.sql
+server/db/seed/uploads/
+
 # OS
 .DS_Store
 Thumbs.db

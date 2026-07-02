@@ -16,12 +16,19 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
+# psql is used by the entrypoint to load the bundled seed on a fresh database.
+RUN apk add --no-cache postgresql-client
+
 # Self-contained Nitro server output, plus the migration assets. node_modules is
 # copied so the standalone migrator (drizzle-orm + pg) can run at boot.
 COPY --from=build /app/.output ./.output
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server/db/migrations ./server/db/migrations
 COPY --from=build /app/server/db/migrate.mjs ./server/db/migrate.mjs
+# Bundled sample content (dev account + project/notebooks/notes + upload files); the
+# entrypoint loads it only when the database is empty. The seed dir always exists (.gitkeep);
+# its data files are gitignored, so a source-only build ships an empty dir and skips seeding.
+COPY --from=build /app/server/db/seed ./server/db/seed
 COPY --from=build /app/package.json ./package.json
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
