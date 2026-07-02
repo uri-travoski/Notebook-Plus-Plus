@@ -452,7 +452,11 @@ const navClass = (to: string) =>
         </li>
       </ul>
 
-      <div class="mb-1 mt-4 border-t border-border px-2 pt-4">
+    </nav>
+
+    <!-- System — pinned to the bottom, above the account area -->
+    <div class="shrink-0 border-t border-border px-2 pb-2 pt-2">
+      <div class="mb-1 px-2">
         <span class="text-xs font-semibold uppercase tracking-[0.06em] text-text-muted"
           >System</span
         >
@@ -473,14 +477,14 @@ const navClass = (to: string) =>
           </NuxtLink>
         </li>
       </ul>
-    </nav>
+    </div>
 
-    <div class="border-t border-border p-2">
+    <div class="shrink-0 border-t border-border px-2 py-1">
       <UiDropdown
         up
         block
         label="Account menu"
-        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-primary"
+        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-primary"
       >
         <template #trigger>
           <span
