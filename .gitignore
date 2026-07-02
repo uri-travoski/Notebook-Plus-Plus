@@ -6,6 +6,14 @@ CLAUDE.local.md
 .env.*
 !.env.example
 
+# Local docs & AI-assistant config (kept local, not published)
+docs/
+CLAUDE.md
+global claude.md
+DESIGN-NOTES.md
+README.md
+AGENTS.md
+
 # Dependencies / build output
 node_modules/
 .nuxt/
