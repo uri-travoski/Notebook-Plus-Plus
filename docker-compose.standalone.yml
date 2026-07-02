@@ -1,0 +1,56 @@
+# Notebook++ — standalone Docker stack (app + Postgres, fully self-contained).
+#
+# Setup:
+#   cp .env.example .env
+#   # in .env set at least: DB_PASSWORD, SESSION_PASSWORD (>= 32 chars), ENCRYPTION_KEY
+#   docker compose -f docker-compose.standalone.yml up -d --build
+#
+# Open http://localhost:3000 (or http://<host-ip>:3000 on your LAN) and register the
+# first account, then set ALLOW_REGISTRATION=false and re-up. Migrations run automatically
+# at boot. Data persists in the named volumes below — no host paths or reverse proxy needed.
+services:
+  app:
+    build: .
+    image: notebookpp:latest
+    container_name: notebookpp-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NUXT_DATABASE_URL: postgres://notebookpp:${DB_PASSWORD:?set DB_PASSWORD in .env}@db:5432/notebookpp
+      NUXT_SESSION_PASSWORD: ${SESSION_PASSWORD:?set SESSION_PASSWORD (>= 32 chars) in .env}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
+      NUXT_PUBLIC_APP_URL: ${NUXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Leave false for plain-HTTP (localhost / LAN); set true only behind HTTPS.
+      NUXT_SESSION_COOKIE_SECURE: ${NUXT_SESSION_COOKIE_SECURE:-false}
+      SMTP_URL: ${SMTP_URL:-}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    volumes:
+      - uploads:/app/.data/uploads
+
+  db:
+    image: postgres:18-alpine
+    container_name: notebookpp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: notebookpp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      POSTGRES_DB: notebookpp
+    volumes:
+      # postgres:18 stores data under /var/lib/postgresql/<major>/... so the volume
+      # MUST mount at /var/lib/postgresql (not /var/lib/postgresql/data).
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U notebookpp']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    name: notebookpp-pgdata
+  uploads:
+    name: notebookpp-uploads
