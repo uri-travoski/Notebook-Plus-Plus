@@ -29,6 +29,7 @@ const pk = () =>
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
 const updatedAt = () => timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 const archivedAt = () => timestamp('archived_at', { withTimezone: true })
+const deletedAt = () => timestamp('deleted_at', { withTimezone: true })
 
 export const docType = pgEnum('doc_type', ['page', 'canvas'])
 export const aiProvider = pgEnum('ai_provider', [
@@ -79,6 +80,7 @@ export const projects = pgTable(
     color: text('color'),
     position: text('position').notNull().default('a0'), // fractional index
     archivedAt: archivedAt(),
+    deletedAt: deletedAt(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -96,6 +98,7 @@ export const notebooks = pgTable(
     icon: text('icon'),
     position: text('position').notNull().default('a0'),
     archivedAt: archivedAt(),
+    deletedAt: deletedAt(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

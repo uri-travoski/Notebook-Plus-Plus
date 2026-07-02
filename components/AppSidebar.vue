@@ -361,7 +361,7 @@ const navClass = (to: string) =>
                 ><Archive />Archive</UiMenuItem
               >
               <UiMenuItem danger @click="deleteProject(project.id)"
-                ><Trash2 />Delete project</UiMenuItem
+                ><Trash2 />Move to Trash</UiMenuItem
               >
             </UiDropdown>
           </div>
@@ -431,7 +431,7 @@ const navClass = (to: string) =>
                     ><Archive />Archive</UiMenuItem
                   >
                   <UiMenuItem danger @click="deleteNotebook(nb.id)"
-                    ><Trash2 />Delete notebook</UiMenuItem
+                    ><Trash2 />Move to Trash</UiMenuItem
                   >
                 </UiDropdown>
               </div>

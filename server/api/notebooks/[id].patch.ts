@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
   if (typeof body.icon === 'string') patch.icon = body.icon
   if (typeof body.position === 'string') patch.position = body.position
   if (typeof body.archived === 'boolean') patch.archivedAt = body.archived ? new Date() : null
+  if (typeof body.deleted === 'boolean') patch.deletedAt = body.deleted ? new Date() : null
   if (typeof body.projectId === 'string') {
     if (!(await ownsProject(db, body.projectId, userId))) {
       throw createError({ statusCode: 404, statusMessage: 'Target project not found.' })
@@ -42,5 +43,13 @@ export default defineEventHandler(async (event) => {
     .set(patch)
     .where(eq(schema.notebooks.id, id))
     .returning()
+
+  // Cascade soft-delete/restore to the notebook's documents.
+  if (typeof body.deleted === 'boolean') {
+    await db
+      .update(schema.documents)
+      .set({ deletedAt: body.deleted ? new Date() : null })
+      .where(and(eq(schema.documents.notebookId, id), eq(schema.documents.userId, userId)))
+  }
   return updated
 })

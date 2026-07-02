@@ -136,6 +136,8 @@ async function onFiles(e: Event) {
 
       <AiKeysManager />
 
+      <RegistrationSetting />
+
       <section class="rounded-box border border-border bg-surface p-5">
         <div class="flex items-start gap-3">
           <Upload class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />

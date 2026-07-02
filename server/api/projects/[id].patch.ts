@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { useDb, schema } from '../../db'
 import { getUserId } from '../../utils/guard'
 
@@ -21,11 +21,27 @@ export default defineEventHandler(async (event) => {
   if (typeof body.color === 'string' || body.color === null) patch.color = body.color
   if (typeof body.position === 'string') patch.position = body.position
   if (typeof body.archived === 'boolean') patch.archivedAt = body.archived ? new Date() : null
+  if (typeof body.deleted === 'boolean') patch.deletedAt = body.deleted ? new Date() : null
 
   const [updated] = await db
     .update(schema.projects)
     .set(patch)
     .where(eq(schema.projects.id, id))
     .returning()
+
+  // Cascade soft-delete/restore to child notebooks + their documents, so the whole subtree
+  // hides everywhere and is restored together (Trash lists only the top-level project).
+  if (typeof body.deleted === 'boolean') {
+    const del = body.deleted ? new Date() : null
+    const nbIds = db
+      .select({ id: schema.notebooks.id })
+      .from(schema.notebooks)
+      .where(eq(schema.notebooks.projectId, id))
+    await db.update(schema.notebooks).set({ deletedAt: del }).where(eq(schema.notebooks.projectId, id))
+    await db
+      .update(schema.documents)
+      .set({ deletedAt: del })
+      .where(and(eq(schema.documents.userId, userId), inArray(schema.documents.notebookId, nbIds)))
+  }
   return updated
 })

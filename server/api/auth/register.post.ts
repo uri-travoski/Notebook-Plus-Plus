@@ -1,12 +1,25 @@
-import { eq, or } from 'drizzle-orm'
+import { asc, eq, or } from 'drizzle-orm'
 import { useDb, schema } from '../../db'
 import { createPasswordHash } from '../../utils/password'
 import { isValidEmail, isValidUsername, defaultPreferences, sessionUser } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
-  if (String(config.allowRegistration) !== 'true') {
-    throw createError({ statusCode: 403, statusMessage: 'Registration is disabled.' })
+  const db = useDb()
+
+  // Registration gate: the owner's saved setting (preferences.allowRegistration) overrides the
+  // ALLOW_REGISTRATION env default; a fresh install (no accounts yet) always allows the first.
+  const [owner] = await db
+    .select({ preferences: schema.users.preferences })
+    .from(schema.users)
+    .orderBy(asc(schema.users.createdAt))
+    .limit(1)
+  if (owner) {
+    const pref = (owner.preferences as Record<string, unknown> | null)?.allowRegistration
+    const enabled = typeof pref === 'boolean' ? pref : String(config.allowRegistration) === 'true'
+    if (!enabled) {
+      throw createError({ statusCode: 403, statusMessage: 'Registration is disabled.' })
+    }
   }
 
   const body = await readBody<Record<string, unknown>>(event)
@@ -30,7 +43,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Password must be at least 8 characters.' })
   }
 
-  const db = useDb()
   const existing = await db
     .select({ id: schema.users.id })
     .from(schema.users)

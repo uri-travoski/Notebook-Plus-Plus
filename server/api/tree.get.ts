@@ -12,7 +12,13 @@ export default defineEventHandler(async (event) => {
   const projects = await db
     .select()
     .from(schema.projects)
-    .where(and(eq(schema.projects.userId, userId), isNull(schema.projects.archivedAt)))
+    .where(
+      and(
+        eq(schema.projects.userId, userId),
+        isNull(schema.projects.archivedAt),
+        isNull(schema.projects.deletedAt),
+      ),
+    )
     .orderBy(desc(schema.projects.position))
 
   const projectIds = projects.map((p) => p.id)
@@ -21,7 +27,11 @@ export default defineEventHandler(async (event) => {
         .select()
         .from(schema.notebooks)
         .where(
-          and(inArray(schema.notebooks.projectId, projectIds), isNull(schema.notebooks.archivedAt)),
+          and(
+            inArray(schema.notebooks.projectId, projectIds),
+            isNull(schema.notebooks.archivedAt),
+            isNull(schema.notebooks.deletedAt),
+          ),
         )
         .orderBy(desc(schema.notebooks.position))
     : []

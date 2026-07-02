@@ -49,8 +49,9 @@ export function useTree() {
     await $fetch(`/api/projects/${id}`, { method: 'PATCH', body })
     await refresh()
   }
+  // Move to Trash (soft delete). Permanent removal happens from the Trash page.
   const deleteProject = async (id: string) => {
-    await $fetch(`/api/projects/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/projects/${id}`, { method: 'PATCH', body: { deleted: true } })
     await refresh()
   }
 
@@ -64,7 +65,7 @@ export function useTree() {
     await refresh()
   }
   const deleteNotebook = async (id: string) => {
-    await $fetch(`/api/notebooks/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/notebooks/${id}`, { method: 'PATCH', body: { deleted: true } })
     await refresh()
   }
 

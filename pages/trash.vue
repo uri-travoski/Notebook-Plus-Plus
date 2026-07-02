@@ -1,34 +1,99 @@
 <script setup lang="ts">
+import IconFolder from '~/components/IconFolder.vue'
+import AppMark from '~/components/AppMark.vue'
 useHead({ title: 'Trash · Notebook++' })
-const { data: docs, refresh } = await useFetch('/api/documents', { query: { view: 'trashed' } })
+
+type Doc = { id: string; title: string; type: 'page' | 'canvas'; updatedAt: string; isStarred?: boolean }
+const { data: trash, refresh } = await useFetch<{
+  projects: { id: string; name: string }[]
+  notebooks: { id: string; name: string }[]
+  documents: Doc[]
+}>('/api/trash')
 const { refresh: refreshTree } = useTree()
 
-async function restore(id: string) {
-  await $fetch(`/api/documents/${id}`, { method: 'PATCH', body: { deleted: false } })
+const hasAny = computed(
+  () =>
+    !!trash.value &&
+    trash.value.projects.length + trash.value.notebooks.length + trash.value.documents.length > 0,
+)
+
+async function act(kind: 'projects' | 'notebooks' | 'documents', id: string, restore: boolean) {
+  if (restore) await $fetch(`/api/${kind}/${id}`, { method: 'PATCH', body: { deleted: false } })
+  else await $fetch(`/api/${kind}/${id}`, { method: 'DELETE' })
   await Promise.all([refresh(), refreshTree()])
-}
-async function purge(id: string) {
-  await $fetch(`/api/documents/${id}`, { method: 'DELETE' })
-  await refresh()
 }
 </script>
 
 <template>
-  <AppPage title="Trash" subtitle="Restore notes, or delete them permanently.">
-    <DocList v-if="docs?.length" :docs="docs" :linkable="false">
-      <template #actions="{ doc }">
-        <div class="flex items-center gap-1">
-          <UiButton variant="ghost" @click="restore(doc.id)">Restore</UiButton>
-          <UiButton variant="ghost" class="!text-danger hover:!bg-danger-bg" @click="purge(doc.id)"
-            >Delete</UiButton
-          >
-        </div>
-      </template>
-    </DocList>
+  <AppPage title="Trash" subtitle="Restore items, or delete them permanently.">
+    <div v-if="hasAny" class="space-y-8">
+      <section v-if="trash!.projects.length">
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+          Projects
+        </h2>
+        <ul
+          class="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface"
+        >
+          <li v-for="p in trash!.projects" :key="p.id" class="flex items-center gap-3 px-4 py-3">
+            <IconFolder class="h-[18px] w-[18px] shrink-0 text-text-subtle" />
+            <span class="min-w-0 flex-1 truncate text-sm font-medium text-heading">{{ p.name }}</span>
+            <div class="flex shrink-0 items-center gap-1">
+              <UiButton variant="ghost" @click="act('projects', p.id, true)">Restore</UiButton>
+              <UiButton
+                variant="ghost"
+                class="!text-danger hover:!bg-danger-bg"
+                @click="act('projects', p.id, false)"
+                >Delete</UiButton
+              >
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="trash!.notebooks.length">
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+          Notebooks
+        </h2>
+        <ul
+          class="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface"
+        >
+          <li v-for="n in trash!.notebooks" :key="n.id" class="flex items-center gap-3 px-4 py-3">
+            <AppMark class="h-[18px] w-[18px] shrink-0 text-text-subtle" />
+            <span class="min-w-0 flex-1 truncate text-sm font-medium text-heading">{{ n.name }}</span>
+            <div class="flex shrink-0 items-center gap-1">
+              <UiButton variant="ghost" @click="act('notebooks', n.id, true)">Restore</UiButton>
+              <UiButton
+                variant="ghost"
+                class="!text-danger hover:!bg-danger-bg"
+                @click="act('notebooks', n.id, false)"
+                >Delete</UiButton
+              >
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="trash!.documents.length">
+        <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">Notes</h2>
+        <DocList :docs="trash!.documents" :linkable="false">
+          <template #actions="{ doc }">
+            <div class="flex items-center gap-1">
+              <UiButton variant="ghost" @click="act('documents', doc.id, true)">Restore</UiButton>
+              <UiButton
+                variant="ghost"
+                class="!text-danger hover:!bg-danger-bg"
+                @click="act('documents', doc.id, false)"
+                >Delete</UiButton
+              >
+            </div>
+          </template>
+        </DocList>
+      </section>
+    </div>
     <EmptyState
       v-else
       title="Trash is empty"
-      hint="Notes you move to Trash appear here until purged."
+      hint="Projects, notebooks, and notes you move to Trash appear here until deleted permanently."
     />
   </AppPage>
 </template>
