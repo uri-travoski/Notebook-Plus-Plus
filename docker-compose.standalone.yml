@@ -3,15 +3,17 @@
 # Setup:
 #   cp .env.example .env
 #   # in .env set at least: DB_PASSWORD, SESSION_PASSWORD (>= 32 chars), ENCRYPTION_KEY
-#   docker compose -f docker-compose.standalone.yml up -d --build
+#   # the app image is private on GHCR — authenticate once first:
+#   #   echo <GITHUB_TOKEN> | docker login ghcr.io -u <github-username> --password-stdin
+#   docker compose -f docker-compose.standalone.yml up -d
 #
 # Open http://localhost:3000 (or http://<host-ip>:3000 on your LAN) and register the
 # first account, then set ALLOW_REGISTRATION=false and re-up. Migrations run automatically
 # at boot. Data persists in the named volumes below — no host paths or reverse proxy needed.
 services:
   app:
-    build: .
-    image: notebookpp:latest
+    # Prebuilt image from GitHub Container Registry (override the tag with IMAGE_TAG).
+    image: ghcr.io/uri-travoski/notebookpp:${IMAGE_TAG:-latest}
     container_name: notebookpp-app
     restart: unless-stopped
     depends_on:

@@ -4,9 +4,12 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# Skip lifecycle scripts here: the project's postinstall (copy-excalidraw-assets + nuxt prepare)
+# needs the full source, which isn't copied yet.
+RUN npm ci --ignore-scripts
 COPY . .
-RUN npm run build
+# Self-host the Excalidraw fonts, then build (nuxt build runs prepare itself).
+RUN node scripts/copy-excalidraw-assets.mjs && npm run build
 
 # ---- Runtime stage ----
 FROM node:20-alpine AS runtime
