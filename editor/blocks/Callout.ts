@@ -5,14 +5,53 @@ import { createElement } from 'react'
 // schema (blockSpecs: { callout: Callout() }). createElement only (no JSX) per gotchas.
 export const CALLOUT_KINDS = ['info', 'warning', 'important', 'tip'] as const
 
-// Filled Phosphor icons (viewBox 0 0 256 256), coloured via currentColor.
-const ICON_PATHS: Record<string, string> = {
-  info: 'M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z',
-  warning:
-    'M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z',
-  important:
-    'M240,128a15.85,15.85,0,0,0-4.67-11.28L139.28,20.69a16,16,0,0,0-22.56,0L20.67,116.72A15.85,15.85,0,0,0,16,128a15.85,15.85,0,0,0,4.67,11.28l96.05,96a16,16,0,0,0,22.56,0l96.05-96A15.85,15.85,0,0,0,240,128ZM120,80a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z',
-  tip: 'M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Z',
+// Per-kind icons (each with its own viewBox + shapes), coloured via currentColor.
+type IconChild = { tag: 'path' | 'circle'; attrs: Record<string, unknown> }
+const ICONS: Record<string, { viewBox: string; children: IconChild[] }> = {
+  tip: {
+    viewBox: '0 0 352 512',
+    children: [
+      {
+        tag: 'path',
+        attrs: {
+          d: 'M96.06 454.35c.01 6.29 1.87 12.45 5.36 17.69l17.09 25.69a31.99 31.99 0 0 0 26.64 14.28h61.71a31.99 31.99 0 0 0 26.64-14.28l17.09-25.69a31.989 31.989 0 0 0 5.36-17.69l.04-38.35H96.01l.05 38.35zM0 176c0 44.37 16.45 84.85 43.56 115.78 16.52 18.85 42.36 58.23 52.21 91.45.04.26.07.52.11.78h160.24c.04-.26.07-.51.11-.78 9.85-33.22 35.69-72.6 52.21-91.45C335.55 260.85 352 220.37 352 176 352 78.61 272.91-.3 175.45 0 73.44.31 0 82.97 0 176zm176-80c-44.11 0-80 35.89-80 80 0 8.84-7.16 16-16 16s-16-7.16-16-16c0-61.76 50.24-112 112-112 8.84 0 16 7.16 16 16s-7.16 16-16 16z',
+        },
+      },
+    ],
+  },
+  important: {
+    viewBox: '0 0 24 24',
+    children: [
+      {
+        tag: 'path',
+        attrs: {
+          d: 'M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2m4.24 16L12 15.45 7.77 18l1.12-4.81-3.73-3.23 4.92-.42L12 5l1.92 4.53 4.92.42-3.73 3.23z',
+        },
+      },
+    ],
+  },
+  warning: {
+    viewBox: '0 0 512 512',
+    children: [
+      {
+        tag: 'path',
+        attrs: {
+          d: 'M228.9 79.9L51.8 403.1C40.6 423.3 55.5 448 78.9 448h354.3c23.3 0 38.2-24.7 27.1-44.9L283.1 79.9c-11.7-21.2-42.5-21.2-54.2 0zM273.6 214L270 336h-28l-3.6-122h35.2zM256 402.4c-10.7 0-19.1-8.1-19.1-18.4s8.4-18.4 19.1-18.4 19.1 8.1 19.1 18.4-8.4 18.4-19.1 18.4z',
+        },
+      },
+    ],
+  },
+  info: {
+    viewBox: '0 0 16 16',
+    children: [
+      {
+        tag: 'path',
+        attrs: {
+          d: 'M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2',
+        },
+      },
+    ],
+  },
 }
 
 export const Callout = createReactBlockSpec(
@@ -25,10 +64,11 @@ export const Callout = createReactBlockSpec(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     render: (props: any) => {
       const kind: string = props?.block?.props?.kind || 'info'
+      const spec = ICONS[kind] || ICONS.info
       const icon = createElement(
         'svg',
-        { viewBox: '0 0 256 256', fill: 'currentColor', xmlns: 'http://www.w3.org/2000/svg' },
-        createElement('path', { d: ICON_PATHS[kind] || ICON_PATHS.info }),
+        { viewBox: spec.viewBox, fill: 'currentColor', xmlns: 'http://www.w3.org/2000/svg' },
+        ...spec.children.map((c, i) => createElement(c.tag, { key: i, ...c.attrs })),
       )
       // In-block type picker (reliable way to change the type after inserting via "/").
       const picker = createElement(
@@ -47,11 +87,7 @@ export const Callout = createReactBlockSpec(
             }),
         },
         ...['info', 'warning', 'important', 'tip'].map((k) =>
-          createElement(
-            'option',
-            { key: k, value: k },
-            k.charAt(0).toUpperCase() + k.slice(1),
-          ),
+          createElement('option', { key: k, value: k }, k.charAt(0).toUpperCase() + k.slice(1)),
         ),
       )
       return createElement(

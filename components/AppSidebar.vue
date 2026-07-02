@@ -263,7 +263,7 @@ const navClass = (to: string) =>
         <li v-for="item in navItems" :key="item.to">
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
+            class="flex items-center gap-3 rounded-md px-2.5 py-1 text-[15px] md:gap-2 md:px-2 md:py-1 md:text-sm"
             :class="navClass(item.to)"
           >
             <component
@@ -461,7 +461,7 @@ const navClass = (to: string) =>
         <li v-for="item in systemItems" :key="item.to">
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-3 rounded-md px-2.5 py-2.5 text-[15px] md:gap-2 md:px-2 md:py-1.5 md:text-sm"
+            class="flex items-center gap-3 rounded-md px-2.5 py-1 text-[15px] md:gap-2 md:px-2 md:py-1 md:text-sm"
             :class="navClass(item.to)"
           >
             <component
