@@ -1,0 +1,36 @@
+# Dependencies & build output (rebuilt inside the image)
+node_modules
+.output
+.nuxt
+dist
+public/fonts
+
+# Local data & VCS
+.data
+.git
+.gitignore
+*.log
+
+# Secrets / local (must never enter the build context)
+.env
+.env.*
+docs
+CLAUDE.md
+global claude.md
+DESIGN-NOTES.md
+README.md
+AGENTS.md
+.claude
+
+# Build coordination / test artifacts
+.notebookpp-build
+.impeccable
+e2e/artifacts
+test-results
+playwright-report
+coverage
+
+# Deploy / editor cruft (not needed to build the app)
+docker-compose*.yml
+.DS_Store
+Thumbs.db
