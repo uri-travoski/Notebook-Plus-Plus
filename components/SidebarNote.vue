@@ -10,6 +10,7 @@ import {
   Pencil,
   FolderInput,
   Download,
+  Copy,
 } from 'lucide-vue-next'
 import type { TreeNote } from '~/composables/useTree'
 
@@ -19,25 +20,25 @@ const props = defineProps<{
   depth: number
 }>()
 
-const { updateNote, reorderNote } = useTree()
+const { updateNote, reorderNote, createNote } = useTree()
 const { isCollapsed, toggleCollapse } = usePreferences()
 const route = useRoute()
 
-// Drag-reorder (desktop). dragId is shared across all SidebarNote rows.
-const dragId = useState<string | null>('sidebar-drag-id', () => null)
+// Drag a note into another notebook (desktop). Drag state is shared across the sidebar.
+const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>('sidebar-drag', () => null)
 const dragOver = ref(false)
 function onDragStart(e: DragEvent) {
-  dragId.value = props.note.id
+  drag.value = { kind: 'note', id: props.note.id }
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
 }
 function onDragOver() {
-  if (dragId.value && dragId.value !== props.note.id) dragOver.value = true
+  if (drag.value?.kind === 'note' && drag.value.id !== props.note.id) dragOver.value = true
 }
 async function onDrop() {
   dragOver.value = false
-  const dragged = dragId.value
-  dragId.value = null
-  if (dragged && dragged !== props.note.id) await reorderNote(dragged, props.note.id)
+  const d = drag.value
+  drag.value = null
+  if (d?.kind === 'note' && d.id !== props.note.id) await reorderNote(d.id, props.note.id)
 }
 
 const children = computed(() => props.childrenMap.get(props.note.id) ?? [])
@@ -91,6 +92,21 @@ async function exportCanvas() {
   a.remove()
   URL.revokeObjectURL(url)
 }
+// Duplicate the note: copy its content into a new note in the same notebook/parent.
+async function duplicate() {
+  const full = await $fetch<{ content?: unknown }>(`/api/documents/${props.note.id}`)
+  const copy = await createNote(
+    props.note.notebookId ?? '',
+    props.note.type,
+    `${props.note.title || 'Untitled'} (copy)`,
+  )
+  await updateNote(copy.id, {
+    content:
+      full.content ??
+      (props.note.type === 'canvas' ? { elements: [], appState: {}, files: {} } : []),
+    parentDocumentId: props.note.parentDocumentId,
+  })
+}
 const archive = () => updateNote(props.note.id, { archived: true })
 const trash = () => updateNote(props.note.id, { deleted: true })
 const showMove = ref(false)
@@ -107,7 +123,7 @@ const showMove = ref(false)
       :style="{ paddingLeft: `${depth * 12 + 6}px` }"
       :draggable="!editing"
       @dragstart="onDragStart"
-      @dragend="dragId = null"
+      @dragend="drag = null"
       @dragover.prevent="onDragOver"
       @dragleave="dragOver = false"
       @drop.prevent="onDrop"
@@ -169,6 +185,7 @@ const showMove = ref(false)
         <UiMenuItem @click="note.type === 'canvas' ? exportCanvas() : exportNote()">
           <Download />{{ note.type === 'canvas' ? 'Export canvas' : 'Export note' }}
         </UiMenuItem>
+        <UiMenuItem @click="duplicate"><Copy />Duplicate</UiMenuItem>
         <UiMenuItem @click="archive"><Archive />Archive</UiMenuItem>
         <UiMenuItem @click="showMove = true"><FolderInput />Move to…</UiMenuItem>
         <UiMenuItem danger @click="trash"><Trash2 />Move to Trash</UiMenuItem>

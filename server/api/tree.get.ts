@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 import { useDb, schema } from '../db'
 import { getUserId } from '../utils/guard'
 
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     .select()
     .from(schema.projects)
     .where(and(eq(schema.projects.userId, userId), isNull(schema.projects.archivedAt)))
-    .orderBy(asc(schema.projects.position))
+    .orderBy(desc(schema.projects.position))
 
   const projectIds = projects.map((p) => p.id)
   const notebooks = projectIds.length
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
         .where(
           and(inArray(schema.notebooks.projectId, projectIds), isNull(schema.notebooks.archivedAt)),
         )
-        .orderBy(asc(schema.notebooks.position))
+        .orderBy(desc(schema.notebooks.position))
     : []
 
   const notes = await db
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
         eq(schema.documents.isDraft, false),
       ),
     )
-    .orderBy(asc(schema.documents.position))
+    .orderBy(desc(schema.documents.position))
 
   const notesByNotebook = new Map<string, typeof notes>()
   for (const n of notes) {

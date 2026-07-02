@@ -3,7 +3,6 @@ import {
   Plus,
   ChevronRight,
   MoreHorizontal,
-  LayoutTemplate,
   Archive,
   Trash2,
   Settings,
@@ -17,6 +16,8 @@ import {
 } from 'lucide-vue-next'
 import IconOverview from '~/components/IconOverview.vue'
 import IconStarred from '~/components/IconStarred.vue'
+import IconArchive from '~/components/IconArchive.vue'
+import IconTrash from '~/components/IconTrash.vue'
 import type { TreeNote } from '~/composables/useTree'
 
 const {
@@ -31,6 +32,10 @@ const {
   updateNotebook,
   deleteNotebook,
   createNote,
+  moveNoteToNotebook,
+  reorderNotebook,
+  moveNotebookToProject,
+  reorderProject,
 } = useTree()
 const { user, clear } = useUserSession()
 const userName = computed(() => user.value?.displayName || user.value?.username || 'Account')
@@ -186,15 +191,51 @@ const decoratedProjects = computed(() =>
   })),
 )
 
+// Drag & drop: reorder within a list, or move a note into a notebook / a notebook into a project.
+const drag = useState<{ kind: 'note' | 'notebook' | 'project'; id: string } | null>(
+  'sidebar-drag',
+  () => null,
+)
+const overId = ref<string | null>(null)
+function onProjectDragStart(e: DragEvent, id: string) {
+  drag.value = { kind: 'project', id }
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+}
+function onProjectDragOver(id: string) {
+  const d = drag.value
+  if (d && (d.kind === 'notebook' || (d.kind === 'project' && d.id !== id))) overId.value = id
+}
+async function onProjectDrop(id: string) {
+  overId.value = null
+  const d = drag.value
+  drag.value = null
+  if (d?.kind === 'notebook') await moveNotebookToProject(d.id, id)
+  else if (d?.kind === 'project' && d.id !== id) await reorderProject(d.id, id)
+}
+function onNotebookDragStart(e: DragEvent, id: string) {
+  drag.value = { kind: 'notebook', id }
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
+}
+function onNotebookDragOver(id: string) {
+  const d = drag.value
+  if (d && (d.kind === 'note' || (d.kind === 'notebook' && d.id !== id))) overId.value = id
+}
+async function onNotebookDrop(id: string) {
+  overId.value = null
+  const d = drag.value
+  drag.value = null
+  if (d?.kind === 'note') await moveNoteToNotebook(d.id, id)
+  else if (d?.kind === 'notebook' && d.id !== id) await reorderNotebook(d.id, id)
+}
+
 const navItems = [
   { to: '/', label: 'Overview', icon: IconOverview },
   { to: '/search', label: 'Search', icon: Search },
   { to: '/starred', label: 'Starred', icon: IconStarred },
 ]
 const systemItems = [
-  { to: '/templates', label: 'Templates', icon: LayoutTemplate },
-  { to: '/archive', label: 'Archive', icon: Archive },
-  { to: '/trash', label: 'Trash', icon: Trash2 },
+  { to: '/archive', label: 'Archive', icon: IconArchive },
+  { to: '/trash', label: 'Trash', icon: IconTrash },
 ]
 const navClass = (to: string) =>
   route.path === to ? 'bg-row-selected font-medium text-heading' : 'text-text hover:bg-row-hover'
@@ -259,7 +300,16 @@ const navClass = (to: string) =>
 
       <ul v-else class="space-y-0.5">
         <li v-for="project in decoratedProjects" :key="project.id">
-          <div class="group flex items-center gap-1 rounded-md pr-1 hover:bg-row-hover">
+          <div
+            class="group flex items-center gap-1 rounded-md pr-1 hover:bg-row-hover"
+            :class="overId === project.id ? 'shadow-[inset_0_0_0_2px_var(--color-primary)]' : ''"
+            :draggable="!(editing?.kind === 'project' && editing?.id === project.id)"
+            @dragstart="onProjectDragStart($event, project.id)"
+            @dragend="drag = null"
+            @dragover.prevent="onProjectDragOver(project.id)"
+            @dragleave="overId = null"
+            @drop.prevent="onProjectDrop(project.id)"
+          >
             <button
               type="button"
               class="shrink-0 rounded p-1 text-text-subtle hover:text-text md:p-0.5"
@@ -272,7 +322,7 @@ const navClass = (to: string) =>
               />
             </button>
             <IconFolder
-              class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[18px] md:w-[18px]"
+              class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[20px] md:w-[20px]"
             />
             <input
               v-if="editing?.kind === 'project' && editing.id === project.id"
@@ -318,7 +368,16 @@ const navClass = (to: string) =>
 
           <ul v-if="!isCollapsed(project.id)" class="space-y-0.5">
             <li v-for="nb in project.notebooks" :key="nb.id">
-              <div class="group flex items-center gap-1 rounded-md pr-1 pl-3.5 hover:bg-row-hover">
+              <div
+                class="group flex items-center gap-1 rounded-md pr-1 pl-3.5 hover:bg-row-hover"
+                :class="overId === nb.id ? 'shadow-[inset_0_0_0_2px_var(--color-primary)]' : ''"
+                :draggable="!(editing?.kind === 'notebook' && editing?.id === nb.id)"
+                @dragstart="onNotebookDragStart($event, nb.id)"
+                @dragend="drag = null"
+                @dragover.prevent="onNotebookDragOver(nb.id)"
+                @dragleave="overId = null"
+                @drop.prevent="onNotebookDrop(nb.id)"
+              >
                 <button
                   type="button"
                   class="shrink-0 rounded p-1 text-text-subtle hover:text-text md:p-0.5"
@@ -331,7 +390,7 @@ const navClass = (to: string) =>
                   />
                 </button>
                 <AppMark
-                  class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[18px] md:w-[18px]"
+                  class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[20px] md:w-[20px]"
                 />
                 <input
                   v-if="editing?.kind === 'notebook' && editing.id === nb.id"
