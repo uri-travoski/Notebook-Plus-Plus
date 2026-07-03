@@ -68,6 +68,13 @@ function selectActive() {
 function onKeydown(e: KeyboardEvent) {
   // Global toggle.
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    // When text is selected inside the editor, Cmd/Ctrl+K is the "insert link" shortcut —
+    // let the editor handle it instead of hijacking the key for search.
+    const el = document.activeElement as HTMLElement | null
+    const inEditor = !!el?.closest?.('.bn-editor, [contenteditable="true"]')
+    const sel = window.getSelection()
+    const hasSelection = !!sel && !sel.isCollapsed && sel.toString().length > 0
+    if (inEditor && hasSelection) return
     e.preventDefault()
     open.value = !open.value
     return

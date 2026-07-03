@@ -236,25 +236,51 @@ export default function Editor({
   ]
 
   async function getSlashItems(query: string) {
+    // Place a custom block where the user invoked "/": replace the (now-empty) current
+    // paragraph if empty, else insert after it, and move the cursor INTO the new block so
+    // typing lands there — matching BlockNote's own slash items. Without this, a Callout was
+    // inserted empty and the user's text went into the paragraph above it.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const placeBlock = (spec: any) => {
+      const cur = ed.getTextCursorPosition().block
+      const empty =
+        cur.type === 'paragraph' && (!Array.isArray(cur.content) || cur.content.length === 0)
+      let targetId: string
+      if (empty) {
+        ed.updateBlock(cur, spec)
+        targetId = cur.id
+      } else {
+        targetId = ed.insertBlocks([spec], cur, 'after')[0].id
+      }
+      // If the new block is last in the document, add a trailing paragraph so there is always
+      // somewhere to type after it — custom blocks (callout/math/database/drawing) can't be
+      // reliably exited with the keyboard otherwise.
+      const doc = ed.document
+      if (doc[doc.length - 1]?.id === targetId) {
+        ed.insertBlocks([{ type: 'paragraph' }], targetId, 'after')
+      }
+      try {
+        ed.setTextCursorPosition(targetId, 'end') // inline-content blocks: caret inside
+      } catch {
+        // content:'none' block (database, drawing) has no text caret — move to the next block.
+        const d = ed.document
+        const next = d[d.findIndex((b: { id: string }) => b.id === targetId) + 1]
+        if (next) ed.setTextCursorPosition(next, 'end')
+      }
+    }
     const callout = {
       title: 'Callout',
       subtext: 'Coloured note box',
       aliases: ['callout', 'note', 'info', 'tip', 'warning', 'danger'],
       group: 'Basic blocks',
-      onItemClick: () => {
-        const block = ed.getTextCursorPosition().block
-        ed.insertBlocks([{ type: 'callout', props: { kind: 'info' } }], block, 'after')
-      },
+      onItemClick: () => placeBlock({ type: 'callout', props: { kind: 'info' } }),
     }
     const math = {
       title: 'Math',
       subtext: 'KaTeX block formula',
       aliases: ['math', 'katex', 'latex', 'equation', 'formula'],
       group: 'Basic blocks',
-      onItemClick: () => {
-        const block = ed.getTextCursorPosition().block
-        ed.insertBlocks([{ type: 'math', content: 'e = mc^2' }], block, 'after')
-      },
+      onItemClick: () => placeBlock({ type: 'math', content: 'e = mc^2' }),
     }
     const database = {
       title: 'Database',
@@ -270,12 +296,7 @@ export default function Editor({
         })
         if (!res.ok) return
         const created = await res.json()
-        const block = ed.getTextCursorPosition().block
-        ed.insertBlocks(
-          [{ type: 'databaseTable', props: { databaseId: created.id } }],
-          block,
-          'after',
-        )
+        placeBlock({ type: 'databaseTable', props: { databaseId: created.id } })
       },
     }
     const drawing = {
@@ -283,10 +304,7 @@ export default function Editor({
       subtext: 'Inline Excalidraw sketch',
       aliases: ['drawing', 'draw', 'sketch', 'excalidraw', 'diagram', 'whiteboard'],
       group: 'Basic blocks',
-      onItemClick: () => {
-        const block = ed.getTextCursorPosition().block
-        ed.insertBlocks([{ type: 'drawing', props: { scene: '' } }], block, 'after')
-      },
+      onItemClick: () => placeBlock({ type: 'drawing', props: { scene: '' } }),
     }
     return filterSuggestionItems(
       [
