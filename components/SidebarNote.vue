@@ -21,7 +21,7 @@ const props = defineProps<{
   depth: number
 }>()
 
-const { updateNote, reorderNote, createNote } = useTree()
+const { updateNote, reorderNote, createNote, nestNote } = useTree()
 const { isCollapsed, toggleCollapse, expand } = usePreferences()
 const route = useRoute()
 
@@ -40,19 +40,27 @@ async function addSubNote(type: 'page' | 'canvas') {
 
 // Drag a note into another notebook (desktop). Drag state is shared across the sidebar.
 const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>('sidebar-drag', () => null)
-const dragOver = ref(false)
+// Drop zones: the top of a row reorders (drops as a sibling above); the rest of the row nests
+// the dragged note as a child of this one.
+const dropMode = ref<'before' | 'inside' | null>(null)
 function onDragStart(e: DragEvent) {
   drag.value = { kind: 'note', id: props.note.id }
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
 }
-function onDragOver() {
-  if (drag.value?.kind === 'note' && drag.value.id !== props.note.id) dragOver.value = true
+function onDragOver(e: DragEvent) {
+  const d = drag.value
+  if (!(d?.kind === 'note' && d.id !== props.note.id)) return
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  dropMode.value = e.clientY - rect.top < rect.height * 0.4 ? 'before' : 'inside'
 }
 async function onDrop() {
-  dragOver.value = false
+  const mode = dropMode.value
+  dropMode.value = null
   const d = drag.value
   drag.value = null
-  if (d?.kind === 'note' && d.id !== props.note.id) await reorderNote(d.id, props.note.id)
+  if (!(d?.kind === 'note' && d.id !== props.note.id)) return
+  if (mode === 'inside') await nestNote(d.id, props.note.id)
+  else await reorderNote(d.id, props.note.id)
 }
 
 const children = computed(() => props.childrenMap.get(props.note.id) ?? [])
@@ -132,14 +140,15 @@ const showMove = ref(false)
       class="group flex items-center gap-1 rounded-md pr-1"
       :class="[
         active ? 'bg-row-selected' : 'hover:bg-row-hover',
-        dragOver ? 'shadow-[inset_0_2px_0_0_var(--color-primary)]' : '',
+        dropMode === 'before' ? 'shadow-[inset_0_2px_0_0_var(--color-primary)]' : '',
+        dropMode === 'inside' ? 'shadow-[inset_0_0_0_2px_var(--color-primary)]' : '',
       ]"
       :style="{ paddingLeft: `${depth * 12 + 6}px` }"
       :draggable="!editing"
       @dragstart="onDragStart"
       @dragend="drag = null"
-      @dragover.prevent="onDragOver"
-      @dragleave="dragOver = false"
+      @dragover.prevent="onDragOver($event)"
+      @dragleave="dropMode = null"
       @drop.prevent="onDrop"
     >
       <button

@@ -135,6 +135,26 @@ export function useTree() {
     })
     await refresh()
   }
+  // Nest a note under another note (as a child). Dropped at the top of the parent's children.
+  const nestNote = async (noteId: string, parentId: string) => {
+    if (noteId === parentId) return
+    const all = (tree.value?.notebooks ?? []).flatMap((nb) => nb.notes)
+    const parent = all.find((n) => n.id === parentId)
+    if (!parent) return
+    // Never nest a note under one of its own descendants (that would create a cycle).
+    const byId = new Map(all.map((n) => [n.id, n]))
+    let cur: string | null = parent.parentDocumentId
+    while (cur) {
+      if (cur === noteId) return
+      cur = byId.get(cur)?.parentDocumentId ?? null
+    }
+    const children = all.filter((n) => n.parentDocumentId === parentId && n.id !== noteId)
+    await $fetch(`/api/documents/${noteId}`, {
+      method: 'PATCH',
+      body: { notebookId: parent.notebookId, parentDocumentId: parentId, position: posTop(children) },
+    })
+    await refresh()
+  }
   const reorderNotebook = async (draggedId: string, targetId: string) => {
     if (draggedId === targetId) return
     const position = posAbove(
@@ -152,6 +172,7 @@ export function useTree() {
   return {
     reorderNote,
     moveNoteToNotebook,
+    nestNote,
     reorderNotebook,
     tree,
     loaded,

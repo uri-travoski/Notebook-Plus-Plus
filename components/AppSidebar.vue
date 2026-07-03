@@ -11,6 +11,7 @@ import {
   Upload,
   Search,
   PenTool,
+  HelpCircle,
   LogOut,
 } from 'lucide-vue-next'
 import IconOverview from '~/components/IconOverview.vue'
@@ -37,6 +38,18 @@ async function logout() {
   await $fetch('/api/auth/logout', { method: 'POST' })
   await clear()
   await navigateTo('/login')
+}
+
+// "Help" opens the built-in "Simple user guide" note (each account has its own copy).
+const MANUAL_TITLE = 'Simple user guide'
+const manualNoteId = computed(() => {
+  for (const nb of tree.value?.notebooks ?? [])
+    for (const n of nb.notes)
+      if ((n.title ?? '').toLowerCase() === MANUAL_TITLE.toLowerCase()) return n.id
+  return null
+})
+function openHelp() {
+  navigateTo(manualNoteId.value ? `/doc/${manualNoteId.value}` : '/')
 }
 
 async function addCanvas(notebookId: string) {
@@ -388,6 +401,7 @@ const navClass = (to: string) =>
           <ChevronRight class="h-4 w-4 shrink-0 -rotate-90 text-text-subtle md:h-3.5 md:w-3.5" />
         </template>
         <UiMenuItem @click="navigateTo('/settings')"><Settings />Settings</UiMenuItem>
+        <UiMenuItem @click="openHelp"><HelpCircle />Help</UiMenuItem>
         <UiMenuItem danger @click="logout"><LogOut />Log out</UiMenuItem>
       </UiDropdown>
     </div>
