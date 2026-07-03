@@ -64,6 +64,12 @@
   --spacing-sidebar: 280px;
   --spacing-topbar: 56px;
 
+  /* Motion — custom easing curves (per Emil Kowalski). The built-in CSS easings are too
+     weak; these give enter/exit the punch that reads as intentional. */
+  --ease-snap: cubic-bezier(0.23, 1, 0.32, 1); /* strong ease-out — enter/exit, presses */
+  --ease-smooth: cubic-bezier(0.77, 0, 0.175, 1); /* strong ease-in-out — on-screen movement */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); /* iOS-like drawer curve */
+
   /* Fonts — user-selectable; runtime override sets these vars on :root. */
   --font-sans:
     'Noto Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica,

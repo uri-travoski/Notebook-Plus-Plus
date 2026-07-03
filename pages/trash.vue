@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Trash2 } from 'lucide-vue-next'
 import AppMark from '~/components/AppMark.vue'
 useHead({ title: 'Trash · Notebook++' })
 
@@ -65,6 +66,7 @@ async function act(kind: 'notebooks' | 'documents', id: string, restore: boolean
     </div>
     <EmptyState
       v-else
+      :icon="Trash2"
       title="Trash is empty"
       hint="Notebooks and notes you move to Trash appear here until deleted permanently."
     />

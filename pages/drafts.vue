@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PencilLine } from 'lucide-vue-next'
 useHead({ title: 'Drafts · Notebook++' })
 const { data: docs } = await useFetch('/api/documents', { query: { view: 'drafts' } })
 </script>
@@ -8,6 +9,7 @@ const { data: docs } = await useFetch('/api/documents', { query: { view: 'drafts
     <DocList v-if="docs?.length" :docs="docs" />
     <EmptyState
       v-else
+      :icon="PencilLine"
       title="No drafts"
       hint="New notes created outside a notebook show up here."
     />

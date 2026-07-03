@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Archive } from 'lucide-vue-next'
 useHead({ title: 'Archive · Notebook++' })
 const { data: docs, refresh } = await useFetch('/api/documents', { query: { view: 'archived' } })
 const { refresh: refreshTree } = useTree()
@@ -18,6 +19,7 @@ async function restore(id: string) {
     </DocList>
     <EmptyState
       v-else
+      :icon="Archive"
       title="Archive is empty"
       hint="Archive a note from its menu to move it here."
     />

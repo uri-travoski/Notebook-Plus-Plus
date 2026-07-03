@@ -24,17 +24,24 @@ onClickOutside(root, () => (open.value = false))
     >
       <slot name="trigger" />
     </button>
-    <div
-      v-if="open"
-      role="menu"
-      :class="[
-        'absolute z-30 min-w-44 rounded-input border border-border bg-surface py-1 shadow-card',
-        up ? 'bottom-full left-0 mb-1' : 'right-0 top-full mt-1',
-        block ? 'w-full min-w-0' : '',
-      ]"
-      @click="open = false"
+    <Transition
+      enter-active-class="transition duration-150 ease-snap"
+      enter-from-class="scale-95 opacity-0"
+      leave-active-class="transition duration-100 ease-snap"
+      leave-to-class="scale-95 opacity-0"
     >
-      <slot />
-    </div>
+      <div
+        v-if="open"
+        role="menu"
+        :class="[
+          'absolute z-30 min-w-44 rounded-input border border-border bg-surface py-1 shadow-card',
+          up ? 'bottom-full left-0 mb-1 origin-bottom-left' : 'right-0 top-full mt-1 origin-top-right',
+          block ? 'w-full min-w-0' : '',
+        ]"
+        @click="open = false"
+      >
+        <slot />
+      </div>
+    </Transition>
   </div>
 </template>

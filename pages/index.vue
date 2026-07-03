@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppMark from '~/components/AppMark.vue'
-import { FileText, BookOpen } from 'lucide-vue-next'
+import { FileText, BookOpen, Star } from 'lucide-vue-next'
 useHead({ title: 'Overview · Notebook++' })
 const { user } = useUserSession()
 const { data: stats } = await useFetch('/api/stats')
@@ -62,25 +62,27 @@ const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
       <hr class="border-border" />
 
       <div class="grid gap-8 md:grid-cols-2">
-        <section>
+        <section class="min-w-0">
           <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
             Recent
           </h2>
           <DocList v-if="recent10.length" :docs="recent10" />
           <EmptyState
             v-else
+            :icon="FileText"
             title="No notes yet"
             hint="Create a notebook in the sidebar, then add your first page or canvas."
           />
         </section>
 
-        <section>
+        <section class="min-w-0">
           <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
             Starred
           </h2>
           <DocList v-if="starred?.length" :docs="starred" />
           <EmptyState
             v-else
+            :icon="Star"
             title="Nothing starred"
             hint="Star a note from its menu to pin it here."
           />

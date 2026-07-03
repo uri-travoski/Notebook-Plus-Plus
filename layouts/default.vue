@@ -16,13 +16,32 @@ watch(
       <AppSidebar />
     </aside>
 
-    <!-- Mobile drawer -->
-    <div v-if="drawerOpen" class="fixed inset-0 z-40 md:hidden">
-      <div class="absolute inset-0 bg-black/40" @click="drawerOpen = false" />
-      <aside class="absolute inset-y-0 left-0 w-[86vw] max-w-[330px] shadow-2xl">
+    <!-- Mobile drawer: backdrop fades, panel slides in on the iOS drawer curve -->
+    <Transition
+      enter-active-class="transition-opacity duration-200 ease-snap"
+      enter-from-class="opacity-0"
+      leave-active-class="transition-opacity duration-200 ease-snap"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="drawerOpen"
+        class="fixed inset-0 z-40 bg-black/40 md:hidden"
+        @click="drawerOpen = false"
+      />
+    </Transition>
+    <Transition
+      enter-active-class="transition-transform duration-300 ease-drawer"
+      enter-from-class="-translate-x-full"
+      leave-active-class="transition-transform duration-200 ease-drawer"
+      leave-to-class="-translate-x-full"
+    >
+      <aside
+        v-if="drawerOpen"
+        class="fixed inset-y-0 left-0 z-40 w-[86vw] max-w-[330px] shadow-2xl md:hidden"
+      >
         <AppSidebar />
       </aside>
-    </div>
+    </Transition>
 
     <div class="flex min-w-0 flex-1 flex-col">
       <!-- Compact top bar: mobile only (the sidebar carries search + account on desktop). -->

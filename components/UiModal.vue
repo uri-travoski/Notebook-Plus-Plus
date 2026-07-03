@@ -27,13 +27,15 @@ onBeforeUnmount(() => {
     >
       <div v-if="open" class="fixed inset-0 z-50 grid place-items-center p-4">
         <div class="absolute inset-0 bg-black/40" @click="close" />
-        <div
-          class="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-5 shadow-card"
-          role="dialog"
-          aria-modal="true"
-        >
-          <slot :close="close" />
-        </div>
+        <Transition appear enter-active-class="transition duration-200 ease-snap" enter-from-class="scale-95 opacity-0">
+          <div
+            class="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-5 shadow-card"
+            role="dialog"
+            aria-modal="true"
+          >
+            <slot :close="close" />
+          </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>

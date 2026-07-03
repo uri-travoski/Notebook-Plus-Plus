@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LayoutTemplate } from 'lucide-vue-next'
 useHead({ title: 'Templates · Notebook++' })
 const { data: docs } = await useFetch('/api/documents', { query: { view: 'templates' } })
 </script>
@@ -8,6 +9,7 @@ const { data: docs } = await useFetch('/api/documents', { query: { view: 'templa
     <DocList v-if="docs?.length" :docs="docs" />
     <EmptyState
       v-else
+      :icon="LayoutTemplate"
       title="No templates yet"
       hint="Mark a note as a template to reuse its structure."
     />

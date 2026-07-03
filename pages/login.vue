@@ -32,7 +32,7 @@ async function submit() {
 
 <template>
   <div>
-    <h1 class="mb-6 text-lg font-semibold text-heading">Please login</h1>
+    <h1 class="mb-6 text-lg font-semibold text-heading">Welcome back</h1>
 
     <form class="space-y-4" novalidate @submit.prevent="submit">
       <UiInput
