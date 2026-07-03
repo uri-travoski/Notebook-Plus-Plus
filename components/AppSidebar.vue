@@ -223,7 +223,7 @@ const navClass = (to: string) =>
     />
     <div class="border-b border-border px-3 pb-2 pt-3">
       <div class="flex items-center gap-2 px-1 pt-1">
-        <AppMark class="h-7 w-7 shrink-0 text-primary md:h-6 md:w-6" />
+        <AppLogo class="h-7 w-7 shrink-0 text-primary md:h-6 md:w-6" />
         <span class="text-lg font-bold text-heading">Notebook++</span>
       </div>
     </div>
