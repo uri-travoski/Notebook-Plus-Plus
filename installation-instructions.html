@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Notebook++ — Installation Instructions</title>
+    <style>
+      /* Notebook++ design tokens (mirrors assets/css/main.css). Light by default; dark via OS setting. */
+      :root {
+        --primary: #0b7c6e;
+        --primary-subtle: #e3f4f1;
+        --primary-subtle-fg: #0b7264;
+        --bg: #ffffff;
+        --surface: #ffffff;
+        --surface-subtle: #f8fafc;
+        --border: #e2e8f0;
+        --heading: #1e293b;
+        --text: #334155;
+        --text-muted: #5b6677;
+        --text-subtle: #94a3b8;
+        --info: #2563eb;
+        --info-bg: #eff6ff;
+        --warning: #d97706;
+        --warning-bg: #fffbeb;
+        --tip: #0e9f8e;
+        --tip-bg: #e3f4f1;
+        --radius-box: 10px;
+        --radius-input: 8px;
+        --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial,
+          sans-serif;
+        --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --primary: #14b8a6;
+          --primary-subtle: #0f2c2a;
+          --primary-subtle-fg: #5eead4;
+          --bg: #0f172a;
+          --surface: #1e293b;
+          --surface-subtle: #172033;
+          --border: #334155;
+          --heading: #f1f5f9;
+          --text: #e2e8f0;
+          --text-muted: #94a3b8;
+          --text-subtle: #64748b;
+          --info-bg: #10233b;
+          --warning-bg: #2c2510;
+          --tip-bg: #0e2d28;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+
+      header.hero {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding-bottom: 1.25rem;
+        margin-bottom: 1.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .mark {
+        width: 40px;
+        height: 40px;
+        color: var(--primary);
+        flex: none;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        line-height: 1.15;
+        color: var(--heading);
+      }
+      .hero p {
+        margin: 0.2rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      h2 {
+        color: var(--heading);
+        font-size: 1.15rem;
+        margin: 2.5rem 0 0.5rem;
+      }
+      p {
+        margin: 0.6rem 0;
+      }
+      a {
+        color: var(--primary);
+      }
+
+      .step {
+        display: flex;
+        gap: 0.85rem;
+        margin: 1.4rem 0;
+      }
+      .num {
+        flex: none;
+        width: 1.7rem;
+        height: 1.7rem;
+        border-radius: 9999px;
+        background: var(--primary);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: grid;
+        place-items: center;
+        margin-top: 0.15rem;
+      }
+      .step-body {
+        min-width: 0;
+        flex: 1;
+      }
+      .step-body h3 {
+        margin: 0.2rem 0 0.35rem;
+        font-size: 1rem;
+        color: var(--heading);
+      }
+
+      code {
+        font-family: var(--font-mono);
+        font-size: 0.86em;
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 0.06rem 0.34rem;
+      }
+      pre {
+        background: var(--surface-subtle);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-input);
+        padding: 0.85rem 1rem;
+        overflow-x: auto;
+        margin: 0.7rem 0;
+      }
+      pre code {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.82rem;
+        color: var(--text);
+        line-height: 1.7;
+      }
+      .cmt {
+        color: var(--text-subtle);
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0.75rem 0;
+        font-size: 0.9rem;
+      }
+      th,
+      td {
+        border: 1px solid var(--border);
+        padding: 0.5rem 0.7rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: var(--surface-subtle);
+        color: var(--heading);
+        font-weight: 600;
+      }
+      td code {
+        white-space: nowrap;
+      }
+      .req {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.08rem 0.45rem;
+        border-radius: 9999px;
+      }
+      .req.yes {
+        background: var(--primary-subtle);
+        color: var(--primary-subtle-fg);
+      }
+      .req.no {
+        background: var(--surface-subtle);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+      }
+
+      .callout {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-box);
+        background: var(--surface-subtle);
+        padding: 0.85rem 1rem;
+        margin: 1.1rem 0;
+      }
+      .callout > :first-child {
+        margin-top: 0;
+      }
+      .callout > :last-child {
+        margin-bottom: 0;
+      }
+      .callout strong {
+        color: var(--heading);
+      }
+      .callout.info {
+        border-color: var(--info);
+        background: var(--info-bg);
+      }
+      .callout.warn {
+        border-color: var(--warning);
+        background: var(--warning-bg);
+      }
+      .callout.tip {
+        border-color: var(--tip);
+        background: var(--tip-bg);
+      }
+
+      footer {
+        margin-top: 3rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+        color: var(--text-subtle);
+        font-size: 0.85rem;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <svg class="mark" viewBox="0 0 256 285" fill="currentColor" aria-hidden="true">
+          <path
+            d="M208,32H48A16,16,0,0,0,32,50V234a16,16,0,0,0,16,19H208a16,16,0,0,0,16-19V50A16,16,0,0,0,208,32ZM80,234H48V50H80ZM176,133H112a9,9,0,0,1,0-18h64a9,9,0,0,1,0,18ZM176,170H112a9,9,0,0,1,0-18h64a9,9,0,0,1,0,18Z"
+          />
+        </svg>
+        <div>
+          <h1>Notebook++</h1>
+          <p>Self-hosted installation &mdash; Docker Compose</p>
+        </div>
+      </header>
+
+      <p>
+        This guide installs Notebook++ as a self-contained Docker Compose stack &mdash; the app plus
+        its PostgreSQL database &mdash; using the prebuilt image from GitHub Container Registry
+        (GHCR). No build step, reverse proxy, or extra services are required.
+      </p>
+
+      <div class="callout info">
+        <p>
+          <strong>Before you begin.</strong> You need a host with <strong>Docker</strong> and
+          <strong>Docker Compose</strong> installed. The app image is published <em>privately</em> to
+          GHCR, so you also need a GitHub account with access to it and a
+          <strong>Personal Access Token</strong> with the <code>read:packages</code> scope to pull it.
+        </p>
+      </div>
+
+      <h2>Steps</h2>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="step-body">
+          <h3>Get the compose file</h3>
+          <p>
+            Put <code>docker-compose.standalone.yml</code> (from the repository) into an empty folder.
+            It defines the whole stack, so no other files are needed.
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div class="step-body">
+          <h3>Generate three secrets</h3>
+          <p>Each command prints one random value (use Git Bash or WSL on Windows):</p>
+          <pre><code>openssl rand -hex 16     <span class="cmt"># -&gt; DB_PASSWORD</span>
+openssl rand -base64 48  <span class="cmt"># -&gt; SESSION_PASSWORD  (must be &ge; 32 characters)</span>
+openssl rand -hex 32     <span class="cmt"># -&gt; ENCRYPTION_KEY</span></code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div class="step-body">
+          <h3>Create a <code>.env</code> file</h3>
+          <p>Place it beside the compose file. Only the first three are required:</p>
+          <pre><code>DB_PASSWORD=&lt;from openssl&gt;
+SESSION_PASSWORD=&lt;from openssl&gt;
+ENCRYPTION_KEY=&lt;from openssl&gt;
+
+<span class="cmt"># optional</span>
+APP_PORT=3000
+ALLOW_REGISTRATION=true
+NUXT_PUBLIC_APP_URL=http://localhost:3000
+NUXT_SESSION_COOKIE_SECURE=false
+SMTP_URL=</code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">4</div>
+        <div class="step-body">
+          <h3>Log in to GHCR</h3>
+          <p>Once, so Docker can pull the private image:</p>
+          <pre><code>echo &lt;YOUR_GITHUB_TOKEN&gt; | docker login ghcr.io -u &lt;your-github-username&gt; --password-stdin</code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">5</div>
+        <div class="step-body">
+          <h3>Start the stack</h3>
+          <pre><code>docker compose -f docker-compose.standalone.yml up -d</code></pre>
+          <p>Database migrations run automatically at first boot.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">6</div>
+        <div class="step-body">
+          <h3>Open the app and register</h3>
+          <p>
+            Visit <code>http://localhost:3000</code> (or <code>http://&lt;host-ip&gt;:3000</code> from
+            another device on your LAN) and register the first account &mdash; it arrives pre-loaded
+            with the starter content. Turn sign-ups off afterwards in
+            <strong>Settings &rarr; Registration</strong> to keep the instance private.
+          </p>
+        </div>
+      </div>
+
+      <h2>Environment variables</h2>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <th>Required</th>
+              <th>Purpose</th>
+              <th>How to generate / default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>DB_PASSWORD</code></td>
+              <td><span class="req yes">Yes</span></td>
+              <td>Password for the bundled PostgreSQL database.</td>
+              <td><code>openssl rand -hex 16</code></td>
+            </tr>
+            <tr>
+              <td><code>SESSION_PASSWORD</code></td>
+              <td><span class="req yes">Yes</span></td>
+              <td>Secret that seals login-session cookies. Must be at least 32 characters.</td>
+              <td><code>openssl rand -base64 48</code></td>
+            </tr>
+            <tr>
+              <td><code>ENCRYPTION_KEY</code></td>
+              <td><span class="req yes">Yes</span></td>
+              <td>
+                Secret used to encrypt saved AI-provider keys at rest (any length; hashed to a
+                256-bit key).
+              </td>
+              <td><code>openssl rand -hex 32</code></td>
+            </tr>
+            <tr>
+              <td><code>APP_PORT</code></td>
+              <td><span class="req no">No</span></td>
+              <td>Host port the app is published on.</td>
+              <td>Default <code>3000</code></td>
+            </tr>
+            <tr>
+              <td><code>IMAGE_TAG</code></td>
+              <td><span class="req no">No</span></td>
+              <td>Image version to run (e.g. a pinned release instead of latest).</td>
+              <td>Default <code>latest</code></td>
+            </tr>
+            <tr>
+              <td><code>ALLOW_REGISTRATION</code></td>
+              <td><span class="req no">No</span></td>
+              <td>Whether new sign-ups are allowed by default (also toggleable in Settings).</td>
+              <td>Default <code>true</code></td>
+            </tr>
+            <tr>
+              <td><code>NUXT_PUBLIC_APP_URL</code></td>
+              <td><span class="req no">No</span></td>
+              <td>Public base URL, used to build password-reset links.</td>
+              <td>Default <code>http://localhost:3000</code></td>
+            </tr>
+            <tr>
+              <td><code>NUXT_SESSION_COOKIE_SECURE</code></td>
+              <td><span class="req no">No</span></td>
+              <td>
+                Marks the session cookie <em>Secure</em>. Set <code>true</code> only when serving over
+                HTTPS; keep <code>false</code> for plain-HTTP localhost/LAN (browsers reject a Secure
+                cookie over http on a non-localhost IP).
+              </td>
+              <td>Default <code>false</code></td>
+            </tr>
+            <tr>
+              <td><code>SMTP_URL</code></td>
+              <td><span class="req no">No</span></td>
+              <td>
+                SMTP server for password-reset email, e.g.
+                <code>smtp://user:pass@host:587</code>. Left empty, the reset link is written to the
+                container log instead.
+              </td>
+              <td>Default empty</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <p>
+          <strong>Keep the three secrets safe and stable.</strong> Changing
+          <code>SESSION_PASSWORD</code> logs everyone out; changing <code>ENCRYPTION_KEY</code> makes
+          previously-saved AI keys undecryptable; changing <code>DB_PASSWORD</code> after the first run
+          means the database must be recreated.
+        </p>
+      </div>
+
+      <h2>Data &amp; backups</h2>
+      <p>
+        Everything lives in two Docker named volumes &mdash; <code>notebookpp-pgdata</code> (the
+        database) and <code>notebookpp-uploads</code> (uploaded files). They survive restarts and image
+        updates; back them up to back up the app.
+      </p>
+
+      <h2>Updating</h2>
+      <p>Pull the newer image and recreate the containers &mdash; migrations run automatically:</p>
+      <pre><code>docker compose -f docker-compose.standalone.yml pull
+docker compose -f docker-compose.standalone.yml up -d</code></pre>
+      <p>
+        To wipe everything and start clean, run
+        <code>docker compose -f docker-compose.standalone.yml down -v</code> before <code>up</code>
+        &mdash; this deletes both volumes.
+      </p>
+
+      <div class="callout tip">
+        <p>
+          <strong>HTTPS on a LAN.</strong> Over plain HTTP on a non-localhost IP, browsers disable some
+          features (pasting into the canvas, installing the app as a PWA). To use those across your
+          network, serve the app over HTTPS through a reverse proxy and set
+          <code>NUXT_SESSION_COOKIE_SECURE=true</code>.
+        </p>
+      </div>
+
+      <footer>Notebook++ &mdash; self-hosted notes &amp; knowledge base.</footer>
+    </div>
+  </body>
+</html>
