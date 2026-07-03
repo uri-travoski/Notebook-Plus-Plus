@@ -167,7 +167,7 @@ const showMove = ref(false)
 
       <component
         :is="note.type === 'canvas' ? PenTool : FileText"
-        class="h-[18px] w-[18px] shrink-0 md:h-4 md:w-4"
+        class="-ml-0.5 h-[18px] w-[18px] shrink-0 md:h-4 md:w-4"
         :class="active ? 'text-primary' : 'text-text-subtle'"
       />
 

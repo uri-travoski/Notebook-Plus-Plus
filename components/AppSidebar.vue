@@ -40,16 +40,9 @@ async function logout() {
   await navigateTo('/login')
 }
 
-// "Help" opens the built-in "Simple user guide" note (each account has its own copy).
-const MANUAL_TITLE = 'Simple user guide'
-const manualNoteId = computed(() => {
-  for (const nb of tree.value?.notebooks ?? [])
-    for (const n of nb.notes)
-      if ((n.title ?? '').toLowerCase() === MANUAL_TITLE.toLowerCase()) return n.id
-  return null
-})
+// "Help" opens the project's GitHub repository in a new tab.
 function openHelp() {
-  navigateTo(manualNoteId.value ? `/doc/${manualNoteId.value}` : '/')
+  window.open('https://github.com/uri-travoski/Notebook-Plus-Plus', '_blank', 'noopener,noreferrer')
 }
 
 async function addCanvas(notebookId: string) {
@@ -298,7 +291,9 @@ const navClass = (to: string) =>
                 :class="isCollapsed(nb.id) ? '' : 'rotate-90'"
               />
             </button>
-            <AppMark class="h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[20px] md:w-[20px]" />
+            <AppMark
+              class="-ml-0.5 h-[20px] w-[20px] shrink-0 text-text-subtle md:h-[20px] md:w-[20px]"
+            />
             <input
               v-if="editing?.id === nb.id"
               v-model="draft"

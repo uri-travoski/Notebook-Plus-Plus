@@ -12,7 +12,7 @@ watch(
 
 <template>
   <div class="flex h-full">
-    <aside class="hidden w-[280px] shrink-0 md:block">
+    <aside class="hidden w-[252px] shrink-0 md:block">
       <AppSidebar />
     </aside>
 
