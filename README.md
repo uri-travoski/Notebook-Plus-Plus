@@ -4,8 +4,8 @@
 
 # Notebook++
 
-**A self-hosted knowledge base you actually own.**
-Rich block editor, embedded databases, infinite canvases, and instant search — in one private app you run yourself.
+<h3>**A self-hosted knowledge base you actually own.**
+Rich block editor, embedded databases, infinite canvases, and instant search — in one private app you run yourself.</h3>
 
 ![Nuxt](https://img.shields.io/badge/Nuxt-3-00DC82?style=flat-square&logo=nuxt.js&logoColor=white)
 ![Postgres](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=flat-square&logo=postgresql&logoColor=white)
