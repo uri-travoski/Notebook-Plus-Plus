@@ -67,7 +67,7 @@ sample notebook, and your notes live in volumes you can back up.
 ## 🚀 Quick start (Docker)
 
 The published image and PostgreSQL run as a self-contained stack. Full walkthrough — env vars, HTTPS, backups —
-in **[`installation-instructions.html`](installation-instructions.html)**.
+in the **[installation guide](https://uri-travoski.github.io/Notebook-Plus-Plus/installation-instructions.html)**.
 
 ```bash
 # 1. Put docker-compose.standalone.yml in an empty folder.
