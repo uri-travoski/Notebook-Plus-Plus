@@ -1,12 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#0E9F8E"/>
-  <rect x="150" y="120" width="212" height="272" rx="22" fill="#EEF2F7"/>
-  <rect x="150" y="120" width="36" height="272" rx="16" fill="#0B7E70"/>
-  <rect x="212" y="178" width="118" height="16" rx="8" fill="#0E9F8E"/>
-  <rect x="212" y="226" width="118" height="16" rx="8" fill="#0E9F8E"/>
-  <rect x="212" y="274" width="78" height="16" rx="8" fill="#0E9F8E"/>
-  <g fill="#0B7E70">
-    <rect x="300" y="300" width="16" height="58" rx="8"/>
-    <rect x="279" y="321" width="58" height="16" rx="8"/>
+  <rect width="512" height="512" fill="#0b7c6e"/>
+  <g transform="translate(134,121) scale(0.95)" fill="#ffffff">
+    <path d="M208,32H48A16,16,0,0,0,32,50V234a16,16,0,0,0,16,19H208a16,16,0,0,0,16-19V50A16,16,0,0,0,208,32ZM80,234H48V50H80ZM176,133H112a9,9,0,0,1,0-18h64a9,9,0,0,1,0,18ZM176,170H112a9,9,0,0,1,0-18h64a9,9,0,0,1,0,18Z"/>
   </g>
 </svg>
