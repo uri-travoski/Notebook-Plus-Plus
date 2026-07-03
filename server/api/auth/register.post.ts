@@ -2,6 +2,7 @@ import { asc, eq, or } from 'drizzle-orm'
 import { useDb, schema } from '../../db'
 import { createPasswordHash } from '../../utils/password'
 import { isValidEmail, isValidUsername, defaultPreferences, sessionUser } from '../../utils/auth'
+import { seedUserContent } from '../../utils/seedTemplate'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -66,6 +67,14 @@ export default defineEventHandler(async (event) => {
       preferences: defaultPreferences(),
     })
     .returning()
+
+  // Give every new account its own copy of the bundled starter content. Best-effort:
+  // a seeding failure must not prevent the account from being created.
+  try {
+    await seedUserContent(user.id)
+  } catch (err) {
+    console.error('[register] failed to seed starter content:', err)
+  }
 
   await setUserSession(event, { user: sessionUser(user) })
   return { user: sessionUser(user) }
