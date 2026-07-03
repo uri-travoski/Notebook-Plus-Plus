@@ -1,40 +1,24 @@
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull } from 'drizzle-orm'
 import { useDb, schema } from '../db'
 import { getUserId } from '../utils/guard'
 
-// Projects -> Notebooks -> Notes (flat note list per notebook; client nests by
-// parentDocumentId). Excludes archived/trashed/template/draft items (those live
-// in the SYSTEM sections).
+// Notebooks -> Notes (flat note list per notebook; client nests by parentDocumentId).
+// Excludes archived/trashed/template/draft items (those live in the SYSTEM sections).
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
   const db = useDb()
 
-  const projects = await db
+  const notebooks = await db
     .select()
-    .from(schema.projects)
+    .from(schema.notebooks)
     .where(
       and(
-        eq(schema.projects.userId, userId),
-        isNull(schema.projects.archivedAt),
-        isNull(schema.projects.deletedAt),
+        eq(schema.notebooks.userId, userId),
+        isNull(schema.notebooks.archivedAt),
+        isNull(schema.notebooks.deletedAt),
       ),
     )
-    .orderBy(desc(schema.projects.position))
-
-  const projectIds = projects.map((p) => p.id)
-  const notebooks = projectIds.length
-    ? await db
-        .select()
-        .from(schema.notebooks)
-        .where(
-          and(
-            inArray(schema.notebooks.projectId, projectIds),
-            isNull(schema.notebooks.archivedAt),
-            isNull(schema.notebooks.deletedAt),
-          ),
-        )
-        .orderBy(desc(schema.notebooks.position))
-    : []
+    .orderBy(desc(schema.notebooks.position))
 
   const notes = await db
     .select({
@@ -68,20 +52,10 @@ export default defineEventHandler(async (event) => {
     else notesByNotebook.set(n.notebookId, [n])
   }
 
-  const notebooksByProject = new Map<string, typeof notebooks>()
-  for (const nb of notebooks) {
-    const list = notebooksByProject.get(nb.projectId)
-    if (list) list.push(nb)
-    else notebooksByProject.set(nb.projectId, [nb])
-  }
-
   return {
-    projects: projects.map((p) => ({
-      ...p,
-      notebooks: (notebooksByProject.get(p.id) ?? []).map((nb) => ({
-        ...nb,
-        notes: notesByNotebook.get(nb.id) ?? [],
-      })),
+    notebooks: notebooks.map((nb) => ({
+      ...nb,
+      notes: notesByNotebook.get(nb.id) ?? [],
     })),
   }
 })

@@ -24,7 +24,7 @@ export function usePreferences() {
     else set.add(id)
     await patch({ sidebarCollapsed: [...set] })
   }
-  // Ensure a project/notebook is expanded (used when a child is added/imported/moved
+  // Ensure a notebook is expanded (used when a child is added/imported/moved
   // into it, so the new item is visible even under the collapsed-by-default sidebar).
   function expand(id: string) {
     const cur = prefs.value.sidebarCollapsed ?? []

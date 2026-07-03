@@ -8,14 +8,10 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id') as string
   const db = useDb()
 
-  const [existing] = await db
-    .select({ id: schema.notebooks.id })
-    .from(schema.notebooks)
-    .innerJoin(schema.projects, eq(schema.notebooks.projectId, schema.projects.id))
-    .where(and(eq(schema.notebooks.id, id), eq(schema.projects.userId, userId)))
-    .limit(1)
-  if (!existing) throw createError({ statusCode: 404, statusMessage: 'Notebook not found.' })
-
-  await db.delete(schema.notebooks).where(eq(schema.notebooks.id, id))
+  const deleted = await db
+    .delete(schema.notebooks)
+    .where(and(eq(schema.notebooks.id, id), eq(schema.notebooks.userId, userId)))
+    .returning({ id: schema.notebooks.id })
+  if (!deleted.length) throw createError({ statusCode: 404, statusMessage: 'Notebook not found.' })
   return { ok: true }
 })

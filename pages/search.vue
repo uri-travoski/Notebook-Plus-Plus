@@ -8,7 +8,6 @@ type Result = {
   type: 'page' | 'canvas'
   notebookId: string | null
   notebookName: string | null
-  projectName: string | null
   snippet: string | null
 }
 
@@ -21,11 +20,11 @@ const inputEl = ref<HTMLInputElement | null>(null)
 // crash SSR (getSSRProps on undefined) since this input is always rendered.
 onMounted(() => inputEl.value?.focus())
 
-// Group hits by "Project / Notebook" (unfiled -> Drafts), same as the Cmd-K palette.
+// Group hits by notebook (unfiled -> Drafts), same as the Cmd-K palette.
 const groups = computed(() => {
   const map = new Map<string, Result[]>()
   for (const r of results.value) {
-    const label = r.notebookName ? `${r.projectName ?? 'Workspace'} / ${r.notebookName}` : 'Drafts'
+    const label = r.notebookName ?? 'Drafts'
     if (!map.has(label)) map.set(label, [])
     map.get(label)!.push(r)
   }

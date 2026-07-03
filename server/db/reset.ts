@@ -4,7 +4,6 @@ import pg from 'pg'
 
 const TABLES = [
   'users',
-  'projects',
   'notebooks',
   'documents',
   'document_versions',

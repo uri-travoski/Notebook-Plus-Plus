@@ -18,15 +18,7 @@ export type TreeNotebook = {
   position: string
   notes: TreeNote[]
 }
-export type TreeProject = {
-  id: string
-  name: string
-  icon: string | null
-  color: string | null
-  position: string
-  notebooks: TreeNotebook[]
-}
-type Tree = { projects: TreeProject[] }
+type Tree = { notebooks: TreeNotebook[] }
 
 export function useTree() {
   const tree = useState<Tree | null>('tree', () => null)
@@ -40,23 +32,8 @@ export function useTree() {
     if (!loaded.value) await refresh()
   }
 
-  const createProject = async (name = 'New project') => {
-    const p = await $fetch('/api/projects', { method: 'POST', body: { name } })
-    await refresh()
-    return p
-  }
-  const updateProject = async (id: string, body: Record<string, unknown>) => {
-    await $fetch(`/api/projects/${id}`, { method: 'PATCH', body })
-    await refresh()
-  }
-  // Move to Trash (soft delete). Permanent removal happens from the Trash page.
-  const deleteProject = async (id: string) => {
-    await $fetch(`/api/projects/${id}`, { method: 'PATCH', body: { deleted: true } })
-    await refresh()
-  }
-
-  const createNotebook = async (projectId: string, name = 'New notebook') => {
-    const n = await $fetch('/api/notebooks', { method: 'POST', body: { projectId, name } })
+  const createNotebook = async (name = 'New notebook') => {
+    const n = await $fetch<TreeNotebook>('/api/notebooks', { method: 'POST', body: { name } })
     await refresh()
     return n
   }
@@ -73,10 +50,11 @@ export function useTree() {
     notebookId: string,
     type: 'page' | 'canvas' = 'page',
     title = 'Untitled',
+    parentDocumentId: string | null = null,
   ) => {
     const d = await $fetch<TreeNote>('/api/documents', {
       method: 'POST',
-      body: { notebookId, type, title },
+      body: { notebookId, type, title, parentDocumentId },
     })
     await refresh()
     return d
@@ -90,13 +68,12 @@ export function useTree() {
   const setNoteTitle = (id: string, title: string) => {
     const t = tree.value
     if (!t) return
-    for (const p of t.projects)
-      for (const nb of p.notebooks)
-        for (const n of nb.notes)
-          if (n.id === id) {
-            n.title = title
-            return
-          }
+    for (const nb of t.notebooks)
+      for (const n of nb.notes)
+        if (n.id === id) {
+          n.title = title
+          return
+        }
   }
 
   // Manual drag ordering on top of the default newest-first order. Items sort by `position`
@@ -128,7 +105,7 @@ export function useTree() {
 
   const reorderNote = async (draggedId: string, targetId: string) => {
     if (draggedId === targetId) return
-    const all = (tree.value?.projects ?? []).flatMap((p) => p.notebooks.flatMap((nb) => nb.notes))
+    const all = (tree.value?.notebooks ?? []).flatMap((nb) => nb.notes)
     const target = all.find((n) => n.id === targetId)
     if (!target) return
     const siblings = all.filter(
@@ -150,9 +127,7 @@ export function useTree() {
     await refresh()
   }
   const moveNoteToNotebook = async (noteId: string, notebookId: string) => {
-    const nb = (tree.value?.projects ?? [])
-      .flatMap((p) => p.notebooks)
-      .find((n) => n.id === notebookId)
+    const nb = (tree.value?.notebooks ?? []).find((n) => n.id === notebookId)
     const top = (nb?.notes ?? []).filter((n) => !n.parentDocumentId && n.id !== noteId)
     await $fetch(`/api/documents/${noteId}`, {
       method: 'PATCH',
@@ -162,38 +137,15 @@ export function useTree() {
   }
   const reorderNotebook = async (draggedId: string, targetId: string) => {
     if (draggedId === targetId) return
-    const proj = (tree.value?.projects ?? []).find((p) =>
-      p.notebooks.some((nb) => nb.id === targetId),
-    )
-    if (!proj) return
     const position = posAbove(
-      proj.notebooks.filter((nb) => nb.id !== draggedId),
+      (tree.value?.notebooks ?? []).filter((nb) => nb.id !== draggedId),
       targetId,
     )
     if (!position) return
     await $fetch(`/api/notebooks/${draggedId}`, {
       method: 'PATCH',
-      body: { projectId: proj.id, position },
+      body: { position },
     })
-    await refresh()
-  }
-  const moveNotebookToProject = async (notebookId: string, projectId: string) => {
-    const proj = (tree.value?.projects ?? []).find((p) => p.id === projectId)
-    const siblings = (proj?.notebooks ?? []).filter((nb) => nb.id !== notebookId)
-    await $fetch(`/api/notebooks/${notebookId}`, {
-      method: 'PATCH',
-      body: { projectId, position: posTop(siblings) },
-    })
-    await refresh()
-  }
-  const reorderProject = async (draggedId: string, targetId: string) => {
-    if (draggedId === targetId) return
-    const position = posAbove(
-      (tree.value?.projects ?? []).filter((p) => p.id !== draggedId),
-      targetId,
-    )
-    if (!position) return
-    await $fetch(`/api/projects/${draggedId}`, { method: 'PATCH', body: { position } })
     await refresh()
   }
 
@@ -201,15 +153,10 @@ export function useTree() {
     reorderNote,
     moveNoteToNotebook,
     reorderNotebook,
-    moveNotebookToProject,
-    reorderProject,
     tree,
     loaded,
     refresh,
     ensure,
-    createProject,
-    updateProject,
-    deleteProject,
     createNotebook,
     updateNotebook,
     deleteNotebook,

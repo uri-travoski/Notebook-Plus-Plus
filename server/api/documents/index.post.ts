@@ -17,8 +17,7 @@ export default defineEventHandler(async (event) => {
     const [nb] = await db
       .select({ id: schema.notebooks.id })
       .from(schema.notebooks)
-      .innerJoin(schema.projects, eq(schema.notebooks.projectId, schema.projects.id))
-      .where(and(eq(schema.notebooks.id, notebookId), eq(schema.projects.userId, userId)))
+      .where(and(eq(schema.notebooks.id, notebookId), eq(schema.notebooks.userId, userId)))
       .limit(1)
     if (!nb) throw createError({ statusCode: 404, statusMessage: 'Notebook not found.' })
   }

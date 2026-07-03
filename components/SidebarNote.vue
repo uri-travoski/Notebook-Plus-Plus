@@ -8,6 +8,7 @@ import {
   Archive,
   Trash2,
   Pencil,
+  FilePlus,
   FolderInput,
   Download,
   Copy,
@@ -21,8 +22,21 @@ const props = defineProps<{
 }>()
 
 const { updateNote, reorderNote, createNote } = useTree()
-const { isCollapsed, toggleCollapse } = usePreferences()
+const { isCollapsed, toggleCollapse, expand } = usePreferences()
 const route = useRoute()
+
+// Create a note (or canvas) nested under this note, in the same notebook.
+async function addSubNote(type: 'page' | 'canvas') {
+  if (!props.note.notebookId) return
+  expand(props.note.id)
+  const d = await createNote(
+    props.note.notebookId,
+    type,
+    type === 'canvas' ? 'Untitled canvas' : 'Untitled',
+    props.note.id,
+  )
+  await navigateTo(`/doc/${d.id}`)
+}
 
 // Drag a note into another notebook (desktop). Drag state is shared across the sidebar.
 const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>('sidebar-drag', () => null)
@@ -182,6 +196,8 @@ const showMove = ref(false)
           ><Star />{{ note.isStarred ? 'Unstar' : 'Star' }}</UiMenuItem
         >
         <UiMenuItem @click="startRename"><Pencil />Rename</UiMenuItem>
+        <UiMenuItem @click="addSubNote('page')"><FilePlus />New note inside</UiMenuItem>
+        <UiMenuItem @click="addSubNote('canvas')"><PenTool />New canvas inside</UiMenuItem>
         <UiMenuItem @click="note.type === 'canvas' ? exportCanvas() : exportNote()">
           <Download />{{ note.type === 'canvas' ? 'Export canvas' : 'Export note' }}
         </UiMenuItem>

@@ -6,7 +6,6 @@ import { uploadDir } from './storage'
 
 type Row = Record<string, unknown>
 type Template = {
-  projects: Row[]
   notebooks: Row[]
   documents: Row[]
   databases: Row[]
@@ -28,21 +27,19 @@ function loadTemplate(): Template | null {
   return template
 }
 
-// Clone the bundled starter content (project / notebooks / notes / tables / attachments) into a
-// freshly-created user's account. Every id is regenerated and every cross-reference remapped —
-// including the databaseId and /api/attachments/<id> ids embedded in document content — so each
-// user gets a fully independent copy. Best-effort: callers should not fail registration if this throws.
+// Clone the bundled starter content (notebooks / notes / tables / attachments) into a freshly-
+// created user's account. Every id is regenerated and every cross-reference remapped — including
+// the databaseId and /api/attachments/<id> ids embedded in document content — so each user gets a
+// fully independent copy. Best-effort: callers should not fail registration if this throws.
 export async function seedUserContent(userId: string): Promise<void> {
   const t = loadTemplate()
-  if (!t || !t.projects?.length) return
+  if (!t || !t.notebooks?.length) return
   const db = useDb()
 
-  const projectMap = new Map<string, string>()
   const notebookMap = new Map<string, string>()
   const docMap = new Map<string, string>()
   const dbMap = new Map<string, string>()
   const attMap = new Map<string, { id: string; key: string }>()
-  for (const p of t.projects) projectMap.set(p.id as string, randomUUID())
   for (const nb of t.notebooks) notebookMap.set(nb.id as string, randomUUID())
   for (const d of t.documents) docMap.set(d.id as string, randomUUID())
   for (const d of t.databases) dbMap.set(d.id as string, randomUUID())
@@ -67,20 +64,10 @@ export async function seedUserContent(userId: string): Promise<void> {
   }
 
   await db.transaction(async (tx) => {
-    await tx.insert(schema.projects).values(
-      t.projects.map((p) => ({
-        id: projectMap.get(p.id as string)!,
-        userId,
-        name: p.name as string,
-        icon: (p.icon as string | null) ?? null,
-        color: (p.color as string | null) ?? null,
-        position: p.position as string,
-      })),
-    )
     await tx.insert(schema.notebooks).values(
       t.notebooks.map((nb) => ({
         id: notebookMap.get(nb.id as string)!,
-        projectId: projectMap.get(nb.projectId as string)!,
+        userId,
         name: nb.name as string,
         icon: (nb.icon as string | null) ?? null,
         position: nb.position as string,

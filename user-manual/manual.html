@@ -20,12 +20,33 @@
 <nav>
   <h2>Contents</h2>
   <ul>
+    <li><a href="#accounts">Accounts &amp; registration</a></li>
     <li><a href="#database-table">Database table block (Table &amp; Board views)</a></li>
   </ul>
 </nav>
 
 <section>
   <h2>Modules</h2>
+
+  <h3 id="accounts">Accounts &amp; registration</h3>
+  <p><strong>What it is.</strong> Notebook++ is self-hosted and account-based: each account is a
+  private, independent workspace. Accounts are created by self-registration on the sign-up page
+  (<code>/register</code>) &mdash; there is no shared or default login.</p>
+  <p><strong>First run.</strong> A fresh install ships with <em>no accounts</em>. Open the app and
+  register the first one; the first account on an empty install is always allowed, even when
+  registration is otherwise disabled.</p>
+  <p><strong>Starter content.</strong> Every new account is created pre-loaded with its own private
+  copy of the starter content &mdash; a <em>Getting Started</em> notebook with sample notes (a
+  formatting reference, a canvas, a data table, a Kanban board, and a short user guide), plus their
+  tables and images. It is a full copy: edit or delete any of it freely without affecting other
+  accounts.</p>
+  <p><strong>Enabling / disabling registration.</strong> Whether new people can register is
+  controlled by <strong>Settings &rarr; Registration</strong> (a toggle), which overrides the
+  <code>ALLOW_REGISTRATION</code> environment default. Turn it off once your account(s) exist to keep
+  the instance private.</p>
+  <p><strong>Connections.</strong> The sign-up endpoint clones the bundled template into the new
+  account (all ids and in-content references remapped, attachment files copied), then signs you in.
+  The registration toggle is stored in the owner's preferences and read by the sign-up endpoint.</p>
 
   <h3 id="database-table">Database table block</h3>
   <p><strong>What it is.</strong> An embedded, spreadsheet-style database you drop into any page

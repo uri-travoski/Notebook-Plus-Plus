@@ -43,6 +43,13 @@
       "when": 1782997745583,
       "tag": "0005_supreme_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783300000000,
+      "tag": "0006_flatten_notebooks",
+      "breakpoints": true
     }
   ]
 }

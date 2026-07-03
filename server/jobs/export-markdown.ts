@@ -3,7 +3,7 @@ import { and, asc, eq, isNull } from 'drizzle-orm'
 import { useDb, schema } from '../db'
 import { documentToMarkdown } from '../utils/markdown'
 
-// Build a zip of the user's notes as Markdown, mirroring the Projects/Notebooks tree.
+// Build a zip of the user's notes as Markdown, mirroring the Notebooks tree.
 // Stored back into the export_jobs row (base64) for the client to download.
 
 function slug(s: string): string {
@@ -41,33 +41,26 @@ export async function runExportJob({ exportId }: { exportId: string }) {
       zip.file(path, await documentToMarkdown(doc))
     }
 
-    const projects = await db
+    const notebooks = await db
       .select()
-      .from(schema.projects)
-      .where(and(eq(schema.projects.userId, userId), isNull(schema.projects.archivedAt)))
-      .orderBy(asc(schema.projects.position))
+      .from(schema.notebooks)
+      .where(and(eq(schema.notebooks.userId, userId), isNull(schema.notebooks.archivedAt)))
+      .orderBy(asc(schema.notebooks.position))
 
-    for (const project of projects) {
-      const notebooks = await db
+    for (const nb of notebooks) {
+      const docs = await db
         .select()
-        .from(schema.notebooks)
-        .where(and(eq(schema.notebooks.projectId, project.id), isNull(schema.notebooks.archivedAt)))
-        .orderBy(asc(schema.notebooks.position))
-      for (const nb of notebooks) {
-        const docs = await db
-          .select()
-          .from(schema.documents)
-          .where(
-            and(
-              eq(schema.documents.notebookId, nb.id),
-              isNull(schema.documents.deletedAt),
-              isNull(schema.documents.archivedAt),
-            ),
-          )
-          .orderBy(asc(schema.documents.position))
-        const folder = `${slug(project.name)}/${slug(nb.name)}`
-        for (const doc of docs) await addDoc(folder, doc)
-      }
+        .from(schema.documents)
+        .where(
+          and(
+            eq(schema.documents.notebookId, nb.id),
+            isNull(schema.documents.deletedAt),
+            isNull(schema.documents.archivedAt),
+          ),
+        )
+        .orderBy(asc(schema.documents.position))
+      const folder = slug(nb.name)
+      for (const doc of docs) await addDoc(folder, doc)
     }
 
     // Documents not filed under a notebook (drafts/templates) go in a flat folder.

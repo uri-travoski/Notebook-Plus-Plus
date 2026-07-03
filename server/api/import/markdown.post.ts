@@ -63,7 +63,7 @@ async function createPage(
 }
 
 // Import Markdown: a flat list of files into one notebook, OR a .zip whose top-level folders
-// become notebooks under a chosen project (nested .md files become their pages).
+// become top-level notebooks under the user (nested .md files become their pages).
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
   const body = await readBody<Record<string, unknown>>(event)
@@ -71,19 +71,6 @@ export default defineEventHandler(async (event) => {
 
   // --- Zip import (folders -> notebooks) ---
   if (body?.zip) {
-    const projectId = String(body.projectId ?? '')
-    if (!projectId)
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'projectId is required for a zip import.',
-      })
-    const [proj] = await db
-      .select({ id: schema.projects.id })
-      .from(schema.projects)
-      .where(and(eq(schema.projects.id, projectId), eq(schema.projects.userId, userId)))
-      .limit(1)
-    if (!proj) throw createError({ statusCode: 404, statusMessage: 'Project not found.' })
-
     const zip = await JSZip.loadAsync(Buffer.from(String(body.zip), 'base64'))
     const entries = Object.values(zip.files).filter((f) => !f.dir && /\.md$/i.test(f.name))
     if (!entries.length)
@@ -96,12 +83,12 @@ export default defineEventHandler(async (event) => {
       const [last] = await db
         .select({ position: schema.notebooks.position })
         .from(schema.notebooks)
-        .where(eq(schema.notebooks.projectId, projectId))
+        .where(eq(schema.notebooks.userId, userId))
         .orderBy(desc(schema.notebooks.position))
         .limit(1)
       const [nb] = await db
         .insert(schema.notebooks)
-        .values({ projectId, name, position: keyAfter(last?.position ?? null) })
+        .values({ userId, name, position: keyAfter(last?.position ?? null) })
         .returning({ id: schema.notebooks.id })
       nbCache.set(name, nb.id)
       return nb.id
@@ -131,8 +118,7 @@ export default defineEventHandler(async (event) => {
     const [nb] = await db
       .select({ id: schema.notebooks.id })
       .from(schema.notebooks)
-      .innerJoin(schema.projects, eq(schema.notebooks.projectId, schema.projects.id))
-      .where(and(eq(schema.notebooks.id, notebookId), eq(schema.projects.userId, userId)))
+      .where(and(eq(schema.notebooks.id, notebookId), eq(schema.notebooks.userId, userId)))
       .limit(1)
     if (!nb) throw createError({ statusCode: 404, statusMessage: 'Notebook not found.' })
   }

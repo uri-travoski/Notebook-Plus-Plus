@@ -6,20 +6,12 @@ useHead({ title: 'Settings · Notebook++' })
 const { tree, ensure, refresh } = useTree()
 onMounted(ensure)
 
-const notebookOptions = computed(() => {
-  const opts: { id: string; label: string }[] = []
-  for (const p of tree.value?.projects ?? []) {
-    for (const nb of p.notebooks) opts.push({ id: nb.id, label: `${p.name} / ${nb.name}` })
-  }
-  return opts
-})
+const notebookOptions = computed(() =>
+  (tree.value?.notebooks ?? []).map((nb) => ({ id: nb.id, label: nb.name })),
+)
 const target = ref('')
 
-// Zip import (folders -> notebooks under a project)
-const projectOptions = computed(() =>
-  (tree.value?.projects ?? []).map((p) => ({ id: p.id, label: p.name })),
-)
-const zipTarget = ref('')
+// Zip import (top-level folders -> notebooks)
 const importingZip = ref(false)
 const zipInput = ref<HTMLInputElement | null>(null)
 function toBase64(buf: ArrayBuffer) {
@@ -34,11 +26,6 @@ async function onZip(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  if (!zipTarget.value) {
-    importError.value = 'Choose a project for the zip first.'
-    input.value = ''
-    return
-  }
   importingZip.value = true
   importMsg.value = ''
   importError.value = ''
@@ -46,7 +33,7 @@ async function onZip(e: Event) {
     const zip = toBase64(await file.arrayBuffer())
     const res = await $fetch<{ created: unknown[]; notebooks: string[] }>('/api/import/markdown', {
       method: 'POST',
-      body: { projectId: zipTarget.value, zip },
+      body: { zip },
     })
     const n = res.created.length
     importMsg.value = `Imported ${n} note${n === 1 ? '' : 's'} into ${res.notebooks.length} notebook${res.notebooks.length === 1 ? '' : 's'}.`
@@ -176,24 +163,13 @@ async function onFiles(e: Event) {
             </div>
 
             <div class="mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
-              <label class="block">
-                <span class="mb-1 block text-xs font-medium text-text-muted">
-                  Or import a .zip into project
-                </span>
-                <select
-                  v-model="zipTarget"
-                  class="rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
-                >
-                  <option value="">Choose a project…</option>
-                  <option v-for="o in projectOptions" :key="o.id" :value="o.id">
-                    {{ o.label }}
-                  </option>
-                </select>
-              </label>
-              <input ref="zipInput" type="file" accept=".zip" class="hidden" @change="onZip" />
-              <UiButton variant="subtle" :loading="importingZip" @click="zipInput?.click()">
-                Choose .zip
-              </UiButton>
+              <div>
+                <span class="mb-1 block text-xs font-medium text-text-muted">Or import a .zip</span>
+                <input ref="zipInput" type="file" accept=".zip" class="hidden" @change="onZip" />
+                <UiButton variant="subtle" :loading="importingZip" @click="zipInput?.click()">
+                  Choose .zip
+                </UiButton>
+              </div>
             </div>
             <p class="mt-1 text-xs text-text-subtle">
               Top-level folders in the zip become notebooks; each <code class="text-xs">.md</code>
@@ -213,7 +189,7 @@ async function onFiles(e: Event) {
             <h2 class="text-base font-semibold text-heading">Export all</h2>
             <p class="mt-1 text-sm text-text-muted">
               Download every note as Markdown in a <code class="text-xs">.zip</code>, mirroring your
-              Projects and Notebooks.
+              Notebooks.
             </p>
             <div class="mt-4">
               <UiButton :loading="exporting" @click="exportAll">

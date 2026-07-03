@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import IconFolder from '~/components/IconFolder.vue'
 import AppMark from '~/components/AppMark.vue'
 import { FileText, BookOpen } from 'lucide-vue-next'
 useHead({ title: 'Overview · Notebook++' })
@@ -19,9 +18,8 @@ const manual = computed(() =>
   ),
 )
 
-// Stat tiles use the same icons as the sidebar (project folder, notebook mark, page).
+// Stat tiles use the same icons as the sidebar (notebook mark, page).
 const cards = computed(() => [
-  { label: 'Projects', value: stats.value?.projects ?? 0, icon: IconFolder, iconClass: 'h-6 w-6' },
   { label: 'Notebooks', value: stats.value?.notebooks ?? 0, icon: AppMark, iconClass: 'h-7 w-7' },
   { label: 'Notes', value: stats.value?.notes ?? 0, icon: FileText, iconClass: 'h-6 w-6' },
 ])
@@ -42,7 +40,7 @@ const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
     </template>
     <div class="space-y-8">
       <section aria-label="At a glance">
-        <dl class="grid grid-cols-3 gap-3 sm:gap-4">
+        <dl class="grid grid-cols-2 gap-3 sm:gap-4">
           <div
             v-for="c in cards"
             :key="c.label"
@@ -72,7 +70,7 @@ const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
           <EmptyState
             v-else
             title="No notes yet"
-            hint="Create a project and notebook in the sidebar, then add your first page or canvas."
+            hint="Create a notebook in the sidebar, then add your first page or canvas."
           />
         </section>
 

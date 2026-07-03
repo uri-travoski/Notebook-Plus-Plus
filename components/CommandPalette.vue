@@ -7,7 +7,6 @@ type Result = {
   type: 'page' | 'canvas'
   notebookId: string | null
   notebookName: string | null
-  projectName: string | null
   snippet: string | null
 }
 
@@ -19,11 +18,11 @@ const activeIndex = ref(0)
 const loading = ref(false)
 const inputEl = ref<HTMLInputElement | null>(null)
 
-// Group results by "Project / Notebook" while keeping a flat order for keyboard nav.
+// Group results by notebook while keeping a flat order for keyboard nav.
 const groups = computed(() => {
   const map = new Map<string, { label: string; items: { r: Result; i: number }[] }>()
   results.value.forEach((r, i) => {
-    const label = r.notebookName ? `${r.projectName ?? 'Workspace'} / ${r.notebookName}` : 'Drafts'
+    const label = r.notebookName ?? 'Drafts'
     if (!map.has(label)) map.set(label, { label, items: [] })
     map.get(label)!.items.push({ r, i })
   })

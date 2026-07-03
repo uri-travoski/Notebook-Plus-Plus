@@ -52,13 +52,9 @@ export async function runSeed() {
       })
       .returning()
 
-    const [project] = await db
-      .insert(schema.projects)
-      .values({ userId: user.id, name: 'Getting Started', icon: 'sparkles', position: 'a0' })
-      .returning()
     const [notebook] = await db
       .insert(schema.notebooks)
-      .values({ projectId: project.id, name: 'Welcome', icon: 'book', position: 'a0' })
+      .values({ userId: user.id, name: 'Welcome', icon: 'book', position: 'a0' })
       .returning()
 
     await db.insert(schema.documents).values({

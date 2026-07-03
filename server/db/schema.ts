@@ -68,8 +68,10 @@ export const passwordResetTokens = pgTable('password_reset_tokens', {
   createdAt: createdAt(),
 })
 
-export const projects = pgTable(
-  'projects',
+// Notebooks are top-level, owned directly by the user (Notebooks -> Notes; notes nest via
+// parentDocumentId). There is no Project layer.
+export const notebooks = pgTable(
+  'notebooks',
   {
     id: pk(),
     userId: uuid('user_id')
@@ -77,32 +79,13 @@ export const projects = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     icon: text('icon'),
-    color: text('color'),
     position: text('position').notNull().default('a0'), // fractional index
     archivedAt: archivedAt(),
     deletedAt: deletedAt(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
-  (t) => [index('projects_user_idx').on(t.userId)],
-)
-
-export const notebooks = pgTable(
-  'notebooks',
-  {
-    id: pk(),
-    projectId: uuid('project_id')
-      .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    name: text('name').notNull(),
-    icon: text('icon'),
-    position: text('position').notNull().default('a0'),
-    archivedAt: archivedAt(),
-    deletedAt: deletedAt(),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-  },
-  (t) => [index('notebooks_project_idx').on(t.projectId)],
+  (t) => [index('notebooks_user_idx').on(t.userId)],
 )
 
 export const documents = pgTable(
@@ -253,7 +236,6 @@ export const exportJobs = pgTable(
 )
 
 export type User = typeof users.$inferSelect
-export type Project = typeof projects.$inferSelect
 export type Notebook = typeof notebooks.$inferSelect
 export type Document = typeof documents.$inferSelect
 export type Database = typeof databases.$inferSelect
