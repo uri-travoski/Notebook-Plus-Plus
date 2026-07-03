@@ -29,39 +29,35 @@ async function submit() {
 
 <template>
   <div>
-    <h1 class="mb-1 text-lg font-semibold text-heading">Create your account</h1>
-    <p class="mb-6 text-sm text-text-muted">One account — this notebook is just for you.</p>
+    <h1 class="mb-6 text-lg font-semibold text-heading">Create your account</h1>
 
     <form class="space-y-4" novalidate @submit.prevent="submit">
-      <FormField id="email" label="Email">
-        <UiInput
-          id="email"
-          v-model="email"
-          type="email"
-          autocomplete="email"
-          placeholder="you@example.com"
-          required
-        />
-      </FormField>
-      <FormField id="username" label="Username">
-        <UiInput
-          id="username"
-          v-model="username"
-          autocomplete="username"
-          placeholder="yourname"
-          required
-        />
-      </FormField>
-      <FormField id="password" label="Password" hint="At least 8 characters.">
-        <UiInput
-          id="password"
-          v-model="password"
-          type="password"
-          autocomplete="new-password"
-          placeholder="••••••••"
-          required
-        />
-      </FormField>
+      <UiInput
+        id="email"
+        v-model="email"
+        type="email"
+        autocomplete="email"
+        placeholder="Email"
+        aria-label="Email"
+        required
+      />
+      <UiInput
+        id="username"
+        v-model="username"
+        autocomplete="username"
+        placeholder="Username"
+        aria-label="Username"
+        required
+      />
+      <UiInput
+        id="password"
+        v-model="password"
+        type="password"
+        autocomplete="new-password"
+        placeholder="Password (at least 8 characters)"
+        aria-label="Password"
+        required
+      />
 
       <p
         v-if="error"
@@ -85,3 +81,15 @@ async function submit() {
     </p>
   </div>
 </template>
+
+<style scoped>
+/* Match the login form: taller inputs + button and the same subtle input fill (scoped so the
+   shared UiInput/UiButton are untouched). */
+form :deep(input) {
+  padding-block: calc(var(--spacing) * 3);
+  background: #f4f6fb;
+}
+form :deep(button) {
+  padding-block: calc(var(--spacing) * 3);
+}
+</style>

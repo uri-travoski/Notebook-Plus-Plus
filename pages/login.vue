@@ -2,6 +2,10 @@
 definePageMeta({ layout: 'auth' })
 useHead({ title: 'Sign in · Notebook++' })
 
+// Fresh install (no accounts yet): send the first visitor straight to registration.
+const { data: setup } = await useFetch<{ needsSetup: boolean }>('/api/auth/needs-setup')
+if (setup.value?.needsSetup) await navigateTo('/register')
+
 const { fetch: refreshSession } = useUserSession()
 const identifier = ref('')
 const password = ref('')
