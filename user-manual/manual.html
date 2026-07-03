@@ -10,6 +10,12 @@
   nav a { text-decoration: none; }
   section { margin-top: 2rem; }
   .empty { color: #666; font-style: italic; }
+  pre { background: #f5f5f5; padding: 0.75rem 1rem; border-radius: 6px; overflow-x: auto; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; }
+  pre code { font-size: 0.85rem; }
+  table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.9rem; }
+  th, td { border: 1px solid #ddd; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+  th { background: #f5f5f5; }
 </style>
 </head>
 <body>
@@ -20,6 +26,7 @@
 <nav>
   <h2>Contents</h2>
   <ul>
+    <li><a href="#install">Installing with Docker Compose</a></li>
     <li><a href="#accounts">Accounts &amp; registration</a></li>
     <li><a href="#database-table">Database table block (Table &amp; Board views)</a></li>
   </ul>
@@ -27,6 +34,82 @@
 
 <section>
   <h2>Modules</h2>
+
+  <h3 id="install">Installing with Docker Compose</h3>
+  <p><strong>What you need.</strong> A host with Docker and Docker Compose. The app image is published
+  <em>privately</em> to GitHub Container Registry (GHCR), so you also need a GitHub account with access
+  to it and a Personal Access Token carrying the <code>read:packages</code> scope in order to pull it.</p>
+
+  <p><strong>1. Get the compose file.</strong> Put <code>docker-compose.standalone.yml</code> (from the
+  repository) in an empty folder. It defines the whole stack &mdash; the app plus its PostgreSQL
+  database &mdash; so no other files are needed.</p>
+
+  <p><strong>2. Generate three secrets.</strong> Each command below prints one random value (OpenSSL
+  ships with macOS/Linux; on Windows use Git Bash or WSL):</p>
+  <pre><code>openssl rand -hex 16     # -&gt; DB_PASSWORD
+openssl rand -base64 48  # -&gt; SESSION_PASSWORD  (must be at least 32 characters)
+openssl rand -hex 32     # -&gt; ENCRYPTION_KEY</code></pre>
+
+  <p><strong>3. Create a <code>.env</code> file</strong> beside the compose file and paste the values in.
+  Only the first three are required; the rest have sensible defaults:</p>
+  <pre><code>DB_PASSWORD=&lt;from openssl&gt;
+SESSION_PASSWORD=&lt;from openssl&gt;
+ENCRYPTION_KEY=&lt;from openssl&gt;
+
+# optional
+APP_PORT=3000
+ALLOW_REGISTRATION=true
+NUXT_PUBLIC_APP_URL=http://localhost:3000
+NUXT_SESSION_COOKIE_SECURE=false
+SMTP_URL=</code></pre>
+
+  <p><strong>4. Log in to GHCR</strong> once so Docker can pull the private image:</p>
+  <pre><code>echo &lt;YOUR_GITHUB_TOKEN&gt; | docker login ghcr.io -u &lt;your-github-username&gt; --password-stdin</code></pre>
+
+  <p><strong>5. Start the stack:</strong></p>
+  <pre><code>docker compose -f docker-compose.standalone.yml up -d</code></pre>
+
+  <p><strong>6. Open the app</strong> at <code>http://localhost:3000</code> (or
+  <code>http://&lt;host-ip&gt;:3000</code> from another device on your LAN) and register the first
+  account &mdash; it arrives pre-loaded with the starter content. See <a href="#accounts">Accounts
+  &amp; registration</a> to turn sign-ups off afterwards.</p>
+
+  <p><strong>Environment variables.</strong></p>
+  <table>
+    <thead>
+      <tr><th>Variable</th><th>Required</th><th>Purpose</th><th>How to generate / default</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>DB_PASSWORD</code></td><td>Yes</td><td>Password for the bundled PostgreSQL database.</td><td><code>openssl rand -hex 16</code></td></tr>
+      <tr><td><code>SESSION_PASSWORD</code></td><td>Yes</td><td>Secret that seals login-session cookies. Must be &ge; 32 characters.</td><td><code>openssl rand -base64 48</code></td></tr>
+      <tr><td><code>ENCRYPTION_KEY</code></td><td>Yes</td><td>Secret used to encrypt saved AI-provider keys at rest (any length; it is hashed to a 256-bit key).</td><td><code>openssl rand -hex 32</code></td></tr>
+      <tr><td><code>APP_PORT</code></td><td>No</td><td>Host port the app is published on.</td><td>Default <code>3000</code></td></tr>
+      <tr><td><code>IMAGE_TAG</code></td><td>No</td><td>Image version to run (e.g. a pinned release instead of latest).</td><td>Default <code>latest</code></td></tr>
+      <tr><td><code>ALLOW_REGISTRATION</code></td><td>No</td><td>Whether new sign-ups are allowed by default (also toggleable in Settings).</td><td>Default <code>true</code></td></tr>
+      <tr><td><code>NUXT_PUBLIC_APP_URL</code></td><td>No</td><td>Public base URL, used to build password-reset links.</td><td>Default <code>http://localhost:3000</code></td></tr>
+      <tr><td><code>NUXT_SESSION_COOKIE_SECURE</code></td><td>No</td><td>Marks the session cookie <em>Secure</em>. Set <code>true</code> only when serving over HTTPS; keep <code>false</code> for plain-HTTP localhost/LAN (browsers reject a Secure cookie over http on a non-localhost IP).</td><td>Default <code>false</code></td></tr>
+      <tr><td><code>SMTP_URL</code></td><td>No</td><td>SMTP server for password-reset email, e.g. <code>smtp://user:pass@host:587</code>. Left empty, the reset link is written to the container log instead.</td><td>Default empty</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Keep the three secrets safe and stable.</strong> Changing <code>SESSION_PASSWORD</code>
+  logs everyone out; changing <code>ENCRYPTION_KEY</code> makes previously-saved AI keys undecryptable;
+  changing <code>DB_PASSWORD</code> after the first run means the database must be recreated.</p>
+
+  <p><strong>Data &amp; backups.</strong> Everything lives in two Docker named volumes &mdash;
+  <code>notebookpp-pgdata</code> (the database) and <code>notebookpp-uploads</code> (uploaded files).
+  They survive restarts and image updates; back them up to back up the app.</p>
+
+  <p><strong>Updating.</strong> Pull the newer image and recreate the containers &mdash; migrations run
+  automatically at boot:</p>
+  <pre><code>docker compose -f docker-compose.standalone.yml pull
+docker compose -f docker-compose.standalone.yml up -d</code></pre>
+  <p>To wipe everything and start clean, run <code>docker compose -f docker-compose.standalone.yml down
+  -v</code> before <code>up</code> &mdash; this deletes both volumes.</p>
+
+  <p><strong>HTTPS on a LAN.</strong> Over plain HTTP on a non-localhost IP, browsers disable some
+  features (pasting into the canvas, installing the app as a PWA). To use those across your network,
+  serve the app over HTTPS through a reverse proxy and set <code>NUXT_SESSION_COOKIE_SECURE=true</code>.</p>
 
   <h3 id="accounts">Accounts &amp; registration</h3>
   <p><strong>What it is.</strong> Notebook++ is self-hosted and account-based: each account is a
