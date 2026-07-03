@@ -50,6 +50,13 @@
       "when": 1783300000000,
       "tag": "0006_flatten_notebooks",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783600000000,
+      "tag": "0007_api_tokens",
+      "breakpoints": true
     }
   ]
 }

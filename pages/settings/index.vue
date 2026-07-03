@@ -123,6 +123,8 @@ async function onFiles(e: Event) {
 
       <AiKeysManager />
 
+      <ApiSettings />
+
       <RegistrationSetting />
 
       <section class="rounded-box border border-border bg-surface p-5">

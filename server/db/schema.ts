@@ -235,6 +235,24 @@ export const exportJobs = pgTable(
   (t) => [index('export_jobs_user_idx').on(t.userId)],
 )
 
+// Bearer API tokens for programmatic access (agents). Only the SHA-256 hash is stored; the
+// plaintext token is shown once at creation. Auth resolves a token to its owner's user id.
+export const apiTokens = pgTable(
+  'api_tokens',
+  {
+    id: pk(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    tokenHash: text('token_hash').notNull(),
+    prefix: text('prefix').notNull(), // first chars, shown for identification
+    lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('api_tokens_user_idx').on(t.userId), index('api_tokens_hash_idx').on(t.tokenHash)],
+)
+
 export type User = typeof users.$inferSelect
 export type Notebook = typeof notebooks.$inferSelect
 export type Document = typeof documents.$inferSelect
