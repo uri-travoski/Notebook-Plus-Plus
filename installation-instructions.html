@@ -264,9 +264,8 @@
       <div class="callout info">
         <p>
           <strong>Before you begin.</strong> You need a host with <strong>Docker</strong> and
-          <strong>Docker Compose</strong> installed. The app image is published <em>privately</em> to
-          GHCR, so you also need a GitHub account with access to it and a
-          <strong>Personal Access Token</strong> with the <code>read:packages</code> scope to pull it.
+          <strong>Docker Compose</strong> installed. The app image is <strong>public</strong> on GHCR,
+          so no login or token is needed to pull it.
         </p>
       </div>
 
@@ -306,7 +305,7 @@ ENCRYPTION_KEY=&lt;from openssl&gt;
 <span class="cmt"># optional</span>
 APP_PORT=3000
 ALLOW_REGISTRATION=true
-NUXT_PUBLIC_APP_URL=http://localhost:3000
+NUXT_PUBLIC_APP_URL=https://notes.mywebsite.com
 NUXT_SESSION_COOKIE_SECURE=false
 SMTP_URL=</code></pre>
         </div>
@@ -315,15 +314,6 @@ SMTP_URL=</code></pre>
       <div class="step">
         <div class="num">4</div>
         <div class="step-body">
-          <h3>Log in to GHCR</h3>
-          <p>Once, so Docker can pull the private image:</p>
-          <pre><code>echo &lt;YOUR_GITHUB_TOKEN&gt; | docker login ghcr.io -u &lt;your-github-username&gt; --password-stdin</code></pre>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="num">5</div>
-        <div class="step-body">
           <h3>Start the stack</h3>
           <pre><code>docker compose -f docker-compose.standalone.yml up -d</code></pre>
           <p>Database migrations run automatically at first boot.</p>
@@ -331,13 +321,12 @@ SMTP_URL=</code></pre>
       </div>
 
       <div class="step">
-        <div class="num">6</div>
+        <div class="num">5</div>
         <div class="step-body">
           <h3>Open the app and register</h3>
           <p>
-            Visit <code>http://localhost:3000</code> (or <code>http://&lt;host-ip&gt;:3000</code> from
-            another device on your LAN) and register the first account &mdash; it arrives pre-loaded
-            with the starter content. Turn sign-ups off afterwards in
+            Visit <code>https://notes.mywebsite.com</code> and register the first account &mdash; it
+            arrives pre-loaded with the starter content. Turn sign-ups off afterwards in
             <strong>Settings &rarr; Registration</strong> to keep the instance private.
           </p>
         </div>
@@ -398,7 +387,7 @@ SMTP_URL=</code></pre>
               <td><code>NUXT_PUBLIC_APP_URL</code></td>
               <td><span class="req no">No</span></td>
               <td>Public base URL, used to build password-reset links.</td>
-              <td>Default <code>http://localhost:3000</code></td>
+              <td>Default <code>https://notes.mywebsite.com</code></td>
             </tr>
             <tr>
               <td><code>NUXT_SESSION_COOKIE_SECURE</code></td>

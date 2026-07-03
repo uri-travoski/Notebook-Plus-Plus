@@ -36,9 +36,8 @@
   <h2>Modules</h2>
 
   <h3 id="install">Installing with Docker Compose</h3>
-  <p><strong>What you need.</strong> A host with Docker and Docker Compose. The app image is published
-  <em>privately</em> to GitHub Container Registry (GHCR), so you also need a GitHub account with access
-  to it and a Personal Access Token carrying the <code>read:packages</code> scope in order to pull it.</p>
+  <p><strong>What you need.</strong> A host with Docker and Docker Compose. The app image is
+  <strong>public</strong> on GitHub Container Registry (GHCR), so no login or token is needed to pull it.</p>
 
   <p><strong>1. Get the compose file.</strong> Put <code>docker-compose.standalone.yml</code> (from the
   repository) in an empty folder. It defines the whole stack &mdash; the app plus its PostgreSQL
@@ -59,18 +58,14 @@ ENCRYPTION_KEY=&lt;from openssl&gt;
 # optional
 APP_PORT=3000
 ALLOW_REGISTRATION=true
-NUXT_PUBLIC_APP_URL=http://localhost:3000
+NUXT_PUBLIC_APP_URL=https://notes.mywebsite.com
 NUXT_SESSION_COOKIE_SECURE=false
 SMTP_URL=</code></pre>
 
-  <p><strong>4. Log in to GHCR</strong> once so Docker can pull the private image:</p>
-  <pre><code>echo &lt;YOUR_GITHUB_TOKEN&gt; | docker login ghcr.io -u &lt;your-github-username&gt; --password-stdin</code></pre>
-
-  <p><strong>5. Start the stack:</strong></p>
+  <p><strong>4. Start the stack:</strong></p>
   <pre><code>docker compose -f docker-compose.standalone.yml up -d</code></pre>
 
-  <p><strong>6. Open the app</strong> at <code>http://localhost:3000</code> (or
-  <code>http://&lt;host-ip&gt;:3000</code> from another device on your LAN) and register the first
+  <p><strong>5. Open the app</strong> at <code>https://notes.mywebsite.com</code> and register the first
   account &mdash; it arrives pre-loaded with the starter content. See <a href="#accounts">Accounts
   &amp; registration</a> to turn sign-ups off afterwards.</p>
 
@@ -86,7 +81,7 @@ SMTP_URL=</code></pre>
       <tr><td><code>APP_PORT</code></td><td>No</td><td>Host port the app is published on.</td><td>Default <code>3000</code></td></tr>
       <tr><td><code>IMAGE_TAG</code></td><td>No</td><td>Image version to run (e.g. a pinned release instead of latest).</td><td>Default <code>latest</code></td></tr>
       <tr><td><code>ALLOW_REGISTRATION</code></td><td>No</td><td>Whether new sign-ups are allowed by default (also toggleable in Settings).</td><td>Default <code>true</code></td></tr>
-      <tr><td><code>NUXT_PUBLIC_APP_URL</code></td><td>No</td><td>Public base URL, used to build password-reset links.</td><td>Default <code>http://localhost:3000</code></td></tr>
+      <tr><td><code>NUXT_PUBLIC_APP_URL</code></td><td>No</td><td>Public base URL, used to build password-reset links.</td><td>Default <code>https://notes.mywebsite.com</code></td></tr>
       <tr><td><code>NUXT_SESSION_COOKIE_SECURE</code></td><td>No</td><td>Marks the session cookie <em>Secure</em>. Set <code>true</code> only when serving over HTTPS; keep <code>false</code> for plain-HTTP localhost/LAN (browsers reject a Secure cookie over http on a non-localhost IP).</td><td>Default <code>false</code></td></tr>
       <tr><td><code>SMTP_URL</code></td><td>No</td><td>SMTP server for password-reset email, e.g. <code>smtp://user:pass@host:587</code>. Left empty, the reset link is written to the container log instead.</td><td>Default empty</td></tr>
     </tbody>

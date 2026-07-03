@@ -77,17 +77,14 @@ in **[`installation-instructions.html`](installation-instructions.html)**.
 #      SESSION_PASSWORD  = $(openssl rand -base64 48)   # >= 32 chars
 #      ENCRYPTION_KEY    = $(openssl rand -hex 32)
 
-# 3. The image is private on GHCR — log in once (token needs read:packages):
-echo <YOUR_GITHUB_TOKEN> | docker login ghcr.io -u <your-github-username> --password-stdin
-
-# 4. Bring it up:
+# 3. Bring it up (the image is public on GHCR — no login needed):
 docker compose -f docker-compose.standalone.yml up -d
 ```
 
-Open <http://localhost:3000> — the first visit lands on the **registration** screen, and your account arrives
+Open <https://notes.mywebsite.com> — the first visit lands on the **registration** screen, and your account arrives
 pre-loaded with the starter content. Migrations run automatically at boot.
 
-> **Image:** `ghcr.io/uri-travoski/notebookpp` (GHCR, private) · tags `latest` and a semver per release.
+> **Image:** `ghcr.io/uri-travoski/notebookpp` (GHCR, public) · tags `latest` and a semver per release.
 > **Update:** `docker compose -f docker-compose.standalone.yml pull && … up -d`.
 
 ## 🛠 Built with
