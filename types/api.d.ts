@@ -21,6 +21,7 @@ declare global {
     title: string
     type: 'page' | 'canvas'
     content: unknown
+    isStarred: boolean
   }
 
   // GET /api/stats

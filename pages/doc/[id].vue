@@ -1,19 +1,32 @@
 <script setup lang="ts">
-import { Download, History } from 'lucide-vue-next'
+import { Download, History, Star } from 'lucide-vue-next'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
 const { prefs, ensure: ensurePrefs } = usePreferences()
-const { setNoteTitle } = useTree()
+const { setNoteTitle, updateNote } = useTree()
 onMounted(ensurePrefs)
 const wide = computed(() => prefs.value.editorWidth === 'wide')
 const { data: doc, error } = await useFetch<DocDetail>(`/api/documents/${id.value}`)
 useHead({ title: () => `${doc.value?.title || 'Untitled'} · Notebook++` })
 
 const title = ref(doc.value?.title ?? 'Untitled')
+// Starred toggle — reflects doc.isStarred; clicking persists + updates the sidebar/Starred view.
+const starred = ref(!!doc.value?.isStarred)
 watch(doc, (d) => {
-  if (d) title.value = d.title
+  if (d) {
+    title.value = d.title
+    starred.value = !!d.isStarred
+  }
 })
+async function toggleStar() {
+  starred.value = !starred.value
+  try {
+    await updateNote(id.value, { isStarred: starred.value })
+  } catch {
+    starred.value = !starred.value // revert on failure
+  }
+}
 
 // Page outline (headings) — live content drives it; persisted on a debounce.
 type Block = { type?: string; props?: { level?: number }; content?: unknown }
@@ -117,6 +130,21 @@ onBeforeUnmount(() => {
       </span>
       <button
         type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        :class="
+          starred
+            ? 'text-amber-500 hover:bg-surface-subtle'
+            : 'text-text-muted hover:bg-surface-subtle hover:text-heading'
+        "
+        :title="starred ? 'Starred — click to unstar' : 'Star this document'"
+        :aria-pressed="starred"
+        @click="toggleStar"
+      >
+        <Star class="h-3.5 w-3.5" :class="starred ? 'fill-amber-400 text-amber-500' : ''" />
+        {{ starred ? 'Starred' : 'Star' }}
+      </button>
+      <button
+        type="button"
         class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Version history"
         @click="historyOpen = true"
@@ -159,6 +187,21 @@ onBeforeUnmount(() => {
         >
           Saving…
         </span>
+        <button
+          type="button"
+          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          :class="
+            starred
+              ? 'text-amber-500 hover:bg-surface-subtle'
+              : 'text-text-muted hover:bg-surface-subtle hover:text-heading'
+          "
+          :title="starred ? 'Starred — click to unstar' : 'Star this document'"
+          :aria-pressed="starred"
+          @click="toggleStar"
+        >
+          <Star class="h-3.5 w-3.5" :class="starred ? 'fill-amber-400 text-amber-500' : ''" />
+          {{ starred ? 'Starred' : 'Star' }}
+        </button>
         <button
           type="button"
           class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
