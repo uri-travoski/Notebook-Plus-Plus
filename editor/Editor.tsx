@@ -1,4 +1,4 @@
-import { createElement, useMemo } from 'react'
+import { createElement, useMemo, useState, useRef, useEffect, Fragment } from 'react'
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -138,6 +138,96 @@ export default function Editor({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ed = editor as any
+
+  // --- Delete confirmation for media blocks (image/video/audio/file) ---
+  // BlockNote deletes media blocks natively with no "before delete" hook, so we guard at the
+  // ProseMirror level: wrap the view's dispatch, and when a transaction would remove a media
+  // block, hold it, ask the user, then replay it on confirm (drop it on cancel). All non-media
+  // edits pass straight through.
+  const MEDIA_TYPES = ['image', 'video', 'audio', 'file']
+  const MEDIA_NOUN: Record<string, string> = {
+    image: 'image',
+    video: 'video',
+    audio: 'audio file',
+    file: 'file',
+  }
+  // confirm state drives the modal; `resolveRef` returns the user's choice to the dispatch guard.
+  const [confirm, setConfirm] = useState<{ types: string[] } | null>(null)
+  const resolveRef = useRef<((ok: boolean) => void) | null>(null)
+  function askDelete(types: string[]): Promise<boolean> {
+    return new Promise((resolve) => {
+      resolveRef.current = resolve
+      setConfirm({ types })
+    })
+  }
+  function closeConfirm(ok: boolean) {
+    setConfirm(null)
+    const r = resolveRef.current
+    resolveRef.current = null
+    r?.(ok)
+  }
+
+  useEffect(() => {
+    let cleanup = () => {}
+    let raf = 0
+    // Map of blockContainer id -> media block type present in a ProseMirror doc.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function mediaMap(doc: any): Map<string, string> {
+      const m = new Map<string, string>()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      doc.descendants((node: any) => {
+        if (node.type.name === 'blockContainer') {
+          const inner = node.firstChild
+          if (inner && MEDIA_TYPES.includes(inner.type.name)) m.set(node.attrs.id, inner.type.name)
+        }
+        return true
+      })
+      return m
+    }
+    function install() {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const view: any = ed.prosemirrorView
+      if (!view) {
+        raf = requestAnimationFrame(install)
+        return
+      }
+      const originalDispatch = view.dispatch.bind(view)
+      let bypass = false // set while replaying a confirmed deletion, so it isn't re-caught
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      view.dispatch = (tr: any) => {
+        if (bypass || !tr.docChanged) return originalDispatch(tr)
+        const before = mediaMap(view.state.doc)
+        if (before.size === 0) return originalDispatch(tr)
+        const after = mediaMap(tr.doc)
+        const removed: string[] = []
+        for (const [id, type] of before) if (!after.has(id)) removed.push(type)
+        if (removed.length === 0) return originalDispatch(tr)
+        // Hold this transaction; ask, then replay (identity-stable while the modal blocks input).
+        const heldDoc = view.state.doc
+        const removedIds = [...before.keys()].filter((id) => !after.has(id))
+        askDelete(removed).then((ok) => {
+          if (!ok) return
+          bypass = true
+          try {
+            if (view.state.doc === heldDoc) originalDispatch(tr)
+            else ed.removeBlocks(removedIds) // doc moved under us: delete by id instead
+          } finally {
+            bypass = false
+          }
+        })
+        return undefined
+      }
+      cleanup = () => {
+        view.dispatch = originalDispatch
+      }
+    }
+    install()
+    return () => {
+      if (raf) cancelAnimationFrame(raf)
+      cleanup()
+    }
+    // editor instance is stable for the component's life (remounts on theme flip via key)
+  }, [])
 
   // --- AI (§16): stream a completion from /api/ai/complete into a target block, live. ---
   function inlineText(content: unknown): string {
@@ -324,37 +414,153 @@ export default function Editor({
     )
   }
 
+  // Themed confirm modal, styled from the app's global CSS tokens (the island mounts inside
+  // the Vue DOM, so the tokens cascade in). Overlay click / Cancel = keep; Delete = remove.
+  function renderConfirm() {
+    if (!confirm) return null
+    const n = confirm.types.length
+    const title =
+      n === 1
+        ? `Delete this ${MEDIA_NOUN[confirm.types[0]] ?? 'attachment'}?`
+        : `Delete ${n} attachments?`
+    return createElement(
+      'div',
+      {
+        role: 'presentation',
+        onMouseDown: () => closeConfirm(false),
+        style: {
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(15,23,42,0.32)',
+          padding: '1rem',
+        },
+      },
+      createElement(
+        'div',
+        {
+          role: 'alertdialog',
+          'aria-modal': 'true',
+          'aria-label': title,
+          onMouseDown: (e: { stopPropagation: () => void }) => e.stopPropagation(),
+          style: {
+            width: '100%',
+            maxWidth: '22rem',
+            background: 'var(--color-surface, #fff)',
+            color: 'var(--color-text, #334155)',
+            border: '1px solid var(--color-border, #e2e8f0)',
+            borderRadius: 'var(--radius-card, 12px)',
+            boxShadow: '0 10px 40px rgba(15,23,42,0.18)',
+            padding: '1.25rem',
+          },
+        },
+        createElement(
+          'h2',
+          {
+            style: {
+              margin: 0,
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: 'var(--color-heading, #0f172a)',
+            },
+          },
+          title,
+        ),
+        createElement(
+          'p',
+          {
+            style: {
+              margin: '0.4rem 0 1.1rem',
+              fontSize: '0.85rem',
+              color: 'var(--color-text-muted, #64748b)',
+            },
+          },
+          'This removes it from the note. This cannot be undone.',
+        ),
+        createElement(
+          'div',
+          { style: { display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' } },
+          createElement(
+            'button',
+            {
+              type: 'button',
+              onClick: () => closeConfirm(false),
+              style: {
+                padding: '0.4rem 0.85rem',
+                fontSize: '0.85rem',
+                fontWeight: 500,
+                borderRadius: 'var(--radius-input, 4px)',
+                border: '1px solid var(--color-border, #e2e8f0)',
+                background: 'var(--color-surface, #fff)',
+                color: 'var(--color-text, #334155)',
+                cursor: 'pointer',
+              },
+            },
+            'Cancel',
+          ),
+          createElement(
+            'button',
+            {
+              type: 'button',
+              autoFocus: true,
+              onClick: () => closeConfirm(true),
+              style: {
+                padding: '0.4rem 0.85rem',
+                fontSize: '0.85rem',
+                fontWeight: 600,
+                borderRadius: 'var(--radius-input, 4px)',
+                border: '1px solid #dc2626',
+                background: '#dc2626',
+                color: '#fff',
+                cursor: 'pointer',
+              },
+            },
+            'Delete',
+          ),
+        ),
+      ),
+    )
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const View = BlockNoteView as any
   return createElement(
-    View,
-    {
-      editor,
-      editable,
-      theme,
-      slashMenu: false,
-      // Disable the built-in toolbar; we render our own FormattingToolbarController
-      // below. Without this, BOTH render and overlap, and neither applies styles.
-      formattingToolbar: false,
-      onChange: () => onChange?.(editor.document as unknown[]),
-    },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createElement(SuggestionMenuController as any, {
-      triggerCharacter: '/',
-      getItems: getSlashItems,
-    }),
-    // Custom selection toolbar = default items + an inline "code" toggle.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createElement(FormattingToolbarController as any, {
-      formattingToolbar: () =>
-        createElement(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          FormattingToolbar as any,
-          null,
-          ...getFormattingToolbarItems(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          createElement(BasicTextStyleButton as any, { key: 'code', basicTextStyle: 'code' }),
-        ),
-    }),
+    Fragment,
+    null,
+    createElement(
+      View,
+      {
+        editor,
+        editable,
+        theme,
+        slashMenu: false,
+        // Disable the built-in toolbar; we render our own FormattingToolbarController
+        // below. Without this, BOTH render and overlap, and neither applies styles.
+        formattingToolbar: false,
+        onChange: () => onChange?.(editor.document as unknown[]),
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      createElement(SuggestionMenuController as any, {
+        triggerCharacter: '/',
+        getItems: getSlashItems,
+      }),
+      // Custom selection toolbar = default items + an inline "code" toggle.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      createElement(FormattingToolbarController as any, {
+        formattingToolbar: () =>
+          createElement(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            FormattingToolbar as any,
+            null,
+            ...getFormattingToolbarItems(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            createElement(BasicTextStyleButton as any, { key: 'code', basicTextStyle: 'code' }),
+          ),
+      }),
+    ),
+    renderConfirm(),
   )
 }
