@@ -32,7 +32,7 @@ export function defaultPreferences() {
     theme: 'system' as 'system' | 'light' | 'dark',
     bodyFont: 'inter',
     monoFont: 'jetbrains-mono',
-    editorWidth: 'normal' as 'normal' | 'wide',
+    editorWidth: 'normal' as 'normal' | 'wide' | 'wider',
     defaultDocType: 'page' as 'page' | 'canvas',
     dateFormat: 'YYYY-MM-DD',
     markdownShortcuts: true,

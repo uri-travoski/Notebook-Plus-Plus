@@ -6,7 +6,23 @@ const id = computed(() => String(route.params.id))
 const { prefs, ensure: ensurePrefs } = usePreferences()
 const { setNoteTitle, updateNote } = useTree()
 onMounted(ensurePrefs)
-const wide = computed(() => prefs.value.editorWidth === 'wide')
+// Prime the shared prefs during SSR with a cookie-forwarding useFetch. Without this, prefs load
+// client-only (onMounted), so the server renders the default width and the client the chosen one;
+// Vue keeps the server DOM on the class mismatch, leaving 'wide'/'wider' stuck on a hard reload.
+const { data: primedPrefs } = await useFetch<Record<string, unknown>>('/api/me/preferences')
+if (primedPrefs.value && Object.keys(prefs.value).length === 0) prefs.value = primedPrefs.value
+// Editor width preference maps to the reading column and its outer container (which also holds
+// the outline aside). 'wider' = 1100px column.
+const columnMax = computed(
+  () =>
+    ({ wide: 'max-w-[920px]', wider: 'max-w-[1100px]' })[prefs.value.editorWidth as string] ??
+    'max-w-[760px]',
+)
+const containerMax = computed(
+  () =>
+    ({ wide: 'max-w-[1240px]', wider: 'max-w-[1420px]' })[prefs.value.editorWidth as string] ??
+    'max-w-[1080px]',
+)
 const { data: doc, error } = await useFetch<DocDetail>(`/api/documents/${id.value}`)
 useHead({ title: () => `${doc.value?.title || 'Untitled'} · Notebook++` })
 
@@ -286,14 +302,8 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="min-h-0 flex-1 overflow-y-auto">
-      <div
-        class="relative mx-auto flex w-full gap-10 px-6 pb-10 pt-0"
-        :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
-      >
-        <div
-          class="mx-auto w-full min-w-0 flex-1"
-          :class="wide ? 'max-w-[920px]' : 'max-w-[760px]'"
-        >
+      <div class="relative mx-auto flex w-full gap-10 px-6 pb-10 pt-0" :class="containerMax">
+        <div class="mx-auto w-full min-w-0 flex-1" :class="columnMax">
           <ClientOnly>
             <EditorIsland
               :document-id="id"

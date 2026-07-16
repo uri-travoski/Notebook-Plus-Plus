@@ -106,6 +106,7 @@ const THEMES = [
       >
         <option value="normal">Normal (760px)</option>
         <option value="wide">Wide (920px)</option>
+        <option value="wider">Wider (1100px)</option>
       </select>
     </label>
   </section>
