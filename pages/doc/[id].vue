@@ -175,7 +175,7 @@ onBeforeUnmount(() => {
 
   <!-- Page: canvas-style top bar (title + actions in one row), then reading column + outline -->
   <div v-else class="flex h-full flex-col">
-    <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-6">
+    <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-[#f5f9ffc2] px-6">
       <input
         v-model="title"
         class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-primary outline-none placeholder:text-text-subtle"
@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
 
     <div class="min-h-0 flex-1 overflow-y-auto">
       <div
-        class="relative mx-auto flex w-full gap-10 px-6 py-10"
+        class="relative mx-auto flex w-full gap-10 px-6 pb-10 pt-7"
         :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
       >
         <div
