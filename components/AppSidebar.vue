@@ -209,7 +209,7 @@ const systemItems = [
   { to: '/trash', label: 'Trash', icon: IconTrash },
 ]
 const navClass = (to: string) =>
-  route.path === to ? 'bg-row-selected font-medium text-heading' : 'text-text hover:bg-row-hover'
+  route.path === to ? 'bg-row-selected font-medium text-heading' : 'text-text hover:bg-row-selected'
 </script>
 
 <template>
@@ -272,7 +272,7 @@ const navClass = (to: string) =>
       <ul v-else class="space-y-0.5">
         <li v-for="nb in decoratedNotebooks" :key="nb.id">
           <div
-            class="group flex items-center gap-1 rounded-md pr-1 hover:bg-row-hover"
+            class="group flex items-center gap-1 rounded-md pr-1 hover:bg-row-selected"
             :class="overId === nb.id ? 'shadow-[inset_0_0_0_2px_var(--color-primary)]' : ''"
             :draggable="!(editing?.id === nb.id)"
             @dragstart="onNotebookDragStart($event, nb.id)"
@@ -381,7 +381,7 @@ const navClass = (to: string) =>
         up
         block
         label="Account menu"
-        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-row-hover focus-visible:outline-2 focus-visible:outline-primary"
+        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
       >
         <template #trigger>
           <span

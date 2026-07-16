@@ -23,9 +23,9 @@ const TABS = [
   { id: 'security', label: 'Security', icon: ShieldCheck },
 ] as const
 const route = useRoute()
-const activeTab = ref<string>(
-  TABS.some((t) => t.id === route.hash.slice(1)) ? route.hash.slice(1) : 'preferences',
-)
+// Start on Preferences on both server and client (the URL hash isn't available during SSR, so
+// reading it into the initial ref would cause a hydration mismatch); apply the hash on mount.
+const activeTab = ref<string>('preferences')
 function selectTab(id: string) {
   activeTab.value = id
   if (import.meta.client) history.replaceState(history.state, '', `#${id}`)
@@ -33,7 +33,11 @@ function selectTab(id: string) {
 
 // Load the tree client-side (onMounted) so a hard SSR load of /settings doesn't 401 on /api/tree.
 const { tree, ensure, refresh } = useTree()
-onMounted(ensure)
+onMounted(() => {
+  ensure()
+  const h = route.hash.slice(1)
+  if (TABS.some((t) => t.id === h)) activeTab.value = h
+})
 
 const notebookOptions = computed(() =>
   (tree.value?.notebooks ?? []).map((nb) => ({ id: nb.id, label: nb.name })),
@@ -149,7 +153,7 @@ async function onFiles(e: Event) {
   <AppPage title="Settings" subtitle="Preferences, AI providers, backups, and more.">
     <div class="flex flex-col gap-5 md:flex-row md:gap-8">
       <!-- Vertical tab navigation (scrolls horizontally on mobile) -->
-      <nav aria-label="Settings sections" class="md:w-56 md:shrink-0">
+      <nav aria-label="Settings sections" class="md:w-44 md:shrink-0">
         <ul
           class="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:sticky md:top-6 md:mx-0 md:flex-col md:gap-0.5 md:overflow-visible md:px-0 md:pb-0"
         >
@@ -157,15 +161,19 @@ async function onFiles(e: Event) {
             <button
               type="button"
               :aria-current="activeTab === t.id ? 'page' : undefined"
-              class="flex w-full items-center gap-2.5 whitespace-nowrap rounded-input px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+              class="flex w-full items-center gap-2 whitespace-nowrap rounded-md px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
               :class="
                 activeTab === t.id
-                  ? 'bg-primary-subtle text-primary-subtle-fg'
-                  : 'text-text-muted hover:bg-row-hover hover:text-heading'
+                  ? 'bg-row-selected font-medium text-heading'
+                  : 'text-text hover:bg-row-selected'
               "
               @click="selectTab(t.id)"
             >
-              <component :is="t.icon" class="h-4 w-4 shrink-0" />
+              <component
+                :is="t.icon"
+                class="h-4 w-4 shrink-0"
+                :class="activeTab === t.id ? 'text-primary' : 'text-text-subtle'"
+              />
               {{ t.label }}
             </button>
           </li>
