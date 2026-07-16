@@ -376,7 +376,7 @@ const navClass = (to: string) =>
       </ul>
     </div>
 
-    <div class="shrink-0 border-t border-border px-2 py-1">
+    <div class="shrink-0 border-t border-border px-2 py-2">
       <UiDropdown
         up
         block
