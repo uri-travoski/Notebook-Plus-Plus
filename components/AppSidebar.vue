@@ -381,13 +381,13 @@ const navClass = (to: string) =>
         up
         block
         label="Account menu"
-        trigger-class="flex h-[27.6px] w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
+        trigger-class="flex h-8 w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
       >
         <template #trigger>
           <span
-            class="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
+            class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
           >
-            <IconUser class="h-4 w-4" />
+            <IconUser class="h-5 w-5" />
           </span>
           <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
             userName
