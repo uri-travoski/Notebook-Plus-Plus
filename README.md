@@ -40,6 +40,8 @@ sample notebook, and your notes live in volumes you can back up.
 - ↕️ **Markdown import** (files or `.zip`) and **export** (a single note or your whole workspace).
 - 🤖 **Bring-your-own AI keys** (Anthropic · OpenAI · Google · Groq · OpenAI-compatible) — encrypted at rest, with
   ordered fallback across providers.
+- 🔐 **Encrypted backups** — scheduled or on-demand backups of the database + uploads to a local folder or S3
+  (R2 · B2 · MinIO · S3), AES-256-GCM encrypted, with in-place restore. **Settings → Backup.**
 - 📱 **Installable PWA**, light/dark themes, keyboard-accessible, and per-account starter content on sign-up.
 - 🔒 **Single-user & self-hosted** — no cloud, no telemetry; your data stays yours.
 
@@ -89,7 +91,7 @@ pre-loaded with the starter content. Migrations run automatically at boot.
 
 ## 🛠 Built with
 
-Nuxt 3 (Vue 3 + TypeScript) · Nitro · PostgreSQL 18 + Drizzle ORM · Tailwind v4 · nuxt-auth-utils (sealed-cookie
+Nuxt 4 (Vue 3 + TypeScript) · Nitro · PostgreSQL 18 + Drizzle ORM · Tailwind v4 · nuxt-auth-utils (sealed-cookie
 sessions) · pg-boss (jobs, no Redis) · Vite PWA. The editor is an isolated **React island** — BlockNote +
 Excalidraw + TanStack Table — mounted client-only and bridged into the Vue shell.
 
@@ -103,7 +105,7 @@ document.
 
 ## 💻 Develop
 
-Requires Node 20.19+ and Docker.
+Requires Node 22.12+ (Node 26 recommended) and Docker.
 
 ```bash
 # Dev Postgres (published on 127.0.0.1:5438)

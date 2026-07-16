@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Star } from 'lucide-vue-next'
 useHead({ title: 'Starred · Notebook++' })
-const { data: docs } = await useFetch('/api/documents', { query: { view: 'starred' } })
+const { data: docs } = await useFetch<DocSummary[]>('/api/documents', {
+  query: { view: 'starred' },
+})
 </script>
 
 <template>

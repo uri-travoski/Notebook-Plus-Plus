@@ -8,6 +8,7 @@ import {
   timestamp,
   boolean,
   integer,
+  bigint,
   index,
   customType,
   type AnyPgColumn,
@@ -251,6 +252,52 @@ export const apiTokens = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index('api_tokens_user_idx').on(t.userId), index('api_tokens_hash_idx').on(t.tokenHash)],
+)
+
+// Backup subsystem (Settings → Backup). Instance-wide, not per-user: a backup is a full
+// pg_dump of the whole database plus the uploads dir, so these are singleton/global tables.
+// `backup_settings` holds one row; secrets (the backup password and the S3 secret key) are
+// encrypted at rest with ENCRYPTION_KEY, the same scheme used for ai_keys.
+export const backupSettings = pgTable('backup_settings', {
+  id: pk(),
+  schedule: text('schedule').notNull().default('off'), // off | 2h | 6h | daily | weekly
+  retention: integer('retention').notNull().default(14),
+  includeUploads: boolean('include_uploads').notNull().default(true),
+  destinationType: text('destination_type').notNull().default('local'), // local | s3
+  localPath: text('local_path').notNull().default(''), // empty → <cwd>/.data/backups (dev) or /backups (container)
+  s3Endpoint: text('s3_endpoint').notNull().default(''),
+  s3Region: text('s3_region').notNull().default('auto'),
+  s3Bucket: text('s3_bucket').notNull().default(''),
+  s3ForcePathStyle: boolean('s3_force_path_style').notNull().default(false),
+  s3AccessKeyId: text('s3_access_key_id').notNull().default(''),
+  // encrypted S3 secret access key
+  s3SecretCiphertext: text('s3_secret_ciphertext'),
+  s3SecretIv: text('s3_secret_iv'),
+  s3SecretAuthTag: text('s3_secret_auth_tag'),
+  // encrypted backup password (encrypts every backup archive)
+  passwordCiphertext: text('password_ciphertext'),
+  passwordIv: text('password_iv'),
+  passwordAuthTag: text('password_auth_tag'),
+  updatedAt: updatedAt(),
+})
+
+// Append-only log of backup/restore runs, newest first when queried.
+export const backupHistory = pgTable(
+  'backup_history',
+  {
+    id: pk(),
+    type: text('type').notNull(), // backup | restore
+    ok: boolean('ok').notNull(),
+    name: text('name'),
+    // byte size can exceed int4 (2 GB) → bigint
+    size: bigint('size', { mode: 'number' }),
+    location: text('location'),
+    includesUploads: boolean('includes_uploads'),
+    error: text('error'),
+    durationMs: integer('duration_ms'),
+    createdAt: createdAt(),
+  },
+  (t) => [index('backup_history_created_idx').on(t.createdAt)],
 )
 
 export type User = typeof users.$inferSelect

@@ -1,10 +1,10 @@
 {
   "name": "notebookpp",
-  "version": "0.32.0",
+  "version": "0.62.0",
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "nuxt dev",
@@ -29,10 +29,12 @@
     "test:sim": "playwright test e2e/simulation.spec.ts"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^4.0.4",
-    "@ai-sdk/google": "^4.0.3",
-    "@ai-sdk/groq": "^4.0.2",
-    "@ai-sdk/openai": "^4.0.4",
+    "@ai-sdk/anthropic": "^4.0.15",
+    "@ai-sdk/google": "^4.0.17",
+    "@ai-sdk/groq": "^4.0.11",
+    "@ai-sdk/openai": "^4.0.15",
+    "@aws-sdk/client-s3": "^3.1088.0",
+    "@aws-sdk/lib-storage": "^3.1088.0",
     "@blocknote/code-block": "^0.51.4",
     "@blocknote/core": "^0.51.4",
     "@blocknote/mantine": "^0.51.4",
@@ -49,7 +51,7 @@
     "@fontsource/google-sans": "^5.2.1",
     "@fontsource/ibm-plex-serif": "^5.2.7",
     "@fontsource/libre-baskerville": "^5.2.10",
-    "ai": "^7.0.9",
+    "ai": "^7.0.29",
     "drizzle-orm": "0.45.2",
     "fractional-indexing": "^4.0.0",
     "h3": "1.15.11",
@@ -57,13 +59,13 @@
     "katex": "^0.17.0",
     "lucide-vue-next": "^1.0.0",
     "nodemailer": "^9.0.3",
-    "nuxt": "3.21.8",
+    "nuxt": "4.4.8",
     "nuxt-auth-utils": "^0.5.29",
     "pg": "8.22.0",
-    "pg-boss": "^12.24.1",
+    "pg-boss": "^12.26.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "shiki": "^4.3.0",
+    "shiki": "^4.3.1",
     "veaury": "^2.6.3",
     "vue": "^3.5.39",
     "zod": "^4.4.3"
@@ -79,16 +81,18 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vite-pwa/nuxt": "^1.1.1",
-    "@vitejs/plugin-react": "^5.2.0",
     "dotenv": "17.4.2",
     "drizzle-kit": "0.31.10",
-    "eslint": "9.39.4",
+    "eslint": "10.7.0",
     "happy-dom": "20.10.6",
-    "prettier": "3.9.4",
+    "prettier": "3.9.5",
     "tailwindcss": "4.3.2",
-    "tsx": "4.22.4",
+    "tsx": "4.23.1",
     "typescript": "5.9.3",
-    "vitest": "4.1.9",
-    "vue-tsc": "3.3.5"
+    "vitest": "4.1.10",
+    "vue-tsc": "3.3.7"
+  },
+  "overrides": {
+    "h3": "1.15.11"
   }
 }

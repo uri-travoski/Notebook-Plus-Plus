@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { LayoutTemplate } from 'lucide-vue-next'
 useHead({ title: 'Templates · Notebook++' })
-const { data: docs } = await useFetch('/api/documents', { query: { view: 'templates' } })
+const { data: docs } = await useFetch<DocSummary[]>('/api/documents', {
+  query: { view: 'templates' },
+})
 </script>
 
 <template>

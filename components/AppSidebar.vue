@@ -12,6 +12,7 @@ import {
   Search,
   PenTool,
   HelpCircle,
+  Github,
   LogOut,
 } from 'lucide-vue-next'
 import IconOverview from '~/components/IconOverview.vue'
@@ -40,8 +41,11 @@ async function logout() {
   await navigateTo('/login')
 }
 
-// "Help" opens the project's GitHub repository in a new tab.
+// "Help" opens the bundled user manual in a new tab; "GitHub" opens the repository.
 function openHelp() {
+  window.open('/manual.html', '_blank', 'noopener,noreferrer')
+}
+function openGithub() {
   window.open('https://github.com/uri-travoski/Notebook-Plus-Plus', '_blank', 'noopener,noreferrer')
 }
 
@@ -177,10 +181,7 @@ const decoratedNotebooks = computed(() =>
 )
 
 // Drag & drop: reorder notebooks, or move a note into a notebook.
-const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>(
-  'sidebar-drag',
-  () => null,
-)
+const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>('sidebar-drag', () => null)
 const overId = ref<string | null>(null)
 function onNotebookDragStart(e: DragEvent, id: string) {
   drag.value = { kind: 'notebook', id }
@@ -330,9 +331,7 @@ const navClass = (to: string) =>
               <UiMenuItem @click="updateNotebook(nb.id, { archived: true })"
                 ><Archive />Archive</UiMenuItem
               >
-              <UiMenuItem danger @click="deleteNotebook(nb.id)"
-                ><Trash2 />Move to Trash</UiMenuItem
-              >
+              <UiMenuItem danger @click="deleteNotebook(nb.id)"><Trash2 />Move to Trash</UiMenuItem>
             </UiDropdown>
           </div>
 
@@ -397,6 +396,7 @@ const navClass = (to: string) =>
         </template>
         <UiMenuItem @click="navigateTo('/settings')"><Settings />Settings</UiMenuItem>
         <UiMenuItem @click="openHelp"><HelpCircle />Help</UiMenuItem>
+        <UiMenuItem @click="openGithub"><Github />GitHub</UiMenuItem>
         <UiMenuItem danger @click="logout"><LogOut />Log out</UiMenuItem>
       </UiDropdown>
     </div>

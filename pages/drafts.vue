@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PencilLine } from 'lucide-vue-next'
 useHead({ title: 'Drafts · Notebook++' })
-const { data: docs } = await useFetch('/api/documents', { query: { view: 'drafts' } })
+const { data: docs } = await useFetch<DocSummary[]>('/api/documents', { query: { view: 'drafts' } })
 </script>
 
 <template>

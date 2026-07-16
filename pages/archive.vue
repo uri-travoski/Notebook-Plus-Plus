@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Archive } from 'lucide-vue-next'
 useHead({ title: 'Archive · Notebook++' })
-const { data: docs, refresh } = await useFetch('/api/documents', { query: { view: 'archived' } })
+const { data: docs, refresh } = await useFetch<DocSummary[]>('/api/documents', {
+  query: { view: 'archived' },
+})
 const { refresh: refreshTree } = useTree()
 
 async function restore(id: string) {

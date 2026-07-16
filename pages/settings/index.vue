@@ -1,6 +1,35 @@
 <script setup lang="ts">
-import { Download, Upload } from 'lucide-vue-next'
+import {
+  Download,
+  Upload,
+  SlidersHorizontal,
+  Sparkles,
+  Code2,
+  DatabaseBackup,
+  ArrowDownUp,
+  UserPlus,
+  ShieldCheck,
+} from 'lucide-vue-next'
 useHead({ title: 'Settings · Notebook++' })
+
+// Vertical tabs. Persist the choice in the URL hash so a tab is deep-linkable and survives reload.
+const TABS = [
+  { id: 'preferences', label: 'Preferences', icon: SlidersHorizontal },
+  { id: 'ai', label: 'AI providers', icon: Sparkles },
+  { id: 'api', label: 'API', icon: Code2 },
+  { id: 'backup', label: 'Backup', icon: DatabaseBackup },
+  { id: 'data', label: 'Import / Export', icon: ArrowDownUp },
+  { id: 'registration', label: 'Registration', icon: UserPlus },
+  { id: 'security', label: 'Security', icon: ShieldCheck },
+] as const
+const route = useRoute()
+const activeTab = ref<string>(
+  TABS.some((t) => t.id === route.hash.slice(1)) ? route.hash.slice(1) : 'preferences',
+)
+function selectTab(id: string) {
+  activeTab.value = id
+  if (import.meta.client) history.replaceState(history.state, '', `#${id}`)
+}
 
 // Load the tree client-side (onMounted) so a hard SSR load of /settings doesn't 401 on /api/tree.
 const { tree, ensure, refresh } = useTree()
@@ -117,93 +146,127 @@ async function onFiles(e: Event) {
 </script>
 
 <template>
-  <AppPage title="Settings" subtitle="AI providers, and Markdown import / export.">
-    <div class="space-y-5">
-      <PreferencesPanel />
+  <AppPage title="Settings" subtitle="Preferences, AI providers, backups, and more.">
+    <div class="flex flex-col gap-5 md:flex-row md:gap-8">
+      <!-- Vertical tab navigation (scrolls horizontally on mobile) -->
+      <nav aria-label="Settings sections" class="md:w-56 md:shrink-0">
+        <ul
+          class="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:sticky md:top-6 md:mx-0 md:flex-col md:gap-0.5 md:overflow-visible md:px-0 md:pb-0"
+        >
+          <li v-for="t in TABS" :key="t.id" class="shrink-0">
+            <button
+              type="button"
+              :aria-current="activeTab === t.id ? 'page' : undefined"
+              class="flex w-full items-center gap-2.5 whitespace-nowrap rounded-input px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+              :class="
+                activeTab === t.id
+                  ? 'bg-primary-subtle text-primary-subtle-fg'
+                  : 'text-text-muted hover:bg-row-hover hover:text-heading'
+              "
+              @click="selectTab(t.id)"
+            >
+              <component :is="t.icon" class="h-4 w-4 shrink-0" />
+              {{ t.label }}
+            </button>
+          </li>
+        </ul>
+      </nav>
 
-      <AiKeysManager />
+      <!-- Tab panels (kept mounted via v-show so each panel loads its data once) -->
+      <div class="min-w-0 flex-1">
+        <div v-show="activeTab === 'preferences'"><PreferencesPanel /></div>
+        <div v-show="activeTab === 'ai'"><AiKeysManager /></div>
+        <div v-show="activeTab === 'api'"><ApiSettings /></div>
+        <div v-show="activeTab === 'backup'"><BackupManager /></div>
+        <div v-show="activeTab === 'registration'"><RegistrationSetting /></div>
+        <div v-show="activeTab === 'security'"><SecurityPanel /></div>
+        <div v-show="activeTab === 'data'" class="space-y-5">
+          <section class="rounded-box border border-border bg-surface p-5">
+            <div class="flex items-start gap-3">
+              <Upload class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
+              <div class="min-w-0 flex-1">
+                <h2 class="text-base font-semibold text-heading">Import Markdown</h2>
+                <p class="mt-1 text-sm text-text-muted">
+                  Bring in one or more <code class="text-xs">.md</code> files. A leading
+                  <code class="text-xs"># Heading</code> becomes the note title.
+                </p>
 
-      <ApiSettings />
+                <div class="mt-4 flex flex-wrap items-end gap-3">
+                  <label class="block">
+                    <span class="mb-1 block text-xs font-medium text-text-muted">Add to</span>
+                    <select
+                      v-model="target"
+                      class="rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
+                    >
+                      <option value="">Drafts (no notebook)</option>
+                      <option v-for="o in notebookOptions" :key="o.id" :value="o.id">
+                        {{ o.label }}
+                      </option>
+                    </select>
+                  </label>
 
-      <RegistrationSetting />
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept=".md,text/markdown"
+                    multiple
+                    class="hidden"
+                    @change="onFiles"
+                  />
+                  <UiButton variant="subtle" :loading="importing" @click="fileInput?.click()">
+                    Choose .md files
+                  </UiButton>
+                </div>
 
-      <section class="rounded-box border border-border bg-surface p-5">
-        <div class="flex items-start gap-3">
-          <Upload class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
-          <div class="min-w-0 flex-1">
-            <h2 class="text-base font-semibold text-heading">Import Markdown</h2>
-            <p class="mt-1 text-sm text-text-muted">
-              Bring in one or more <code class="text-xs">.md</code> files. A leading
-              <code class="text-xs"># Heading</code> becomes the note title.
-            </p>
+                <div class="mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
+                  <div>
+                    <span class="mb-1 block text-xs font-medium text-text-muted"
+                      >Or import a .zip</span
+                    >
+                    <input
+                      ref="zipInput"
+                      type="file"
+                      accept=".zip"
+                      class="hidden"
+                      @change="onZip"
+                    />
+                    <UiButton variant="subtle" :loading="importingZip" @click="zipInput?.click()">
+                      Choose .zip
+                    </UiButton>
+                  </div>
+                </div>
+                <p class="mt-1 text-xs text-text-subtle">
+                  Top-level folders in the zip become notebooks; each
+                  <code class="text-xs">.md</code>
+                  becomes a note.
+                </p>
 
-            <div class="mt-4 flex flex-wrap items-end gap-3">
-              <label class="block">
-                <span class="mb-1 block text-xs font-medium text-text-muted">Add to</span>
-                <select
-                  v-model="target"
-                  class="rounded-input border border-border bg-surface px-3 py-2 text-sm text-text outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
-                >
-                  <option value="">Drafts (no notebook)</option>
-                  <option v-for="o in notebookOptions" :key="o.id" :value="o.id">
-                    {{ o.label }}
-                  </option>
-                </select>
-              </label>
-
-              <input
-                ref="fileInput"
-                type="file"
-                accept=".md,text/markdown"
-                multiple
-                class="hidden"
-                @change="onFiles"
-              />
-              <UiButton variant="subtle" :loading="importing" @click="fileInput?.click()">
-                Choose .md files
-              </UiButton>
-            </div>
-
-            <div class="mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
-              <div>
-                <span class="mb-1 block text-xs font-medium text-text-muted">Or import a .zip</span>
-                <input ref="zipInput" type="file" accept=".zip" class="hidden" @change="onZip" />
-                <UiButton variant="subtle" :loading="importingZip" @click="zipInput?.click()">
-                  Choose .zip
-                </UiButton>
+                <p v-if="importMsg" class="mt-3 text-sm text-success">{{ importMsg }}</p>
+                <p v-if="importError" class="mt-3 text-sm text-danger">{{ importError }}</p>
               </div>
             </div>
-            <p class="mt-1 text-xs text-text-subtle">
-              Top-level folders in the zip become notebooks; each <code class="text-xs">.md</code>
-              becomes a note.
-            </p>
+          </section>
 
-            <p v-if="importMsg" class="mt-3 text-sm text-success">{{ importMsg }}</p>
-            <p v-if="importError" class="mt-3 text-sm text-danger">{{ importError }}</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="rounded-box border border-border bg-surface p-5">
-        <div class="flex items-start gap-3">
-          <Download class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
-          <div class="min-w-0 flex-1">
-            <h2 class="text-base font-semibold text-heading">Export all</h2>
-            <p class="mt-1 text-sm text-text-muted">
-              Download every note as Markdown in a <code class="text-xs">.zip</code>, mirroring your
-              Notebooks.
-            </p>
-            <div class="mt-4">
-              <UiButton :loading="exporting" @click="exportAll">
-                {{ exporting ? 'Preparing zip…' : 'Export Markdown (.zip)' }}
-              </UiButton>
+          <section class="rounded-box border border-border bg-surface p-5">
+            <div class="flex items-start gap-3">
+              <Download class="mt-0.5 h-5 w-5 shrink-0 text-text-muted" />
+              <div class="min-w-0 flex-1">
+                <h2 class="text-base font-semibold text-heading">Export all</h2>
+                <p class="mt-1 text-sm text-text-muted">
+                  Download every note as Markdown in a <code class="text-xs">.zip</code>, mirroring
+                  your Notebooks.
+                </p>
+                <div class="mt-4">
+                  <UiButton :loading="exporting" @click="exportAll">
+                    {{ exporting ? 'Preparing zip…' : 'Export Markdown (.zip)' }}
+                  </UiButton>
+                </div>
+                <p v-if="exportError" class="mt-3 text-sm text-danger">{{ exportError }}</p>
+              </div>
             </div>
-            <p v-if="exportError" class="mt-3 text-sm text-danger">{{ exportError }}</p>
-          </div>
+          </section>
         </div>
-      </section>
-
-      <SecurityPanel />
+      </div>
     </div>
   </AppPage>
 </template>

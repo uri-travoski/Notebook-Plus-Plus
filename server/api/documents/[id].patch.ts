@@ -7,7 +7,7 @@ import { snapshotIfDue } from '../../utils/versions'
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
   const id = getRouterParam(event, 'id') as string
-  const body = await readBody<Record<string, unknown>>(event)
+  const body = (await readBody<Record<string, unknown>>(event)) ?? {}
   const db = useDb()
 
   const [existing] = await db

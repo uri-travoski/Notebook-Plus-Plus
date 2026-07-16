@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import AppMark from '~/components/AppMark.vue'
-import { FileText, BookOpen, Star } from 'lucide-vue-next'
+import { FileText, BookOpen, Star, PenTool } from 'lucide-vue-next'
 useHead({ title: 'Overview · Notebook++' })
 const { user } = useUserSession()
-const { data: stats } = await useFetch('/api/stats')
-const { data: recent } = await useFetch('/api/documents', { query: { view: 'recent' } })
-const { data: starred } = await useFetch('/api/documents', { query: { view: 'starred' } })
+const { data: stats } = await useFetch<StatsSummary>('/api/stats')
+const { data: recent } = await useFetch<DocSummary[]>('/api/documents', {
+  query: { view: 'recent' },
+})
+const { data: starred } = await useFetch<DocSummary[]>('/api/documents', {
+  query: { view: 'starred' },
+})
 // The manual document (renamed to "Simple user guide").
 const MANUAL_TITLE = 'Simple user guide'
 const { data: manualSearch } = await useFetch<{ results: { id: string; title: string }[] }>(
@@ -18,10 +22,11 @@ const manual = computed(() =>
   ),
 )
 
-// Stat tiles use the same icons as the sidebar (notebook mark, page).
+// Stat tiles use the same icons as the sidebar (notebook mark, page, canvas pen).
 const cards = computed(() => [
   { label: 'Notebooks', value: stats.value?.notebooks ?? 0, icon: AppMark, iconClass: 'h-7 w-7' },
   { label: 'Notes', value: stats.value?.notes ?? 0, icon: FileText, iconClass: 'h-6 w-6' },
+  { label: 'Canvases', value: stats.value?.canvases ?? 0, icon: PenTool, iconClass: 'h-6 w-6' },
 ])
 // Overview shows only the 10 most recent notes.
 const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
@@ -40,14 +45,14 @@ const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
     </template>
     <div class="space-y-8">
       <section aria-label="At a glance">
-        <dl class="grid grid-cols-2 gap-3 sm:gap-4">
+        <dl class="grid grid-cols-3 gap-3 sm:gap-4">
           <div
             v-for="c in cards"
             :key="c.label"
             class="flex min-h-[110px] flex-col justify-center rounded-card border border-border bg-sidebar px-3 py-4 text-center sm:px-5 sm:py-5"
           >
             <dt
-              class="flex items-center justify-center gap-2 text-base font-medium uppercase tracking-[0.06em] text-text-muted"
+              class="flex flex-col items-center justify-center gap-1 text-[11px] font-medium uppercase tracking-[0.06em] text-text-muted sm:flex-row sm:gap-2 sm:text-base"
             >
               <component :is="c.icon" class="shrink-0 text-text-subtle" :class="c.iconClass" />
               {{ c.label }}

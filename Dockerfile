@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage ----
-FROM node:20-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 # Skip lifecycle scripts here: the project's postinstall (copy-excalidraw-assets + nuxt prepare)
@@ -12,9 +12,27 @@ COPY . .
 RUN node scripts/copy-excalidraw-assets.mjs && npm run build
 
 # ---- Runtime stage ----
-FROM node:20-alpine AS runtime
+# Debian (glibc) rather than Alpine so we can install the official postgresql-client-18 from PGDG
+# — pg_dump/pg_restore for the Settings → Backup subsystem, which must match the PG18 server.
+# The runtime never loads the build stage's musl native addons (Vite/Tailwind/oxc are build-only;
+# the Nitro .output bundles its own pure-JS runtime deps), so mixing the Alpine-built node_modules
+# with a glibc base is safe here.
+FROM node:26-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
+
+# postgresql-client-18 (PGDG repo — Debian bookworm ships an older client) + tar for backups.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates gnupg curl tar && \
+    install -d /usr/share/postgresql-common/pgdg && \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+      -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc && \
+    echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" \
+      > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends postgresql-client-18 && \
+    apt-get purge -y gnupg curl && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Self-contained Nitro server output, plus the migration assets. node_modules is
 # copied so the standalone migrator (drizzle-orm + pg) can run at boot.

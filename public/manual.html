@@ -29,6 +29,7 @@
     <li><a href="#install">Installing with Docker Compose</a></li>
     <li><a href="#accounts">Accounts &amp; registration</a></li>
     <li><a href="#database-table">Database table block (Table &amp; Board views)</a></li>
+    <li><a href="#backups">Backups &amp; restore</a></li>
   </ul>
 </nav>
 
@@ -154,6 +155,87 @@ docker compose -f docker-compose.standalone.yml up -d</code></pre>
   <p><strong>Connections.</strong> Lives inside a page note's content; the editor island renders
   it but reads/writes rows through the <code>/api/databases</code> endpoints (the Vue shell owns
   document autosave). Needs at least one Select column to use Board view.</p>
+
+  <h3 id="backups">Backups &amp; restore</h3>
+  <p><strong>What it is.</strong> A built-in, encrypted backup system (<strong>Settings &rarr; Backup</strong>)
+  that captures your whole instance &mdash; the PostgreSQL database and your uploaded files &mdash; into a single
+  encrypted <code>.npbk</code> file, on a schedule or on demand, to a local folder or any S3-compatible object
+  store (Cloudflare R2, Backblaze B2, MinIO, AWS S3). Restores happen in place, with no downtime.</p>
+
+  <p><strong>How a backup works.</strong> Each run:</p>
+  <ol>
+    <li>dumps the database with <code>pg_dump</code> (every note, canvas, database table, tag, and setting);</li>
+    <li>archives the uploads folder (images, video, audio, file attachments) &mdash; when "Include uploads" is on;</li>
+    <li>bundles them with a manifest and a copy of the instance <code>ENCRYPTION_KEY</code>;</li>
+    <li>encrypts the whole bundle with <strong>AES-256-GCM</strong> using a key derived (scrypt) from your
+    <em>backup password</em>; and</li>
+    <li>uploads it to your destination, then prunes backups beyond your retention count.</li>
+  </ol>
+  <p>Backups always nest under a <code>notebookpp/</code> folder at the destination, so a shared bucket or drive
+  stays tidy. Each file is named <code>notebookpp-YYYYMMDD-HHMMSS.npbk</code>.</p>
+
+  <p><strong>Encryption.</strong> The <em>backup password</em> is not your login password, and it is
+  <strong>not recoverable</strong>: without it a <code>.npbk</code> cannot be decrypted, by design. A small
+  "check block" at the front of each file verifies the password in milliseconds before a restore touches
+  anything, and GCM authentication makes a corrupted or tampered file fail to decrypt rather than restore
+  garbage. <strong>Write the backup password down and keep it off this machine.</strong></p>
+
+  <p><strong>Set up backups (step by step).</strong></p>
+  <ol>
+    <li>Open <strong>Settings &rarr; Backup</strong>.</li>
+    <li><strong>Set a backup password.</strong> Store it somewhere safe first &mdash; it encrypts every backup and
+    cannot be recovered.</li>
+    <li><strong>Pick a destination:</strong>
+      <ul>
+        <li><em>Local folder</em> &mdash; a directory inside the app container. In Docker, mount a host folder and
+        enter its path; backups land in <code>&lt;dir&gt;/notebookpp/</code>.</li>
+        <li><em>S3 compatible</em> &mdash; for Cloudflare R2: Endpoint
+        <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code>, Region <code>auto</code>, your Bucket,
+        Force path style <em>No</em> (use <em>Yes</em> for MinIO/B2), and the Access key ID / Secret access key.</li>
+      </ul>
+    </li>
+    <li><strong>Choose a schedule:</strong> Off (manual only), every 2 hours, every 6 hours, daily at 03:00, or
+    weekly (Sun 03:00). Scheduled runs use the app's built-in job queue &mdash; no cron, no extra service.</li>
+    <li><strong>Set retention</strong> (default 14). Older backups are deleted after each successful run.</li>
+    <li>Leave <strong>Include uploads</strong> on unless your uploads live in external object storage already.</li>
+    <li>Click <strong>Save settings</strong>, then <strong>Back up now</strong> to prove the whole path works.</li>
+  </ol>
+  <p>The <strong>Backups</strong> table lists each file with size and date; the <strong>History</strong> table logs
+  every run. To verify a backup without changing anything, click <strong>Restore&hellip;</strong>, enter the
+  password until it reads "Password OK", then <strong>Cancel</strong>.</p>
+
+  <p><strong>Restoring.</strong> In <strong>Backups</strong>, click <strong>Restore&hellip;</strong>, enter the
+  backup password (verified first), then type <code>RESTORE</code> to confirm. The app then, in place and without
+  a restart: downloads and decrypts the backup, replaces the database (<code>pg_restore --clean</code>), restores
+  the uploads folder (if included), runs any pending migrations, and re-keys your saved AI keys from the backup's
+  embedded key to the running instance's key (so they keep working even if <code>ENCRYPTION_KEY</code> changed).
+  <strong>This replaces everything not in the backup</strong> &mdash; anything created afterwards is lost. Reload
+  the app when the banner clears.</p>
+
+  <p><strong>Disaster recovery.</strong> If the server or its data is lost: bring the stack up empty, open
+  <strong>Settings &rarr; Backup</strong>, re-enter your destination and backup password, then Restore&hellip; the
+  newest file. Because the backup embeds your <code>ENCRYPTION_KEY</code>, restored AI keys keep working. The two
+  things to keep <em>off</em> the machine are the <strong>backup password</strong> and (for S3) the
+  <strong>bucket endpoint + keys</strong>: with those and any <code>.npbk</code> file you can rebuild the instance
+  from nothing.</p>
+
+  <p><strong>Gotchas.</strong></p>
+  <table>
+    <thead><tr><th>Symptom</th><th>Cause &amp; fix</th></tr></thead>
+    <tbody>
+      <tr><td>"Set a backup password first."</td><td>No password saved &mdash; enter one and Save settings.</td></tr>
+      <tr><td>"Wrong backup password."</td><td>Use the password set <em>when that backup ran</em> &mdash; changing the password does not re-encrypt old backups.</td></tr>
+      <tr><td>Backup fails to S3</td><td>Re-check the endpoint, bucket, and that the token has write access (R2: endpoint <code>https://&lt;account-id&gt;.r2.cloudflarestorage.com</code>, region <code>auto</code>, force-path-style <em>No</em>).</td></tr>
+      <tr><td>Backup fails to a local folder</td><td>The path must exist <em>inside the app container</em> &mdash; mount the host folder as a volume first.</td></tr>
+      <tr><td>Restored, but attachments are missing</td><td>The backup was taken with "Include uploads" off. Turn it on so uploads are captured.</td></tr>
+      <tr><td>A <code>.npbk</code> is lost with its password</td><td>Unrecoverable by design. Keep the password off the machine and keep more than one backup (retention &ge; 2).</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Connections.</strong> The panel talks to the <code>/api/backup</code> endpoints (all behind your
+  login); scheduling uses the same in-app job queue as Markdown export; the password and S3 secret are encrypted
+  at rest with the instance <code>ENCRYPTION_KEY</code>. Treat a <code>.npbk</code> as sensitive even though it is
+  encrypted &mdash; it contains your whole instance.</p>
 </section>
 
 </body>

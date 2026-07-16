@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id') as string
   const rowId = getRouterParam(event, 'rowId') as string
   await requireOwnedDatabase(event, id)
-  const body = await readBody<Record<string, unknown>>(event)
+  const body = (await readBody<Record<string, unknown>>(event)) ?? {}
 
   const patch: Record<string, unknown> = {}
   if (body.values && typeof body.values === 'object') patch.values = body.values

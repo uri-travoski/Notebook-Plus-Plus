@@ -7,7 +7,7 @@ const { prefs, ensure: ensurePrefs } = usePreferences()
 const { setNoteTitle } = useTree()
 onMounted(ensurePrefs)
 const wide = computed(() => prefs.value.editorWidth === 'wide')
-const { data: doc, error } = await useFetch(`/api/documents/${id.value}`)
+const { data: doc, error } = await useFetch<DocDetail>(`/api/documents/${id.value}`)
 useHead({ title: () => `${doc.value?.title || 'Untitled'} · Notebook++` })
 
 const title = ref(doc.value?.title ?? 'Untitled')

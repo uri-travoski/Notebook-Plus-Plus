@@ -5,7 +5,7 @@ import { getUserId } from '../../utils/guard'
 // Enable/disable self-registration. Persisted on the owner's preferences.
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
-  const { enabled } = await readBody<{ enabled?: boolean }>(event)
+  const { enabled } = (await readBody<{ enabled?: boolean }>(event)) ?? {}
   if (typeof enabled !== 'boolean') {
     throw createError({ statusCode: 400, statusMessage: 'enabled (boolean) is required.' })
   }

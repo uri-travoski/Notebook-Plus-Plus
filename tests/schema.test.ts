@@ -6,7 +6,6 @@ describe('db schema', () => {
     const tables = [
       'users',
       'passwordResetTokens',
-      'projects',
       'notebooks',
       'documents',
       'documentVersions',
@@ -14,6 +13,8 @@ describe('db schema', () => {
       'databaseRows',
       'attachments',
       'aiKeys',
+      'backupSettings',
+      'backupHistory',
     ]
     for (const t of tables) {
       expect(schema, `missing table: ${t}`).toHaveProperty(t)

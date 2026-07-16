@@ -9,7 +9,7 @@ const PROVIDERS = ['anthropic', 'openai', 'google', 'openrouter', 'groq'] as con
 // recording lastOkAt / lastError.
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
-  const body = await readBody<Record<string, unknown>>(event)
+  const body = (await readBody<Record<string, unknown>>(event)) ?? {}
   const provider = String(body?.provider ?? '') as Provider
   if (!PROVIDERS.includes(provider))
     throw createError({ statusCode: 400, statusMessage: 'Unknown provider.' })

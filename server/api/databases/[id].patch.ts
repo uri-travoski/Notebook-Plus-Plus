@@ -5,7 +5,7 @@ import { requireOwnedDatabase } from '../../utils/owners'
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id') as string
   await requireOwnedDatabase(event, id)
-  const body = await readBody<Record<string, unknown>>(event)
+  const body = (await readBody<Record<string, unknown>>(event)) ?? {}
 
   const patch: Record<string, unknown> = { updatedAt: new Date() }
   if (typeof body.name === 'string') patch.name = body.name.trim() || 'Untitled table'

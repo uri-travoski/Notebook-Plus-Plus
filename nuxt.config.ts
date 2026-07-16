@@ -1,5 +1,4 @@
 import tailwindcss from '@tailwindcss/vite'
-import react from '@vitejs/plugin-react'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -9,6 +8,17 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint', 'nuxt-auth-utils', '@vite-pwa/nuxt'],
 
   css: ['~/assets/css/main.css'],
+
+  typescript: {
+    // Nuxt 4 turns on `noUncheckedIndexedAccess` by default. This codebase was written under
+    // `strict` without it; keep the original policy for the version upgrade rather than rewrite
+    // ~150 safe array/tuple accesses. Adopting it is a separate hardening task.
+    tsConfig: {
+      compilerOptions: {
+        noUncheckedIndexedAccess: false,
+      },
+    },
+  },
 
   pwa: {
     registerType: 'autoUpdate',
@@ -43,9 +53,13 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    // React (BlockNote/Excalidraw island) JSX is processed ONLY under editor/.
-    // Everything else stays Vue. esbuild-based plugin-react@5 works with Vite 8.
-    plugins: [tailwindcss(), react({ include: /\/editor\// })],
+    plugins: [tailwindcss()],
+    // No @vitejs/plugin-react: the editor React island (editor/*.tsx) is written with
+    // `createElement` (no JSX — see docs/gotchas.md), so Vite/esbuild transpiles it natively.
+    // plugin-react only added React Fast Refresh, whose runtime is incompatible with Nuxt 4's
+    // rolldown-based dev bundler ("Missing field moduleType") and 500'd every dev page. Dropping
+    // it fixes dev SSR; the editor still builds and runs, it just doesn't hot-reload (it mounts
+    // client-only via a dynamic import, so a manual refresh picks up editor edits).
     optimizeDeps: {
       include: ['react', 'react-dom', 'react-dom/client'],
     },
@@ -58,6 +72,10 @@ export default defineNuxtConfig({
     smtpUrl: '', // SMTP_URL
     allowRegistration: 'true', // ALLOW_REGISTRATION
     uploadDir: '', // NUXT_UPLOAD_DIR — attachment storage dir (default: <cwd>/.data/uploads)
+    // NUXT_PG_BIN_DIR — dir holding pg_dump/pg_restore for the backup subsystem. Empty → use
+    // PATH (the container installs postgresql-client-18). Only needed for local dev on a host
+    // without a PG18 client; a lib/ subdir there is added to LD_LIBRARY_PATH.
+    pgBinDir: '',
     // nuxt-auth-utils sealed-session cookie. Secure cookies are dropped by browsers
     // over plain http on a LAN IP (only localhost/HTTPS are "secure contexts"), so
     // default off for LAN/HTTP access; set NUXT_SESSION_COOKIE_SECURE=true behind HTTPS.
