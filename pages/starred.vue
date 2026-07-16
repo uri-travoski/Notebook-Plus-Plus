@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Star } from 'lucide-vue-next'
 useHead({ title: 'Starred · Notebook++' })
-const { data: docs } = await useFetch<DocSummary[]>('/api/documents', {
+const { data: docs, refresh } = await useFetch<DocSummary[]>('/api/documents', {
   query: { view: 'starred' },
 })
 </script>
 
 <template>
   <AppPage title="Starred" subtitle="Notes you've pinned for quick access.">
-    <DocList v-if="docs?.length" :docs="docs" />
+    <DocList v-if="docs?.length" :docs="docs" @toggle-star="() => refresh()" />
     <EmptyState
       v-else
       :icon="Star"

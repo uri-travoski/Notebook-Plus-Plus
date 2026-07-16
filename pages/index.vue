@@ -7,7 +7,7 @@ const { data: stats } = await useFetch<StatsSummary>('/api/stats')
 const { data: recent } = await useFetch<DocSummary[]>('/api/documents', {
   query: { view: 'recent' },
 })
-const { data: starred } = await useFetch<DocSummary[]>('/api/documents', {
+const { data: starred, refresh: refreshStarred } = await useFetch<DocSummary[]>('/api/documents', {
   query: { view: 'starred' },
 })
 // The manual document (renamed to "Simple user guide").
@@ -84,7 +84,7 @@ const recent10 = computed(() => (recent.value ?? []).slice(0, 10))
           <h2 class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
             Starred
           </h2>
-          <DocList v-if="starred?.length" :docs="starred" />
+          <DocList v-if="starred?.length" :docs="starred" @toggle-star="() => refreshStarred()" />
           <EmptyState
             v-else
             :icon="Star"
