@@ -385,9 +385,9 @@ const navClass = (to: string) =>
       >
         <template #trigger>
           <span
-            class="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
+            class="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
           >
-            <IconUser class="h-3.5 w-3.5" />
+            <IconUser class="h-4 w-4" />
           </span>
           <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
             userName
