@@ -117,7 +117,7 @@ onBeforeUnmount(() => {
     <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-6">
       <input
         v-model="title"
-        class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-heading outline-none placeholder:text-text-subtle"
+        class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-primary outline-none placeholder:text-text-subtle"
         placeholder="Untitled canvas"
         aria-label="Canvas title"
         @input="onTitleInput"
@@ -173,100 +173,105 @@ onBeforeUnmount(() => {
     <DocHistory v-model:open="historyOpen" :document-id="id" />
   </div>
 
-  <!-- Page: reading column + editor + outline -->
-  <div
-    v-else
-    class="relative mx-auto flex w-full gap-10 px-6 py-10"
-    :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
-  >
-    <div class="mx-auto w-full min-w-0 flex-1" :class="wide ? 'max-w-[920px]' : 'max-w-[760px]'">
-      <div class="mb-1 flex h-5 items-center justify-end gap-2">
-        <span
-          class="text-xs text-text-muted transition-opacity"
-          :class="saving ? 'opacity-100' : 'opacity-0'"
-        >
-          Saving…
-        </span>
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          :class="
-            starred
-              ? 'text-amber-500 hover:bg-surface-subtle'
-              : 'text-text-muted hover:bg-surface-subtle hover:text-heading'
-          "
-          :title="starred ? 'Starred — click to unstar' : 'Star this document'"
-          :aria-pressed="starred"
-          @click="toggleStar"
-        >
-          <Star class="h-3.5 w-3.5" :class="starred ? 'fill-amber-400 text-amber-500' : ''" />
-          {{ starred ? 'Starred' : 'Star' }}
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          title="Version history"
-          @click="historyOpen = true"
-        >
-          <History class="h-3.5 w-3.5" />
-          History
-        </button>
-        <button
-          type="button"
-          class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          title="Export as Markdown"
-          @click="exportMarkdown"
-        >
-          <Download class="h-3.5 w-3.5" />
-          Export
-        </button>
-      </div>
-
+  <!-- Page: canvas-style top bar (title + actions in one row), then reading column + outline -->
+  <div v-else class="flex h-full flex-col">
+    <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-surface px-6">
       <input
         v-model="title"
-        class="mb-4 w-full border-0 bg-transparent text-[26px] font-bold leading-tight text-heading outline-none placeholder:text-text-subtle sm:text-[32px]"
+        class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-primary outline-none placeholder:text-text-subtle"
         placeholder="Untitled"
         aria-label="Note title"
         @input="onTitleInput"
       />
-
-      <ClientOnly>
-        <EditorIsland
-          :document-id="id"
-          :initial-content="liveContent as unknown[]"
-          @change="onContentChange"
-        />
-        <template #fallback>
-          <div class="space-y-3" aria-hidden="true">
-            <div class="h-4 w-2/3 animate-pulse rounded bg-surface-subtle" />
-            <div class="h-4 w-1/2 animate-pulse rounded bg-surface-subtle" />
-            <div class="h-4 w-3/5 animate-pulse rounded bg-surface-subtle" />
-          </div>
-        </template>
-      </ClientOnly>
+      <span
+        class="text-xs text-text-muted transition-opacity"
+        :class="saving ? 'opacity-100' : 'opacity-0'"
+      >
+        Saving…
+      </span>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        :class="
+          starred
+            ? 'text-amber-500 hover:bg-surface-subtle'
+            : 'text-text-muted hover:bg-surface-subtle hover:text-heading'
+        "
+        :title="starred ? 'Starred — click to unstar' : 'Star this document'"
+        :aria-pressed="starred"
+        @click="toggleStar"
+      >
+        <Star class="h-3.5 w-3.5" :class="starred ? 'fill-amber-400 text-amber-500' : ''" />
+        {{ starred ? 'Starred' : 'Star' }}
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        title="Version history"
+        @click="historyOpen = true"
+      >
+        <History class="h-3.5 w-3.5" />
+        History
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        title="Export as Markdown"
+        @click="exportMarkdown"
+      >
+        <Download class="h-3.5 w-3.5" />
+        Export
+      </button>
     </div>
 
-    <aside
-      v-if="outline.length"
-      class="sticky top-10 hidden h-fit w-48 shrink-0 xl:block"
-      aria-label="Outline"
-    >
-      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
-        On this page
-      </p>
-      <ul class="space-y-0.5 border-l border-border">
-        <li v-for="(h, i) in outline" :key="i">
-          <button
-            type="button"
-            class="block w-full truncate py-0.5 text-left text-sm text-text-muted transition-colors hover:text-primary"
-            :style="{ paddingLeft: `${(h.level - 1) * 10 + 12}px` }"
-            @click="scrollToHeading(i)"
-          >
-            {{ h.text }}
-          </button>
-        </li>
-      </ul>
-    </aside>
+    <div class="min-h-0 flex-1 overflow-y-auto">
+      <div
+        class="relative mx-auto flex w-full gap-10 px-6 py-10"
+        :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
+      >
+        <div
+          class="mx-auto w-full min-w-0 flex-1"
+          :class="wide ? 'max-w-[920px]' : 'max-w-[760px]'"
+        >
+          <ClientOnly>
+            <EditorIsland
+              :document-id="id"
+              :initial-content="liveContent as unknown[]"
+              @change="onContentChange"
+            />
+            <template #fallback>
+              <div class="space-y-3" aria-hidden="true">
+                <div class="h-4 w-2/3 animate-pulse rounded bg-surface-subtle" />
+                <div class="h-4 w-1/2 animate-pulse rounded bg-surface-subtle" />
+                <div class="h-4 w-3/5 animate-pulse rounded bg-surface-subtle" />
+              </div>
+            </template>
+          </ClientOnly>
+        </div>
+
+        <aside
+          v-if="outline.length"
+          class="sticky top-10 hidden h-fit w-48 shrink-0 xl:block"
+          aria-label="Outline"
+        >
+          <p class="mb-2 text-xs font-semibold uppercase tracking-[0.06em] text-text-muted">
+            On this page
+          </p>
+          <ul class="space-y-0.5 border-l border-border">
+            <li v-for="(h, i) in outline" :key="i">
+              <button
+                type="button"
+                class="block w-full truncate py-0.5 text-left text-sm text-text-muted transition-colors hover:text-primary"
+                :style="{ paddingLeft: `${(h.level - 1) * 10 + 12}px` }"
+                @click="scrollToHeading(i)"
+              >
+                {{ h.text }}
+              </button>
+            </li>
+          </ul>
+        </aside>
+      </div>
+    </div>
 
     <DocHistory v-model:open="historyOpen" :document-id="id" />
   </div>
