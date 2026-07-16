@@ -362,7 +362,7 @@ const navClass = (to: string) =>
         <li v-for="item in systemItems" :key="item.to">
           <NuxtLink
             :to="item.to"
-            class="flex items-center gap-3 rounded-md px-2.5 py-1 text-[15px] md:gap-2 md:px-2 md:py-1 md:text-sm"
+            class="flex h-[32.2px] items-center gap-3 rounded-md px-2.5 text-[15px] md:gap-2 md:px-2 md:text-sm"
             :class="navClass(item.to)"
           >
             <component
@@ -381,7 +381,7 @@ const navClass = (to: string) =>
         up
         block
         label="Account menu"
-        trigger-class="flex h-6 w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
+        trigger-class="flex h-[27.6px] w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
       >
         <template #trigger>
           <span
