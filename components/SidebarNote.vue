@@ -185,7 +185,7 @@ const showMove = ref(false)
         :to="`/doc/${note.id}`"
         :draggable="false"
         class="min-w-0 flex-1 truncate py-1.5 text-[15px] md:py-1 md:text-sm"
-        :class="active ? 'font-medium text-heading' : 'text-text'"
+        :class="active ? 'font-[550] text-heading' : 'text-text'"
       >
         {{ note.title || 'Untitled' }}
       </NuxtLink>

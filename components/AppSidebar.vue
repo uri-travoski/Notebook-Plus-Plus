@@ -209,7 +209,7 @@ const systemItems = [
   { to: '/trash', label: 'Trash', icon: IconTrash },
 ]
 const navClass = (to: string) =>
-  route.path === to ? 'bg-row-selected font-medium text-heading' : 'text-text hover:bg-row-selected'
+  route.path === to ? 'bg-row-selected font-[550] text-heading' : 'text-text hover:bg-row-selected'
 </script>
 
 <template>
@@ -381,13 +381,13 @@ const navClass = (to: string) =>
         up
         block
         label="Account menu"
-        trigger-class="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
+        trigger-class="flex h-6 w-full items-center gap-2 rounded-md px-2 text-left transition-colors hover:bg-row-selected focus-visible:outline-2 focus-visible:outline-primary"
       >
         <template #trigger>
           <span
-            class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
+            class="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full bg-primary-subtle text-primary-subtle-fg"
           >
-            <IconUser class="h-[18px] w-[18px]" />
+            <IconUser class="h-3.5 w-3.5" />
           </span>
           <span class="min-w-0 flex-1 truncate text-[15px] font-medium text-heading md:text-sm">{{
             userName

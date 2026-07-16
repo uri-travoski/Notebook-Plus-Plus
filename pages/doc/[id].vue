@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download, History, Star } from 'lucide-vue-next'
+import { Download, History, Star, Info } from 'lucide-vue-next'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
@@ -101,6 +101,9 @@ function exportMarkdown() {
 }
 
 const historyOpen = ref(false)
+function fmtDateTime(s?: string) {
+  return s ? new Date(s).toLocaleString() : '—'
+}
 onBeforeUnmount(() => {
   if (contentTimer) clearTimeout(contentTimer)
   if (titleTimer) clearTimeout(titleTimer)
@@ -130,7 +133,7 @@ onBeforeUnmount(() => {
       </span>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         :class="
           starred
             ? 'text-amber-500 hover:bg-surface-subtle'
@@ -145,16 +148,44 @@ onBeforeUnmount(() => {
       </button>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Version history"
         @click="historyOpen = true"
       >
         <History class="h-3.5 w-3.5" />
         History
       </button>
+      <UiDropdown
+        label="File info"
+        trigger-class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <template #trigger>
+          <Info class="h-3.5 w-3.5" />
+          Info
+        </template>
+        <div class="w-60 px-3 py-2">
+          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+            File info
+          </p>
+          <dl class="space-y-1 text-xs">
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Type</dt>
+              <dd class="capitalize text-heading">{{ doc?.type }}</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Created</dt>
+              <dd class="text-heading">{{ fmtDateTime(doc?.createdAt) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Updated</dt>
+              <dd class="text-heading">{{ fmtDateTime(doc?.updatedAt) }}</dd>
+            </div>
+          </dl>
+        </div>
+      </UiDropdown>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Export as Markdown"
         @click="exportMarkdown"
       >
@@ -175,7 +206,9 @@ onBeforeUnmount(() => {
 
   <!-- Page: canvas-style top bar (title + actions in one row), then reading column + outline -->
   <div v-else class="flex h-full flex-col">
-    <div class="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-[#f5f9ffc2] px-6">
+    <div
+      class="flex h-14 shrink-0 items-center gap-3 border-b border-border/50 bg-[#f5f9ffc2] px-6"
+    >
       <input
         v-model="title"
         class="min-w-0 flex-1 border-0 bg-transparent text-lg font-bold text-primary outline-none placeholder:text-text-subtle"
@@ -191,7 +224,7 @@ onBeforeUnmount(() => {
       </span>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         :class="
           starred
             ? 'text-amber-500 hover:bg-surface-subtle'
@@ -206,16 +239,44 @@ onBeforeUnmount(() => {
       </button>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Version history"
         @click="historyOpen = true"
       >
         <History class="h-3.5 w-3.5" />
         History
       </button>
+      <UiDropdown
+        label="File info"
+        trigger-class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <template #trigger>
+          <Info class="h-3.5 w-3.5" />
+          Info
+        </template>
+        <div class="w-60 px-3 py-2">
+          <p class="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-text-muted">
+            File info
+          </p>
+          <dl class="space-y-1 text-xs">
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Type</dt>
+              <dd class="capitalize text-heading">{{ doc?.type }}</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Created</dt>
+              <dd class="text-heading">{{ fmtDateTime(doc?.createdAt) }}</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+              <dt class="text-text-muted">Updated</dt>
+              <dd class="text-heading">{{ fmtDateTime(doc?.updatedAt) }}</dd>
+            </div>
+          </dl>
+        </div>
+      </UiDropdown>
       <button
         type="button"
-        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-xs text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        class="inline-flex items-center gap-1.5 rounded-input px-2 py-1 text-[0.8rem] text-text-muted transition-colors hover:bg-surface-subtle hover:text-heading focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         title="Export as Markdown"
         @click="exportMarkdown"
       >
@@ -226,7 +287,7 @@ onBeforeUnmount(() => {
 
     <div class="min-h-0 flex-1 overflow-y-auto">
       <div
-        class="relative mx-auto flex w-full gap-10 px-6 pb-10 pt-7"
+        class="relative mx-auto flex w-full gap-10 px-6 pb-10 pt-0"
         :class="wide ? 'max-w-[1240px]' : 'max-w-[1080px]'"
       >
         <div

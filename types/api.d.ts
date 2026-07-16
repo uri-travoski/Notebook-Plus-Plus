@@ -22,6 +22,8 @@ declare global {
     type: 'page' | 'canvas'
     content: unknown
     isStarred: boolean
+    createdAt: string
+    updatedAt: string
   }
 
   // GET /api/stats
