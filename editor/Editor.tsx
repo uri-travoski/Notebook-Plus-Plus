@@ -1,4 +1,5 @@
 import { createElement, useMemo, useState, useRef, useEffect, Fragment } from 'react'
+import * as BlockNoteReact from '@blocknote/react'
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -39,7 +40,7 @@ import './editor.css'
 // SideMenuExtension is a runtime export from @blocknote/react but not in the .d.ts types.
 // It's the extension that tracks which block the side menu (drag handle) is showing for.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SideMenuExtension = (0, eval)('require')('@blocknote/react').SideMenuExtension as any
+const SideMenuExtension = (BlockNoteReact as any).SideMenuExtension
 
 // Link icon SVG for the "copy link" toolbar button and drag handle menu item.
 const LINK_ICON = createElement(
