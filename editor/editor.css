@@ -1056,3 +1056,20 @@
   border: 1px dashed var(--color-border);
   border-radius: var(--radius-card);
 }
+
+/* Deep-link target highlight: when navigating to /doc/{id}#{blockId}, the target
+   block flashes briefly so the user can spot it in a long note. */
+@keyframes nb-block-highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.nb-block-highlight {
+  animation: nb-block-highlight 2.5s ease-out;
+  border-radius: var(--radius-input, 4px);
+}

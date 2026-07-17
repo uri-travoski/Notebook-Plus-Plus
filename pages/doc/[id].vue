@@ -124,6 +124,25 @@ onBeforeUnmount(() => {
   if (contentTimer) clearTimeout(contentTimer)
   if (titleTimer) clearTimeout(titleTimer)
 })
+
+// Deep-link navigation: if the URL has a #blockId hash, scroll to that block and
+// highlight it. The editor is client-only and takes a moment to mount, so retry.
+onMounted(() => {
+  const blockId = route.hash.slice(1)
+  if (!blockId || doc.value?.type !== 'page') return
+  let attempts = 0
+  const tryScroll = () => {
+    const el = document.querySelector(`[data-id="${blockId}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('nb-block-highlight')
+      setTimeout(() => el.classList.remove('nb-block-highlight'), 2600)
+    } else if (++attempts < 20) {
+      setTimeout(tryScroll, 200)
+    }
+  }
+  tryScroll()
+})
 </script>
 
 <template>

@@ -7,6 +7,17 @@ import {
   FormattingToolbar,
   getFormattingToolbarItems,
   BasicTextStyleButton,
+  SideMenuController,
+  SideMenu,
+  DragHandleMenu,
+  RemoveBlockItem,
+  BlockColorsItem,
+  TableColumnHeaderItem,
+  TableRowHeaderItem,
+  useBlockNoteEditor,
+  useComponentsContext,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  useExtensionState as useExtensionStateRaw,
 } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
 import {
@@ -24,6 +35,97 @@ import { Drawing } from './blocks/Drawing'
 import '@blocknote/mantine/style.css'
 import 'katex/dist/katex.min.css'
 import './editor.css'
+
+// SideMenuExtension is a runtime export from @blocknote/react but not in the .d.ts types.
+// It's the extension that tracks which block the side menu (drag handle) is showing for.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SideMenuExtension = (0, eval)('require')('@blocknote/react').SideMenuExtension as any
+
+// Link icon SVG for the "copy link" toolbar button and drag handle menu item.
+const LINK_ICON = createElement(
+  'svg',
+  { width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+  createElement('path', { d: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71' }),
+  createElement('path', { d: 'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71' }),
+)
+
+// Extract the document ID from the current URL path: /doc/{documentId}
+function docIdFromUrl(): string | undefined {
+  if (typeof window === 'undefined') return undefined
+  return window.location.pathname.match(/\/doc\/([^/]+)/)?.[1]
+}
+
+// Copy a deep link to a block: /doc/{documentId}#{blockId}
+function copyBlockLink(blockId: string) {
+  const docId = docIdFromUrl()
+  if (!docId) return
+  const url = `${window.location.origin}/doc/${docId}#${blockId}`
+  navigator.clipboard.writeText(url).catch(() => {})
+}
+
+// Custom drag handle menu: default items + "Copy link to block".
+// Defined outside Editor to avoid remounts; gets the block from SideMenuExtension state.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CopyLinkDragHandleMenu() {
+  const editor = useBlockNoteEditor()
+  const components = useComponentsContext()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const block = useExtensionStateRaw(SideMenuExtension, {
+    editor,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    selector: (state: any) => state?.block,
+  })
+
+  if (!components) return null
+
+  return createElement(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    DragHandleMenu as any,
+    null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createElement(RemoveBlockItem as any, null, 'Delete block'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createElement(BlockColorsItem as any, null, 'Colors'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createElement(TableColumnHeaderItem as any, null, 'Header column'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    createElement(TableRowHeaderItem as any, null, 'Header row'),
+    block
+      ? createElement(components.Generic.Menu.Item, {
+          className: 'bn-menu-item',
+          onClick: () => copyBlockLink(block.id),
+          icon: LINK_ICON,
+        }, 'Copy link to block')
+      : null,
+  )
+}
+
+// Custom side menu: default buttons + our custom drag handle menu.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomSideMenu() {
+  return createElement(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    SideMenu as any,
+    { dragHandleMenu: CopyLinkDragHandleMenu },
+  )
+}
+
+// "Copy link to this block" button for the formatting toolbar.
+// Must be a component (not inline) so it can call useComponentsContext inside the toolbar.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CopyLinkToolbarButton({ editor }: { editor: any }) {
+  const components = useComponentsContext()
+  if (!components) return null
+  return createElement(components.FormattingToolbar.Button, {
+    mainTooltip: 'Copy link to this block',
+    label: 'Copy link to this block',
+    icon: LINK_ICON,
+    onClick: () => {
+      const block = editor.getTextCursorPosition().block
+      if (block?.id) copyBlockLink(block.id as string)
+    },
+  })
+}
 
 // Shiki highlighting: load both github themes so the code block can render dark tokens
 // in dark mode and light tokens in light mode (see the .dark code-block CSS override).
@@ -547,7 +649,12 @@ export default function Editor({
         triggerCharacter: '/',
         getItems: getSlashItems,
       }),
-      // Custom selection toolbar = default items + an inline "code" toggle.
+      // Custom side menu: default buttons + "Copy link to block" in the drag handle menu.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      createElement(SideMenuController as any, {
+        sideMenu: CustomSideMenu,
+      }),
+      // Custom selection toolbar = default items + an inline "code" toggle + copy-link button.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       createElement(FormattingToolbarController as any, {
         formattingToolbar: () =>
@@ -558,6 +665,8 @@ export default function Editor({
             ...getFormattingToolbarItems(),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             createElement(BasicTextStyleButton as any, { key: 'code', basicTextStyle: 'code' }),
+            // "Copy link to this block" — uses the block at the text cursor position.
+            createElement(CopyLinkToolbarButton, { key: 'copylink', editor: ed }),
           ),
       }),
     ),
