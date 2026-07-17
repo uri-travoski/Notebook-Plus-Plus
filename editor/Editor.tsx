@@ -1,5 +1,4 @@
 import { createElement, useMemo, useState, useRef, useEffect, Fragment } from 'react'
-import * as BlockNoteReact from '@blocknote/react'
 import {
   useCreateBlockNote,
   SuggestionMenuController,
@@ -17,8 +16,6 @@ import {
   TableRowHeaderItem,
   useBlockNoteEditor,
   useComponentsContext,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  useExtensionState as useExtensionStateRaw,
 } from '@blocknote/react'
 import { BlockNoteView } from '@blocknote/mantine'
 import {
@@ -36,11 +33,6 @@ import { Drawing } from './blocks/Drawing'
 import '@blocknote/mantine/style.css'
 import 'katex/dist/katex.min.css'
 import './editor.css'
-
-// SideMenuExtension is a runtime export from @blocknote/react but not in the .d.ts types.
-// It's the extension that tracks which block the side menu (drag handle) is showing for.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const SideMenuExtension = (BlockNoteReact as any).SideMenuExtension
 
 // Link icon SVG for the "copy link" toolbar button and drag handle menu item.
 const LINK_ICON = createElement(
@@ -65,17 +57,11 @@ function copyBlockLink(blockId: string) {
 }
 
 // Custom drag handle menu: default items + "Copy link to block".
-// Defined outside Editor to avoid remounts; gets the block from SideMenuExtension state.
+// Uses the editor's text cursor position to identify the block, same as the toolbar button.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function CopyLinkDragHandleMenu() {
   const editor = useBlockNoteEditor()
   const components = useComponentsContext()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const block = useExtensionStateRaw(SideMenuExtension, {
-    editor,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    selector: (state: any) => state?.block,
-  })
 
   if (!components) return null
 
@@ -91,13 +77,14 @@ function CopyLinkDragHandleMenu() {
     createElement(TableColumnHeaderItem as any, null, 'Header column'),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createElement(TableRowHeaderItem as any, null, 'Header row'),
-    block
-      ? createElement(components.Generic.Menu.Item, {
-          className: 'bn-menu-item',
-          onClick: () => copyBlockLink(block.id),
-          icon: LINK_ICON,
-        }, 'Copy link to block')
-      : null,
+    createElement(components.Generic.Menu.Item, {
+      className: 'bn-menu-item',
+      onClick: () => {
+        const block = editor.getTextCursorPosition().block
+        if (block?.id) copyBlockLink(block.id as string)
+      },
+      icon: LINK_ICON,
+    }, 'Copy link to block'),
   )
 }
 
