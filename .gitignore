@@ -35,6 +35,11 @@ coverage/
 # Self-hosted Excalidraw fonts (copied from node_modules on postinstall)
 public/fonts/
 
+# Tauri
+src-tauri/target/
+src-tauri/resources/
+src-tauri/binaries/pg0-*
+
 # Bundled starter-content template (baked into the private image, not committed to git). The
 # dir itself is kept via .gitkeep so a source build ships an empty template.
 server/db/seed/template.json

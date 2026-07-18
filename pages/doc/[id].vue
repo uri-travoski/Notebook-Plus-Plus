@@ -230,7 +230,7 @@ onMounted(() => {
     </div>
     <div class="min-h-0 flex-1">
       <ClientOnly>
-        <CanvasIsland :initial-scene="doc.content" @change="onCanvasChange" />
+        <CanvasIsland :key="id" :initial-scene="doc.content" @change="onCanvasChange" />
         <template #fallback>
           <div class="grid h-full place-items-center text-sm text-text-muted">Loading canvas…</div>
         </template>
@@ -325,6 +325,7 @@ onMounted(() => {
         <div class="mx-auto w-full min-w-0 flex-1" :class="columnMax">
           <ClientOnly>
             <EditorIsland
+              :key="id"
               :document-id="id"
               :initial-content="liveContent as unknown[]"
               @change="onContentChange"

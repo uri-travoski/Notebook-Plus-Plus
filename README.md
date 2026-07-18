@@ -12,6 +12,7 @@ Rich block editor, embedded databases, infinite canvases, and instant search —
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Self-hosted](https://img.shields.io/badge/self--hosted-0b7c6e?style=flat-square)
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?style=flat-square)
+![Tauri](https://img.shields.io/badge/Tauri-2-desktop-FFC131?style=flat-square&logo=tauri&logoColor=white)
 
 <br />
 
@@ -89,7 +90,26 @@ pre-loaded with the starter content. Migrations run automatically at boot.
 > **Image:** `ghcr.io/uri-travoski/notebookpp` (GHCR, public) · tags `latest` and a semver per release.
 > **Update:** `docker compose -f docker-compose.standalone.yml pull && … up -d`.
 
-## 🛠 Built with
+## � Desktop app (Windows, macOS, Linux)
+
+Notebook++ also ships as a **standalone desktop app** built with [Tauri 2](https://tauri.app). No Docker,
+no external PostgreSQL — the app bundles an embedded PostgreSQL 18 instance that starts automatically.
+
+```bash
+# Build from source (requires Rust + Tauri system deps — see installation guide)
+npm run tauri:build
+
+# Output: src-tauri/target/release/bundle/
+#   Linux:   .deb, .rpm, .AppImage
+#   Windows: .msi, .exe (NSIS)
+#   macOS:   .dmg
+```
+
+Data is stored in the OS app-data directory and persists across restarts. See the
+**[installation guide](https://uri-travoski.github.io/Notebook-Plus-Plus/installation-instructions.html)**
+for the full desktop app walkthrough.
+
+## �� Built with
 
 Nuxt 4 (Vue 3 + TypeScript) · Nitro · PostgreSQL 18 + Drizzle ORM · Tailwind v4 · nuxt-auth-utils (sealed-cookie
 sessions) · pg-boss (jobs, no Redis) · Vite PWA. The editor is an isolated **React island** — BlockNote +

@@ -448,6 +448,118 @@ docker compose -f docker-compose.standalone.yml up -d</code></pre>
         </p>
       </div>
 
+      <h2>Desktop app (Windows, macOS, Linux)</h2>
+      <p>
+        Notebook++ is also available as a <strong>standalone desktop application</strong> built with
+        Tauri 2. It requires no Docker, no external PostgreSQL, and no command-line setup &mdash;
+        just download and run the installer for your platform.
+      </p>
+
+      <div class="callout info">
+        <p>
+          <strong>Embedded database.</strong> The desktop app bundles an embedded PostgreSQL 18
+          instance (via <a href="https://github.com/vectorize-io/pg0">pg0</a>) that starts
+          automatically when you launch the app. Your data is stored in the OS application-data
+          directory and persists across restarts.
+        </p>
+      </div>
+
+      <h3>Download</h3>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Platform</th>
+              <th>Installer</th>
+              <th>Data location</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Linux (x86_64)</td>
+              <td><code>.deb</code>, <code>.rpm</code>, or <code>.AppImage</code></td>
+              <td><code>~/.local/share/com.notebookpp.desktop/pgdata</code></td>
+            </tr>
+            <tr>
+              <td>Windows (x64)</td>
+              <td><code>.msi</code> or <code>.exe</code> (NSIS)</td>
+              <td><code>%APPDATA%\com.notebookpp.desktop\pgdata</code></td>
+            </tr>
+            <tr>
+              <td>macOS (Universal)</td>
+              <td><code>.dmg</code></td>
+              <td><code>~/Library/Application Support/com.notebookpp.desktop/pgdata</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>First run</h3>
+      <div class="step">
+        <div class="num">1</div>
+        <div class="step-body">
+          <h3>Install and launch</h3>
+          <p>
+            Run the installer, then open Notebook++ from your application menu. The app
+            automatically starts its embedded PostgreSQL, runs database migrations, and launches
+            the server &mdash; you don't need to do anything.
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div class="step-body">
+          <h3>Log in</h3>
+          <p>
+            A default <code>dev</code> account is created automatically (username
+            <code>dev</code>, password <code>notebookpp</code>). Log in and change your password in
+            <strong>Settings</strong>, or register a new account if sign-ups are enabled.
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div class="step-body">
+          <h3>Start writing</h3>
+          <p>
+            The app works exactly like the web version &mdash; create notebooks, pages, and canvases
+            from the sidebar. Everything autosaves.
+          </p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <p>
+          <strong>Port usage.</strong> The desktop app uses <code>localhost:55436</code> for
+          PostgreSQL and <code>localhost:3940</code> for the web server. If these ports are already
+          in use, the app may fail to start. Close any conflicting services before launching.
+        </p>
+      </div>
+
+      <h3>Building from source</h3>
+      <p>
+        To build the desktop app yourself, you need <strong>Rust</strong>, the
+        <strong>Tauri prerequisites</strong> for your platform, and Node.js:
+      </p>
+      <pre><code><span class="cmt"># Install Rust</span>
+curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+
+<span class="cmt"># Linux: install system deps (Debian/Ubuntu)</span>
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+<span class="cmt"># Build the desktop app</span>
+npm install
+npm run tauri:build</code></pre>
+      <p>
+        Installers are output to <code>src-tauri/target/release/bundle/</code>. For cross-platform
+        builds, download the appropriate <code>pg0</code> binary from the
+        <a href="https://github.com/vectorize-io/pg0/releases">pg0 releases page</a> and place it in
+        <code>src-tauri/binaries/</code> with the correct target-triple suffix (e.g.
+        <code>pg0-x86_64-pc-windows-msvc.exe</code> for Windows).
+      </p>
+
       <footer>Notebook++ &mdash; self-hosted notes &amp; knowledge base.</footer>
     </div>
   </body>
