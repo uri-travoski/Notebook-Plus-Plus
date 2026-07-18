@@ -3,6 +3,10 @@
 > Backup versions and what changed. Newest entry on top.
 > See `docs/backups.md` for the process and entry format.
 
+## 0.62.16
+
+- **Tabs**: Document tabs now appear in a tab bar above the content area. Navigating to a note/canvas opens a tab (or switches to it if already open). Tabs support close buttons and drag-to-reorder. Non-doc pages (Overview, Starred, etc.) navigate without creating a tab. Session-only — tabs clear on refresh.
+
 ## 0.62.15
 
 - **Tauri desktop app**: Added cross-platform desktop builds for Windows, Linux, and macOS using Tauri 2.
