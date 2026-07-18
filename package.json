@@ -27,6 +27,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test --grep-invert @sim",
     "test:sim": "playwright test e2e/simulation.spec.ts",
+    "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "tauri:prepare": "node scripts/prepare-tauri-resources.mjs",

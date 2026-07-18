@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Notebook++",
-  "version": "0.62.15",
+  "version": "0.62.16",
   "identifier": "com.notebookpp.desktop",
   "build": {
     "frontendDist": "frontend",

@@ -37,6 +37,7 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_OPTIONS: --max-old-space-size=4096
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "Notebook++ ${{ github.ref_name }}"
@@ -90,6 +91,8 @@ jobs:
 
       - name: Build Tauri app
         run: npx tauri build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Upload deb artifact
         uses: actions/upload-artifact@v4
@@ -130,6 +133,8 @@ jobs:
 
       - name: Build Tauri app
         run: npx tauri build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Upload dmg artifact
         uses: actions/upload-artifact@v4
