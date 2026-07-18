@@ -14,7 +14,7 @@ test('a page note edits, autosaves, and persists across reload', async ({ page }
   // Create a fresh page note via the API (deterministic, no seed dependency).
   const id = await page.evaluate(async () => {
     const tree = await fetch('/api/tree').then((r) => r.json())
-    const nb = tree.projects[0]?.notebooks[0]
+    const nb = tree.notebooks[0]
     const doc = await fetch('/api/documents', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

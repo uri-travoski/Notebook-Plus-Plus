@@ -58,6 +58,7 @@ watch(
         </button>
         <span class="font-bold text-heading">Notebook++</span>
       </header>
+      <TabBar />
       <!-- tabindex makes the scroll region keyboard-accessible (axe scrollable-region-focusable). -->
       <main tabindex="0" class="min-h-0 flex-1 overflow-y-auto outline-none">
         <slot />
