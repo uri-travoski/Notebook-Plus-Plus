@@ -40,9 +40,8 @@ COPY --from=build /app/.output ./.output
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/server/db/migrations ./server/db/migrations
 COPY --from=build /app/server/db/migrate.mjs ./server/db/migrate.mjs
-# Starter-content template (project/notebooks/notes + upload files) cloned into each new account
-# at registration. The seed dir always exists (.gitkeep); its data files are gitignored, so a
-# source-only build ships an empty dir and new accounts simply start blank.
+# Starter-content template (notebooks/notes/tables/attachments) cloned into each new account
+# at registration. Committed to git so CI builds include it.
 COPY --from=build /app/server/db/seed ./server/db/seed
 COPY --from=build /app/package.json ./package.json
 COPY docker/entrypoint.sh /entrypoint.sh
