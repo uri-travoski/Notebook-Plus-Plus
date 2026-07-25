@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.62.15"
+version = "0.62.18"
 description = "Notebook++ Desktop — self-hosted notes & knowledge base"
 authors = ["Notebook++"]
 license = "MIT"

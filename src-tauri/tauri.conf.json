@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Notebook++ Portable",
-  "version": "0.62.17",
+  "version": "0.62.18",
   "identifier": "com.notebookpp.desktop",
   "build": {
     "frontendDist": "frontend",

@@ -3,6 +3,10 @@
 > Backup versions and what changed. Newest entry on top.
 > See `docs/backups.md` for the process and entry format.
 
+## 0.62.18
+
+- **Branding**: Replaced the favicon, web app icon, and desktop app icon set with the new notebook icon. The icon is rendered in the primary teal color with no background and is used across all generated sizes (favicon, PWA icons, Apple touch icon, and Tauri desktop icons).
+
 ## 0.62.17
 
 - **Starter content**: All fresh installations (desktop and web-hosted) now include 1 "Getting Started" notebook with 4 notes: "Formatting & Elements in Notebook++", "My first canvas", "Data Table", and "Kanban" — matching v0.62.12. The seed template is now committed to git so CI builds include it.
