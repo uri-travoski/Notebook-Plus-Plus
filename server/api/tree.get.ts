@@ -44,12 +44,33 @@ export default defineEventHandler(async (event) => {
     )
     .orderBy(desc(schema.documents.position))
 
+  const docMap = new Map(notes.map((n) => [n.id, n]))
+  function resolveNotebookId(n: (typeof notes)[0]): string | null {
+    let cur: (typeof notes)[0] | undefined = n
+    const seen = new Set<string>()
+    while (cur) {
+      if (seen.has(cur.id)) break
+      seen.add(cur.id)
+      if (cur.parentDocumentId) {
+        const p = docMap.get(cur.parentDocumentId)
+        if (p) {
+          cur = p
+          continue
+        }
+      }
+      return cur.notebookId
+    }
+    return n.notebookId
+  }
+
   const notesByNotebook = new Map<string, typeof notes>()
   for (const n of notes) {
-    if (!n.notebookId) continue
-    const list = notesByNotebook.get(n.notebookId)
+    const effectiveNbId = resolveNotebookId(n)
+    if (!effectiveNbId) continue
+    n.notebookId = effectiveNbId
+    const list = notesByNotebook.get(effectiveNbId)
     if (list) list.push(n)
-    else notesByNotebook.set(n.notebookId, [n])
+    else notesByNotebook.set(effectiveNbId, [n])
   }
 
   return {

@@ -3,6 +3,10 @@
 > Backup versions and what changed. Newest entry on top.
 > See `docs/backups.md` for the process and entry format.
 
+## 0.62.19
+
+- **Sidebar Page Tree Movement**: Moving a page under another page (or to another notebook) now moves the entire page tree including all subpages and descendants, preventing nested pages from disappearing. Includes recursive database notebook ID cascading, parent notebook inheritance, cycle prevention, and auto-expanding the moved subtree.
+
 ## 0.62.18
 
 - **Branding**: Replaced the favicon, web app icon, and desktop app icon set with the new notebook icon. The icon is rendered in the primary teal color with no background and is used across all generated sizes (favicon, PWA icons, Apple touch icon, and Tauri desktop icons).

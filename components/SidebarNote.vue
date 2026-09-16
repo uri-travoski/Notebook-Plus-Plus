@@ -21,7 +21,7 @@ const props = defineProps<{
   depth: number
 }>()
 
-const { updateNote, reorderNote, createNote, nestNote } = useTree()
+const { tree, updateNote, reorderNote, createNote, nestNote } = useTree()
 const { isCollapsed, toggleCollapse, expand } = usePreferences()
 const route = useRoute()
 
@@ -43,6 +43,19 @@ const drag = useState<{ kind: 'note' | 'notebook'; id: string } | null>('sidebar
 // Drop zones: the top of a row reorders (drops as a sibling above); the rest of the row nests
 // the dragged note as a child of this one.
 const dropMode = ref<'before' | 'inside' | null>(null)
+
+function isDescendantOf(noteId: string, ancestorId: string): boolean {
+  if (noteId === ancestorId) return true
+  const all = (tree.value?.notebooks ?? []).flatMap((nb) => nb.notes)
+  const byId = new Map(all.map((n) => [n.id, n]))
+  let cur: string | null = byId.get(noteId)?.parentDocumentId ?? null
+  while (cur) {
+    if (cur === ancestorId) return true
+    cur = byId.get(cur)?.parentDocumentId ?? null
+  }
+  return false
+}
+
 function onDragStart(e: DragEvent) {
   drag.value = { kind: 'note', id: props.note.id }
   if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move'
@@ -50,6 +63,7 @@ function onDragStart(e: DragEvent) {
 function onDragOver(e: DragEvent) {
   const d = drag.value
   if (!(d?.kind === 'note' && d.id !== props.note.id)) return
+  if (isDescendantOf(props.note.id, d.id)) return
   const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
   dropMode.value = e.clientY - rect.top < rect.height * 0.4 ? 'before' : 'inside'
 }
@@ -59,8 +73,14 @@ async function onDrop() {
   const d = drag.value
   drag.value = null
   if (!(d?.kind === 'note' && d.id !== props.note.id)) return
-  if (mode === 'inside') await nestNote(d.id, props.note.id)
-  else await reorderNote(d.id, props.note.id)
+  if (isDescendantOf(props.note.id, d.id)) return
+  if (mode === 'inside') {
+    expand(props.note.id)
+    expand(d.id)
+    await nestNote(d.id, props.note.id)
+  } else {
+    await reorderNote(d.id, props.note.id)
+  }
 }
 
 const children = computed(() => props.childrenMap.get(props.note.id) ?? [])

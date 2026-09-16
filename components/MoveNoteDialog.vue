@@ -12,8 +12,9 @@ const options = computed(() =>
 
 async function move(notebookId: string) {
   if (notebookId !== props.note.notebookId) {
-    // Expand the target notebook so the moved note is visible.
+    // Expand the target notebook and note so the moved note and any subpages are visible.
     expand(notebookId)
+    expand(props.note.id)
     await moveNoteToNotebook(props.note.id, notebookId)
   }
   open.value = false

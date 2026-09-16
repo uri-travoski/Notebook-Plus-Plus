@@ -108,6 +108,13 @@ export function useTree() {
     const all = (tree.value?.notebooks ?? []).flatMap((nb) => nb.notes)
     const target = all.find((n) => n.id === targetId)
     if (!target) return
+    // Never reorder into one of its own descendants (that would create a cycle).
+    const byId = new Map(all.map((n) => [n.id, n]))
+    let cur: string | null = target.parentDocumentId
+    while (cur) {
+      if (cur === draggedId) return
+      cur = byId.get(cur)?.parentDocumentId ?? null
+    }
     const siblings = all.filter(
       (n) =>
         n.id !== draggedId &&
@@ -148,6 +155,9 @@ export function useTree() {
       if (cur === noteId) return
       cur = byId.get(cur)?.parentDocumentId ?? null
     }
+    const { expand } = usePreferences()
+    expand(parentId)
+    expand(noteId)
     const children = all.filter((n) => n.parentDocumentId === parentId && n.id !== noteId)
     await $fetch(`/api/documents/${noteId}`, {
       method: 'PATCH',
